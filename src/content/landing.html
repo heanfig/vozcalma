@@ -1,103 +1,43 @@
 <!DOCTYPE html>
-
-<html class="light" lang="es"><head>
+<html class="light" lang="es">
+<head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Calma - Relajación a tu medida</title>
-<!-- Tailwind CSS -->
+<title>VozCalma - Meditación guiada en español</title>
+<meta name="description" content="Meditaciones guiadas en español para ansiedad, estrés y descanso. Encuentra calma con sesiones personalizadas para tu momento actual."/>
+<meta property="og:title" content="VozCalma - Meditación guiada en español"/>
+<meta property="og:description" content="Respira, suelta tensión y vuelve a tu centro con sesiones de meditación personalizadas."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://vozcalma.app/"/>
+<meta property="og:image" content="https://lh3.googleusercontent.com/aida-public/AB6AXuCJVeX03go6ZEv92TQphTQL11wzXdyYS_L7m2m-ZWJWcV3YsRgyvvjw0Uhnqji8Omtyaw5CiBSf4RmotbkFzpn8LVNtLidLHfk7Sg0rBLU987v4qtKCpgLUP7Qwfpg98Kcm95_PTPyTgjZFpirmy2D7blkDYMR4SehB8_bKwFsFZJ3Npt576q7mSzqEzE5rbkFdy6E3ac48wUlnhqHKPB96Sx6drXWbSoVtrGS9j6rOyG5gTdcQLOu4xeDkQiHkk7UuRiZGqVdj3aMM"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<link rel="canonical" href="https://vozcalma.app/"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<!-- Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<!-- Material Symbols -->
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              "tertiary-fixed": "#c2ecd5",
-              "error": "#ba1a1a",
-              "primary-fixed-dim": "#ccbeff",
-              "surface-container-low": "#f5f3f5",
-              "surface-variant": "#e3e2e4",
-              "on-background": "#1b1c1e",
-              "inverse-on-surface": "#f2f0f3",
-              "surface-dim": "#dbd9dc",
-              "primary": "#4f17ce",
-              "surface-bright": "#faf9fb",
-              "outline": "#797487",
-              "on-tertiary": "#ffffff",
-              "inverse-surface": "#2f3032",
-              "surface-tint": "#6439e3",
-              "surface-container-high": "#e9e8ea",
-              "on-secondary": "#ffffff",
-              "primary-fixed": "#e7deff",
-              "surface-container": "#efedf0",
-              "primary-container": "#673de6",
-              "secondary-fixed-dim": "#bcc6e5",
-              "tertiary-fixed-dim": "#a7d0ba",
-              "secondary": "#545e79",
-              "on-secondary-fixed-variant": "#3c4660",
-              "on-error": "#ffffff",
-              "on-tertiary-fixed-variant": "#294e3d",
-              "secondary-container": "#d5dfff",
-              "on-tertiary-container": "#bde7d0",
-              "background": "#faf9fb",
-              "outline-variant": "#cac3d8",
-              "tertiary-container": "#436957",
-              "on-secondary-container": "#58627d",
-              "on-error-container": "#93000a",
-              "on-surface-variant": "#484455",
-              "surface": "#faf9fb",
-              "inverse-primary": "#ccbeff",
-              "on-tertiary-fixed": "#002114",
-              "on-primary": "#ffffff",
-              "on-surface": "#1b1c1e",
-              "on-primary-container": "#e1d7ff",
-              "on-primary-fixed": "#1e0060",
-              "on-secondary-fixed": "#101b32",
-              "surface-container-lowest": "#ffffff",
-              "error-container": "#ffdad6",
-              "on-primary-fixed-variant": "#4c10cc",
-              "tertiary": "#2b5140",
-              "secondary-fixed": "#d9e2ff",
-              "surface-container-highest": "#e3e2e4"
-            },
-            fontFamily: {
-              "headline": ["Noto Serif"],
-              "body": ["Plus Jakarta Sans"],
-              "label": ["Plus Jakarta Sans"]
-            },
-            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-          },
-        },
-      }
-    </script>
+tailwind.config={darkMode:"class",theme:{extend:{colors:{"tertiary-fixed":"#c2ecd5","error":"#ba1a1a","primary-fixed-dim":"#ccbeff","surface-container-low":"#f5f3f5","surface-variant":"#e3e2e4","on-background":"#1b1c1e","inverse-on-surface":"#f2f0f3","surface-dim":"#dbd9dc","primary":"#4f17ce","surface-bright":"#faf9fb","outline":"#797487","on-tertiary":"#ffffff","inverse-surface":"#2f3032","surface-tint":"#6439e3","surface-container-high":"#e9e8ea","on-secondary":"#ffffff","primary-fixed":"#e7deff","surface-container":"#efedf0","primary-container":"#673de6","secondary-fixed-dim":"#bcc6e5","tertiary-fixed-dim":"#a7d0ba","secondary":"#545e79","on-secondary-fixed-variant":"#3c4660","on-error":"#ffffff","on-tertiary-fixed-variant":"#294e3d","secondary-container":"#d5dfff","on-tertiary-container":"#bde7d0","background":"#faf9fb","outline-variant":"#cac3d8","tertiary-container":"#436957","on-secondary-container":"#58627d","on-error-container":"#93000a","on-surface-variant":"#484455","surface":"#faf9fb","inverse-primary":"#ccbeff","on-tertiary-fixed":"#002114","on-primary":"#ffffff","on-surface":"#1b1c1e","on-primary-container":"#e1d7ff","on-primary-fixed":"#1e0060","on-secondary-fixed":"#101b32","surface-container-lowest":"#ffffff","error-container":"#ffdad6","on-primary-fixed-variant":"#4c10cc","tertiary":"#2b5140","secondary-fixed":"#d9e2ff","surface-container-highest":"#e3e2e4"},fontFamily:{headline:["Noto Serif"],body:["Plus Jakarta Sans"],label:["Plus Jakarta Sans"]},borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"}}}};
+</script>
 <style>
-      .material-symbols-outlined {
-        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-      }
-      .glass-card {
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(12px);
-      }
-    </style>
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+.glass-card{background:rgba(255,255,255,.76);backdrop-filter:blur(14px)}
+</style>
 </head>
 <body class="bg-surface font-body text-on-surface">
 <!-- Top Navigation Bar -->
 <nav class="bg-surface-container-low docked full-width top-0 z-50">
 <div class="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
-<div class="text-2xl font-headline font-bold text-primary">Calma</div>
+<div class="text-2xl font-headline font-bold text-primary">VozCalma</div>
 <div class="hidden md:flex gap-8 items-center">
-<a class="text-primary font-bold border-b-2 border-primary font-headline tracking-tight" href="#">How it works</a>
-<a class="text-slate-600 font-medium font-headline tracking-tight hover:text-primary transition-colors duration-300" href="#">Prices</a>
-<a class="text-slate-600 font-medium font-headline tracking-tight hover:text-primary transition-colors duration-300" href="/sign-in">Login</a>
+<a class="text-primary font-bold border-b-2 border-primary font-headline tracking-tight" href="#como-funciona">Cómo funciona</a>
+<a class="text-slate-600 font-medium font-headline tracking-tight hover:text-primary transition-colors duration-300" href="#precios">Precios</a>
+<a class="text-slate-600 font-medium font-headline tracking-tight hover:text-primary transition-colors duration-300" href="/blog">Blog</a>
+<a class="text-slate-600 font-medium font-headline tracking-tight hover:text-primary transition-colors duration-300" href="/sign-in">Iniciar sesión</a>
 </div>
-<button class="md:hidden text-primary">
-<span class="material-symbols-outlined">menu</span>
-</button>
+<div class="md:hidden flex items-center gap-3">
+<a class="text-sm font-semibold text-primary" href="#precios">Precios</a>
+<a class="text-sm font-semibold text-primary" href="/sign-in">Entrar</a>
+</div>
 </div>
 </nav>
 <!-- Hero Section -->
@@ -108,14 +48,14 @@
 <div class="max-w-7xl mx-auto px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 <div class="space-y-8">
 <h1 class="text-5xl md:text-7xl font-headline font-bold text-on-surface leading-[1.1] tracking-tight">
-                    Relajación a tu medida.
+                    Meditación guiada a tu medida.
                 </h1>
 <p class="text-xl md:text-2xl font-headline text-on-surface-variant max-w-xl leading-relaxed">
                     Sesiones de meditación guiada creadas especialmente para tu momento actual.
                 </p>
 <div class="bg-surface-container-low p-6 rounded-xl border-l-4 border-tertiary max-w-lg">
 <p class="text-body-md text-on-surface-variant italic">
-                        "Dinos cómo te sientes y nuestra Inteligencia Artificial creará un audio único con una voz suave para ayudarte a encontrar tu centro."
+                        "Cuéntanos cómo te sientes y crearemos una sesión única, con voz suave y pausada, para ayudarte a volver a tu centro."
                     </p>
 </div>
 <div class="flex flex-col sm:flex-row gap-4 pt-4">
@@ -126,7 +66,7 @@
 </div>
 <div class="relative">
 <div class="aspect-square rounded-[3rem] overflow-hidden shadow-2xl">
-<img alt="Paz mental con Calma" class="w-full h-full object-cover" data-alt="serene woman sitting in a minimalist bright room with large window morning sunlight soft shadows peaceful expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2sKSfciBN3QTq1ve95AtRyNsMkd14hDUi-V_EBr-i7VXfpZpT1-mp2VE4vGQoNXsaDZsi__kOHnzbaT6TnUjXJwpqE834MyBKlj4BpFPnLw2JURenu87n9LeSepkH0cotmwNHM_oIED2QDt9AtaIphrPWPtoiPGXKZNf5HILW3T3I0Zd7ZTYe2orE5zbg3l0lfT5zLYaQ4oTxaNCE-0uBmjWHD6JViPkpi65MTuHORTWcqeSkBxRONVZ4fuLvw3JMS1H75cfpDz-j"/>
+<img alt="Paz mental con VozCalma" class="w-full h-full object-cover" data-alt="serene woman sitting in a minimalist bright room with large window morning sunlight soft shadows peaceful expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJVeX03go6ZEv92TQphTQL11wzXdyYS_L7m2m-ZWJWcV3YsRgyvvjw0Uhnqji8Omtyaw5CiBSf4RmotbkFzpn8LVNtLidLHfk7Sg0rBLU987v4qtKCpgLUP7Qwfpg98Kcm95_PTPyTgjZFpirmy2D7blkDYMR4SehB8_bKwFsFZJ3Npt576q7mSzqEzE5rbkFdy6E3ac48wUlnhqHKPB96Sx6drXWbSoVtrGS9j6rOyG5gTdcQLOu4xeDkQiHkk7UuRiZGqVdj3aMM" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=1200&auto=format&fit=crop';"/>
 </div>
 <!-- Floating Glass Card -->
 <div class="absolute -bottom-8 -left-8 md:-left-16 p-6 glass-card rounded-2xl shadow-lg max-w-xs">
@@ -139,6 +79,9 @@
 <p class="font-headline font-semibold text-on-surface">Calma Profunda</p>
 </div>
 </div>
+<audio controls preload="none" class="w-full mb-3 rounded-lg" aria-label="Reproductor de muestra">
+<source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg"/>
+</audio>
 <div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
 <div class="bg-primary h-full w-1/3"></div>
 </div>
@@ -147,7 +90,7 @@
 </div>
 </section>
 <!-- Cómo Funciona Section -->
-<section class="py-24 bg-surface-container-low">
+<section id="como-funciona" class="py-24 bg-surface-container-low">
 <div class="max-w-7xl mx-auto px-8">
 <div class="text-center mb-20">
 <h2 class="text-4xl font-headline font-bold text-on-surface mb-4">Cómo Funciona</h2>
@@ -168,7 +111,7 @@
 <span class="material-symbols-outlined text-primary text-4xl" data-icon="auto_awesome">auto_awesome</span>
 </div>
 <h3 class="text-2xl font-headline font-semibold">2. Magia al instante</h3>
-<p class="text-on-surface-variant leading-relaxed">Nuestra IA compone una narrativa y música específica para tus necesidades actuales.</p>
+<p class="text-on-surface-variant leading-relaxed">Creamos una narrativa y un ritmo de voz alineados con tus necesidades actuales.</p>
 </div>
 <!-- Step 3 -->
 <div class="flex flex-col items-center text-center space-y-6 group">
@@ -204,7 +147,7 @@
 <p class="opacity-80">Accede instantáneamente desde cualquier dispositivo sin ocupar espacio en tu memoria.</p>
 </div>
 <div class="md:col-span-8 rounded-3xl overflow-hidden relative">
-<img alt="Calma Visual" class="w-full h-full object-cover" data-alt="abstract calm water ripples macro shot with soft teal and cream light reflecting serenity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCh-U74v9WesclAO1PqxMobz7iR3J5nKrLjlP5w06gkJCYD6s_AIlWSbDzDmCJf0LLQKwa4XD6NVwAj3MCbOEbwj3bSMv9HaSPKv7Jpq7aVZFsH0v4C6MLmMQt8Md6BSUAfcotY-rdPjCU9bgter_bIxIon2ntKs4MtTDaseZujZ0xQXkynuO2EcAQDiysFeDqOLGo-EHDidXwETD5RvDjxlhX4McnNb_7LG45HX8PB6YbBJA56Bsf1fWPV99hSoXdTE-Kzc-IIfHGU"/>
+<img alt="Visual calmado" class="w-full h-full object-cover" data-alt="abstract calm water ripples macro shot with soft teal and cream light reflecting serenity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCh-U74v9WesclAO1PqxMobz7iR3J5nKrLjlP5w06gkJCYD6s_AIlWSbDzDmCJf0LLQKwa4XD6NVwAj3MCbOEbwj3bSMv9HaSPKv7Jpq7aVZFsH0v4C6MLmMQt8Md6BSUAfcotY-rdPjCU9bgter_bIxIon2ntKs4MtTDaseZujZ0xQXkynuO2EcAQDiysFeDqOLGo-EHDidXwETD5RvDjxlhX4McnNb_7LG45HX8PB6YbBJA56Bsf1fWPV99hSoXdTE-Kzc-IIfHGU"/>
 <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-10">
 <p class="text-white font-headline text-2xl italic">"Encuentra tu santuario digital, donde sea que estés."</p>
 </div>
@@ -213,7 +156,7 @@
 </div>
 </section>
 <!-- Pricing Section -->
-<section class="py-24 bg-surface-container-low">
+<section id="precios" class="py-24 bg-surface-container-low">
 <div class="max-w-5xl mx-auto px-8">
 <div class="text-center mb-16">
 <h2 class="text-4xl font-headline font-bold mb-4">Elige tu camino a la paz</h2>
@@ -234,7 +177,7 @@
 </li>
 <li class="flex items-center gap-3">
 <span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-<span>IA Generativa estándar</span>
+<span>Sesiones personalizadas estándar</span>
 </li>
 <li class="flex items-center gap-3">
 <span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
@@ -260,7 +203,7 @@
 </li>
 <li class="flex items-center gap-3">
 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
-<span>IA de alta fidelidad</span>
+<span>Personalización avanzada de la sesión</span>
 </li>
 <li class="flex items-center gap-3">
 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
@@ -293,14 +236,14 @@
 <!-- Footer -->
 <footer class="tonal-shift pt-12 mt-20 bg-surface-container-low border-none">
 <div class="w-full px-8 py-12 flex flex-col items-center gap-8 text-center max-w-7xl mx-auto">
-<div class="font-headline text-2xl font-bold text-slate-800">Calma</div>
+<div class="font-headline text-2xl font-bold text-slate-800">VozCalma</div>
 <div class="flex flex-wrap justify-center gap-8">
-<a class="font-body text-xs text-slate-400 hover:text-primary transition-colors uppercase tracking-widest" href="#">Privacy Policy</a>
-<a class="font-body text-xs text-slate-400 hover:text-primary transition-colors uppercase tracking-widest" href="#">Terms of Service</a>
-<a class="font-body text-xs text-slate-400 hover:text-primary transition-colors uppercase tracking-widest" href="#">Legal Disclaimer</a>
+<a class="font-body text-xs text-slate-400 hover:text-primary transition-colors uppercase tracking-widest" href="/politica-de-privacidad">Política de privacidad</a>
+<a class="font-body text-xs text-slate-400 hover:text-primary transition-colors uppercase tracking-widest" href="/terminos-del-servicio">Términos del servicio</a>
+<a class="font-body text-xs text-slate-400 hover:text-primary transition-colors uppercase tracking-widest" href="/aviso-legal">Aviso legal</a>
 </div>
 <p class="font-body text-xs text-slate-500 max-w-md">
-                © 2024 Calma. Designed for your peace of mind.
+                © 2026 VozCalma. Diseñado para tu bienestar.
             </p>
 </div>
 </footer>
@@ -309,11 +252,34 @@
 <a href="/app" class="flex flex-col items-center justify-center bg-primary text-white rounded-full p-3 w-12 h-12 mb-1 transition-all active:scale-95 duration-200 ease-out">
 <span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
 </a>
-<div class="flex flex-col items-center justify-center text-slate-500 p-2 hover:bg-slate-100 rounded-full transition-all">
+<a href="/blog" class="flex flex-col items-center justify-center text-slate-500 p-2 hover:bg-slate-100 rounded-full transition-all">
 <span class="material-symbols-outlined" data-icon="play_circle">play_circle</span>
-</div>
-<div class="flex flex-col items-center justify-center text-slate-500 p-2 hover:bg-slate-100 rounded-full transition-all">
+</a>
+<a href="#precios" class="flex flex-col items-center justify-center text-slate-500 p-2 hover:bg-slate-100 rounded-full transition-all">
 <span class="material-symbols-outlined" data-icon="payments">payments</span>
+</a>
 </div>
+<div id="cookie-consent" class="fixed inset-x-4 bottom-4 z-[70] hidden md:inset-x-auto md:right-6 md:max-w-md rounded-2xl border border-outline-variant/30 bg-white p-5 shadow-2xl">
+  <p class="text-sm text-slate-700">Usamos cookies esenciales para el funcionamiento del sitio y cookies opcionales para mejorar tu experiencia. Puedes aceptar o rechazar las opcionales.</p>
+  <div class="mt-4 flex flex-wrap gap-2">
+    <button id="cookies-accept" class="rounded-full bg-primary px-4 py-2 text-xs font-semibold text-white">Aceptar</button>
+    <button id="cookies-reject" class="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700">Rechazar</button>
+    <a class="rounded-full px-4 py-2 text-xs font-semibold text-primary hover:bg-primary-fixed" href="/politica-de-privacidad">Ver política</a>
+  </div>
 </div>
+<script>
+(() => {
+  const key = "vozcalma_cookie_choice";
+  const modal = document.getElementById("cookie-consent");
+  if (!modal) return;
+  const current = localStorage.getItem(key);
+  if (!current) modal.classList.remove("hidden");
+  const save = (value) => {
+    localStorage.setItem(key, value);
+    modal.classList.add("hidden");
+  };
+  document.getElementById("cookies-accept")?.addEventListener("click", () => save("accepted"));
+  document.getElementById("cookies-reject")?.addEventListener("click", () => save("rejected"));
+})();
+</script>
 </body></html>

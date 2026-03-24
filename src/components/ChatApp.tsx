@@ -385,7 +385,12 @@ export default function ChatApp() {
               >
                 Biblioteca
               </button>
-              <span className="text-sm text-slate-500">Comunidad</span>
+              <a href="/#precios" className="text-sm text-slate-500 hover:text-[#4f17ce]">
+                Precios
+              </a>
+              <a href="/blog" className="text-sm text-slate-500 hover:text-[#4f17ce]">
+                Blog
+              </a>
             </nav>
             <div className="flex items-center gap-2">
               <button
@@ -572,7 +577,7 @@ export default function ChatApp() {
                   </button>
                 </div>
                 <p className="text-center text-[10px] font-medium text-slate-400">
-                  VozCalma AI es una guía de acompañamiento, no reemplaza la terapia profesional.
+                  VozCalma es una guía de acompañamiento, no reemplaza la terapia profesional.
                 </p>
               </div>
             </footer>
