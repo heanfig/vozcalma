@@ -1,0 +1,15 @@
+# Ejemplo para VPS (Hostinger u otro): proxy TLS con Nginx/Caddy delante.
+# Uso: copiar a docker-compose.yml, crear .env junto al compose y:
+#   docker compose up -d --build
+
+services:
+  vozcalma:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"
+    env_file:
+      - .env
+    environment:
+      HOST: "0.0.0.0"
+      PORT: "8080"

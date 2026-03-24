@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Calma - Your Digital Sanctuary</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-fixed": "#c2ecd5",
+              "error": "#ba1a1a",
+              "primary-fixed-dim": "#ccbeff",
+              "surface-container-low": "#f5f3f5",
+              "surface-variant": "#e3e2e4",
+              "on-background": "#1b1c1e",
+              "inverse-on-surface": "#f2f0f3",
+              "surface-dim": "#dbd9dc",
+              "primary": "#4f17ce",
+              "surface-bright": "#faf9fb",
+              "outline": "#797487",
+              "on-tertiary": "#ffffff",
+              "inverse-surface": "#2f3032",
+              "surface-tint": "#6439e3",
+              "surface-container-high": "#e9e8ea",
+              "on-secondary": "#ffffff",
+              "primary-fixed": "#e7deff",
+              "surface-container": "#efedf0",
+              "primary-container": "#673de6",
+              "secondary-fixed-dim": "#bcc6e5",
+              "tertiary-fixed-dim": "#a7d0ba",
+              "secondary": "#545e79",
+              "on-secondary-fixed-variant": "#3c4660",
+              "on-error": "#ffffff",
+              "on-tertiary-fixed-variant": "#294e3d",
+              "secondary-container": "#d5dfff",
+              "on-tertiary-container": "#bde7d0",
+              "background": "#faf9fb",
+              "outline-variant": "#cac3d8",
+              "tertiary-container": "#436957",
+              "on-secondary-container": "#58627d",
+              "on-error-container": "#93000a",
+              "on-surface-variant": "#484455",
+              "surface": "#faf9fb",
+              "inverse-primary": "#ccbeff",
+              "on-tertiary-fixed": "#002114",
+              "on-primary": "#ffffff",
+              "on-surface": "#1b1c1e",
+              "on-primary-container": "#e1d7ff",
+              "on-primary-fixed": "#1e0060",
+              "on-secondary-fixed": "#101b32",
+              "surface-container-lowest": "#ffffff",
+              "error-container": "#ffdad6",
+              "on-primary-fixed-variant": "#4c10cc",
+              "tertiary": "#2b5140",
+              "secondary-fixed": "#d9e2ff",
+              "surface-container-highest": "#e3e2e4"
+            },
+            fontFamily: {
+              "headline": ["Noto Serif"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-morphism {
+        background: rgba(250, 249, 251, 0.7);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      .soft-gradient-bg {
+        background: linear-gradient(15deg, #e7deff 0%, #faf9fb 100%);
+      }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-[#faf9fb] dark:bg-slate-950 fixed top-0 w-full z-50">
+<nav class="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
+<div class="text-2xl font-['Noto_Serif'] font-bold text-[#4f17ce] dark:text-[#a282f1]">
+                Calma
+            </div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#4f17ce] transition-colors duration-300" href="#">How it works</a>
+<a class="text-slate-600 dark:text-slate-400 font-medium hover:text-[#4f17ce] transition-colors duration-300" href="#">Prices</a>
+<a class="text-[#4f17ce] dark:text-[#a282f1] font-bold border-b-2 border-[#4f17ce] hover:text-[#4f17ce] transition-colors duration-300" href="#">Login</a>
+</div>
+<!-- Mobile Profile Avatar (Minimalist) -->
+<div class="md:hidden w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm">person</span>
+</div>
+</nav>
+</header>
+<main class="flex-grow pt-24 pb-32 px-6 max-w-4xl mx-auto w-full flex flex-col">
+<!-- Hero Section -->
+<section class="mt-8 mb-12 text-center">
+<h1 class="font-headline text-4xl md:text-5xl font-bold tracking-tight text-on-surface mb-4">
+                ¿Cómo te sientes hoy?
+            </h1>
+<p class="text-on-surface-variant font-light text-lg max-w-md mx-auto">
+                Tómate un momento para respirar. Cuéntanos qué pasa por tu mente y prepararemos algo para ti.
+            </p>
+</section>
+<!-- Main Input Canvas -->
+<div class="relative flex-grow flex flex-col items-center">
+<!-- Decorative Organic Shapes (Abstract) -->
+<div class="absolute -z-10 top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-lg opacity-40 blur-3xl pointer-events-none">
+<div class="absolute top-10 left-10 w-64 h-64 bg-primary-fixed rounded-full"></div>
+<div class="absolute bottom-20 right-10 w-72 h-72 bg-tertiary-fixed rounded-full"></div>
+</div>
+<!-- Input Area -->
+<div class="w-full bg-surface-container-lowest rounded-[32px] p-8 md:p-12 shadow-[0_10px_40px_rgba(27,28,30,0.04)] border border-outline-variant/10">
+<textarea class="w-full min-h-[200px] md:min-h-[250px] bg-transparent border-none focus:ring-0 text-2xl md:text-3xl font-headline placeholder:text-surface-variant text-on-surface resize-none leading-relaxed" placeholder="Escribe aquí... (ej. 'No puedo dormir por el estrés del trabajo')"></textarea>
+<!-- Prompt Suggestions (Horizontal Scroll/Chips) -->
+<div class="mt-8 flex flex-wrap gap-3">
+<button class="px-4 py-2 rounded-full bg-surface-container-low text-on-surface-variant text-sm hover:bg-primary-fixed transition-colors">Estoy estresado</button>
+<button class="px-4 py-2 rounded-full bg-surface-container-low text-on-surface-variant text-sm hover:bg-primary-fixed transition-colors">Busco concentrarme</button>
+<button class="px-4 py-2 rounded-full bg-surface-container-low text-on-surface-variant text-sm hover:bg-primary-fixed transition-colors">Necesito un respiro</button>
+</div>
+</div>
+<!-- Generate CTA -->
+<div class="mt-12 text-center w-full">
+<button class="group relative inline-flex items-center justify-center px-12 py-5 font-bold text-white transition-all duration-300 bg-primary rounded-full hover:bg-primary-container active:scale-95 overflow-hidden shadow-lg">
+<span class="relative z-10 flex items-center gap-3 font-body tracking-wide">
+                        Generate My Session
+                        <span class="material-symbols-outlined text-xl">auto_awesome</span>
+</span>
+<div class="absolute inset-0 bg-gradient-to-r from-primary to-primary-container opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+</button>
+<p class="mt-6 text-on-surface-variant text-xs font-medium uppercase tracking-[0.2em]">
+                    IA entrenada para tu bienestar
+                </p>
+</div>
+</div>
+<!-- Featured Reflection (Editorial Card) -->
+<section class="mt-20 grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="bg-surface-container-low rounded-[24px] overflow-hidden flex flex-col md:flex-row items-center">
+<div class="w-full md:w-1/3 h-48 md:h-full relative">
+<img alt="Mindfulness" class="absolute inset-0 w-full h-full object-cover" data-alt="Calm morning scene with soft sunlight filtering through a window onto a minimal ceramic vase with a single branch" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSHsz5vKAXwDEWQ_VpgxvuwonlI3dBYR2NlAFuechLNX65-d-vde3JU4UT6xvTw58xWqILfJRUWpMm4MxJW_J8CUguliJP1CYZLQHtukl-vnXaIWOOCwZu9mDudAHg-zR3tMzGXR-AtzKOLIMZRV03S73hS28E23xjdHBoL35lXv7e2OehJuBz2E6fulkhmFZmCGH0XcqJc8tyvJvZrmuXNRT9ftVVkhndXmC36eCYA0Eu1vEujTK8M9SnEyf3_iycH4kZ4BGTnLSN"/>
+</div>
+<div class="p-8 w-full md:w-2/3">
+<h3 class="font-headline text-xl font-bold mb-2">Momento de Calma</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">
+                        "La paz no es la ausencia de caos, sino la presencia de serenidad dentro de él."
+                    </p>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-[24px] p-8 flex flex-col justify-center">
+<div class="flex items-center gap-4 mb-4">
+<div class="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary">psychology</span>
+</div>
+<div>
+<h3 class="font-headline text-lg font-bold">Tu progreso</h3>
+<p class="text-on-surface-variant text-xs">3 sesiones esta semana</p>
+</div>
+</div>
+<div class="w-full bg-surface-variant rounded-full h-1.5 overflow-hidden">
+<div class="bg-tertiary w-3/4 h-full rounded-full"></div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-6 pb-6 pt-3 bg-[#faf9fb]/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-[0_-10px_40px_rgba(27,28,30,0.06)] rounded-t-[24px]">
+<!-- Active Tab: Session (Home context) -->
+<a class="flex flex-col items-center justify-center bg-[#4f17ce] text-white rounded-full p-3 w-12 h-12 mb-1 Active: scale-95 duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="play_circle">play_circle</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium tracking-wide uppercase">Journal</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="payments">payments</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium tracking-wide uppercase">Settings</span>
+</a>
+</nav>
+<!-- Footer -->
+<footer class="w-full px-8 py-12 flex flex-col items-center gap-4 text-center bg-[#faf9fb] dark:bg-slate-950 pt-12 mt-20">
+<div class="font-['Noto_Serif'] text-lg text-slate-800">Calma</div>
+<div class="flex gap-6">
+<a class="font-['Plus_Jakarta_Sans'] text-xs text-slate-400 hover:text-[#4f17ce] transition-colors" href="#">Privacy Policy</a>
+<a class="font-['Plus_Jakarta_Sans'] text-xs text-slate-400 hover:text-[#4f17ce] transition-colors" href="#">Terms of Service</a>
+<a class="font-['Plus_Jakarta_Sans'] text-xs text-slate-400 hover:text-[#4f17ce] transition-colors" href="#">Legal Disclaimer</a>
+</div>
+<p class="font-['Plus_Jakarta_Sans'] text-xs text-slate-500">© 2024 Calma. Designed for your peace of mind.</p>
+</footer>
+</body></html>

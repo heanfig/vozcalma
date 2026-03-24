@@ -1,0 +1,61 @@
+---
+import "../../styles/play.css";
+import { getSupabaseAdmin } from "../../lib/supabase-server";
+
+const { token } = Astro.params;
+
+if (!token) {
+  return Astro.redirect("/");
+}
+
+const supabase = getSupabaseAdmin();
+
+const { data, error } = await supabase
+  .from("play_links")
+  .select("audio_url, expires_at")
+  .eq("token", token)
+  .maybeSingle();
+
+if (error || !data) {
+  return new Response("Enlace no encontrado", {
+    status: 404,
+    headers: { "Content-Type": "text/plain; charset=utf-8" },
+  });
+}
+
+if (new Date(data.expires_at) < new Date()) {
+  return new Response("Este enlace expiró", {
+    status: 410,
+    headers: { "Content-Type": "text/plain; charset=utf-8" },
+  });
+}
+
+const audioUrl = data.audio_url;
+---
+
+<!doctype html>
+<html class="light" lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Meditación — VozCalma</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="play-body">
+    <main class="play-main">
+      <p class="play-brand">VozCalma</p>
+      <p class="play-hint">Meditación guiada</p>
+      <audio class="play-audio" controls src={audioUrl} preload="metadata">
+        Tu navegador no soporta audio.
+      </audio>
+      <p class="play-disclaimer">
+        VozCalma no sustituye atención profesional de salud mental.
+      </p>
+    </main>
+  </body>
+</html>

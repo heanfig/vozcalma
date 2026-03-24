@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700;800&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-fixed": "#c2ecd5",
+              "error": "#ba1a1a",
+              "primary-fixed-dim": "#ccbeff",
+              "surface-container-low": "#f5f3f5",
+              "surface-variant": "#e3e2e4",
+              "on-background": "#1b1c1e",
+              "inverse-on-surface": "#f2f0f3",
+              "surface-dim": "#dbd9dc",
+              "primary": "#4f17ce",
+              "surface-bright": "#faf9fb",
+              "outline": "#797487",
+              "on-tertiary": "#ffffff",
+              "inverse-surface": "#2f3032",
+              "surface-tint": "#6439e3",
+              "surface-container-high": "#e9e8ea",
+              "on-secondary": "#ffffff",
+              "primary-fixed": "#e7deff",
+              "surface-container": "#efedf0",
+              "primary-container": "#673de6",
+              "secondary-fixed-dim": "#bcc6e5",
+              "tertiary-fixed-dim": "#a7d0ba",
+              "secondary": "#545e79",
+              "on-secondary-fixed-variant": "#3c4660",
+              "on-error": "#ffffff",
+              "on-tertiary-fixed-variant": "#294e3d",
+              "secondary-container": "#d5dfff",
+              "on-tertiary-container": "#bde7d0",
+              "background": "#faf9fb",
+              "outline-variant": "#cac3d8",
+              "tertiary-container": "#436957",
+              "on-secondary-container": "#58627d",
+              "on-error-container": "#93000a",
+              "on-surface-variant": "#484455",
+              "surface": "#faf9fb",
+              "inverse-primary": "#ccbeff",
+              "on-tertiary-fixed": "#002114",
+              "on-primary": "#ffffff",
+              "on-surface": "#1b1c1e",
+              "on-primary-container": "#e1d7ff",
+              "on-primary-fixed": "#1e0060",
+              "on-secondary-fixed": "#101b32",
+              "surface-container-lowest": "#ffffff",
+              "error-container": "#ffdad6",
+              "on-primary-fixed-variant": "#4c10cc",
+              "tertiary": "#2b5140",
+              "secondary-fixed": "#d9e2ff",
+              "surface-container-highest": "#e3e2e4"
+            },
+            fontFamily: {
+              "headline": ["Noto Serif"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-player {
+        background: rgba(250, 249, 251, 0.7);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+      }
+      .bg-soft-gradient {
+        background: linear-gradient(15deg, #e7deff 0%, #faf9fb 100%);
+      }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface overflow-hidden">
+<!-- Hero Background Canvas -->
+<div class="fixed inset-0 z-0 bg-soft-gradient">
+<div class="absolute inset-0 opacity-40 mix-blend-multiply">
+<img alt="" class="w-full h-full object-cover" data-alt="abstract soft focus close-up of water ripples with lavender and silver reflections in a minimalist serene style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJa2KjlmJMz8cGeLoZtTSTCAMO2aDPfmhWkV-z00OFrZTLUSsu-RudZIQPdFfyQMI2UBJKo0DGe_Q4SJJwoWokL4Uq_4AsKgwYvdx_oAx4ysNkxajvBQ-A5siuhbav7fIAR9QP9-16CTYtxQ2Nvufx9zBM--srd_RcldFO9k-GigibPjufVNbIUlkIOch-8reHk-GmfdpzTqR1YgpCvIN13mCeCtsRBUKYZSOqDFTXE3ezYPH2dvI6jB9Zwo-mMDSvnemPXFFzKxJm"/>
+</div>
+<div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-fixed-dim rounded-full blur-[120px] opacity-30"></div>
+<div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-tertiary-fixed-dim rounded-full blur-[120px] opacity-20"></div>
+</div>
+<!-- Top Navigation Anchor (Manual Implementation of TopNavBar context) -->
+<nav class="relative z-50 flex justify-between items-center w-full px-8 py-6 max-w-7xl mx-auto">
+<div class="text-2xl font-headline font-bold text-primary tracking-tight">Calma</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="close">close</span>
+</button>
+</nav>
+<!-- Main Content Canvas -->
+<main class="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-160px)] px-6 text-center">
+<!-- Album Art / Focus Visual -->
+<div class="mb-12 relative group">
+<div class="w-64 h-64 md:w-80 md:h-80 rounded-[48px] overflow-hidden shadow-[0_40px_80px_rgba(27,28,30,0.08)] bg-surface-container-lowest p-1">
+<img alt="" class="w-full h-full object-cover rounded-[44px]" data-alt="dreamy soft-focus photograph of a single wildflower against a misty morning field in pastel violet and sage tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9PgU82Hjqfd8R1kimK_GCKDByUkvIDT3bIZdasr2YCr1I4keedlLPBXis_IEYMa5Ho7ids01c5-76di0jCouIN7WcpRcuCrGT6_HsrjluDcjgekSmSmHuamCNhtENZr0svFFEgmMI8b_HenvTvfoHXWYW158-ABL5rgNdFS3IJgFKnPexaVOnW_DcFrC2uJh4m2Wn47ANRTC08h_gA-zGmdi2VOcUb4Uzahn67fJidvQmireRdvsKuZ4NM3i_2zwWO9fPEFd5lUzk"/>
+</div>
+<!-- Decorative halo -->
+<div class="absolute -inset-4 bg-primary/5 rounded-[60px] -z-10 blur-xl"></div>
+</div>
+<!-- Session Title & Artist -->
+<div class="mb-10 space-y-2">
+<h1 class="font-headline text-4xl md:text-5xl font-bold tracking-tight text-on-surface leading-tight">Tu momento de calma</h1>
+<p class="text-on-surface-variant font-medium tracking-wide uppercase text-sm">Sesión de Relajación Profunda</p>
+</div>
+<!-- Immersive Audio Player Controls -->
+<div class="w-full max-w-md glass-player rounded-[40px] p-8 shadow-[0_10px_40px_rgba(27,28,30,0.06)]">
+<!-- Progress Bar -->
+<div class="mb-8 group">
+<div class="flex justify-between text-[11px] font-bold tracking-widest uppercase text-on-surface-variant mb-3 px-1">
+<span>12:45</span>
+<span>20:00</span>
+</div>
+<div class="relative w-full h-1.5 bg-surface-variant/50 rounded-full overflow-hidden">
+<div class="absolute top-0 left-0 h-full w-[65%] bg-primary rounded-full"></div>
+</div>
+</div>
+<!-- Primary Controls -->
+<div class="flex items-center justify-between mb-10 px-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-3xl" data-icon="replay_10">replay_10</span>
+</button>
+<div class="flex items-center gap-8">
+<button class="text-on-surface hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-4xl" data-icon="skip_previous">skip_previous</span>
+</button>
+<button class="w-20 h-20 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-all">
+<span class="material-symbols-outlined text-5xl" data-icon="pause" style="font-variation-settings: 'FILL' 1;">pause</span>
+</button>
+<button class="text-on-surface hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-4xl" data-icon="skip_next">skip_next</span>
+</button>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-3xl" data-icon="forward_10">forward_10</span>
+</button>
+</div>
+<!-- Background Sounds Selector -->
+<div class="space-y-4">
+<h3 class="text-xs font-bold tracking-[0.2em] uppercase text-on-surface-variant opacity-60">Background Sounds</h3>
+<div class="flex justify-between gap-3">
+<button class="flex-1 py-3 px-2 rounded-2xl bg-primary-fixed text-on-primary-fixed-variant text-xs font-semibold flex flex-col items-center gap-1 transition-all">
+<span class="material-symbols-outlined text-lg" data-icon="water_drop">water_drop</span>
+                        Rain
+                    </button>
+<button class="flex-1 py-3 px-2 rounded-2xl bg-surface-container-high text-on-surface-variant text-xs font-semibold flex flex-col items-center gap-1 hover:bg-surface-variant transition-all">
+<span class="material-symbols-outlined text-lg" data-icon="park">park</span>
+                        Nature
+                    </button>
+<button class="flex-1 py-3 px-2 rounded-2xl bg-surface-container-high text-on-surface-variant text-xs font-semibold flex flex-col items-center gap-1 hover:bg-surface-variant transition-all">
+<span class="material-symbols-outlined text-lg" data-icon="graphic_eq">graphic_eq</span>
+                        Bowls
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Post-Session Feedback Prompt (Appears focused/at end) -->
+<div class="fixed bottom-32 left-0 w-full px-6 pointer-events-none">
+<div class="max-w-md mx-auto pointer-events-auto">
+<div class="bg-tertiary-container text-on-tertiary-container p-6 rounded-[32px] shadow-2xl flex flex-col items-center text-center gap-4">
+<div class="w-10 h-10 bg-tertiary rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-xl" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div class="space-y-1">
+<h4 class="font-headline font-bold text-xl">¿Cómo te sientes ahora?</h4>
+<p class="text-sm opacity-90 px-4">Tu registro ayuda a Calma a personalizar tus próximas sesiones.</p>
+</div>
+<div class="flex gap-4 w-full pt-2">
+<button class="flex-1 h-12 bg-white/10 hover:bg-white/20 rounded-2xl flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined" data-icon="sentiment_satisfied">sentiment_satisfied</span>
+</button>
+<button class="flex-1 h-12 bg-white/10 hover:bg-white/20 rounded-2xl flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined" data-icon="sentiment_neutral">sentiment_neutral</span>
+</button>
+<button class="flex-1 h-12 bg-white/10 hover:bg-white/20 rounded-2xl flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined" data-icon="sentiment_very_satisfied">sentiment_very_satisfied</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Shell (Fixed Implementation from JSON) -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-6 pb-6 pt-3 bg-[#faf9fb]/70 backdrop-blur-xl rounded-t-[24px] shadow-[0_-10px_40px_rgba(27,28,30,0.06)]">
+<a class="flex flex-col items-center justify-center bg-primary text-white rounded-full p-3 w-12 h-12 mb-1 shadow-lg shadow-primary/20" href="#">
+<span class="material-symbols-outlined" data-icon="chat_bubble" style="font-variation-settings: 'FILL' 1;">chat_bubble</span>
+<span class="hidden">Session</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:bg-slate-100 rounded-full transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="play_circle">play_circle</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium tracking-wide uppercase mt-1">Journal</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 p-2 hover:bg-slate-100 rounded-full transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium tracking-wide uppercase mt-1">Settings</span>
+</a>
+</footer>
+</body></html>
