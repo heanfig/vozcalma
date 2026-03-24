@@ -1,15 +1,5 @@
-/**
- * Normalización del guion para TTS: capa de “última milla” antes de ElevenLabs.
- *
- * Arquitectura: el modelo genera texto libre; aquí se (1) quitan marcadores internos,
- * (2) se evita que se lean frases tipo “fin guion”, (3) se corrige el nombre, (4) se
- * relajan saltos para que el motor inserte micro-pausas. Si en el futuro movés la
- * personalización al prompt o a otro servicio, mantené esta función como único lugar
- * de reglas de voz para no duplicar lógica en chat + audio.
- */
 const END_MARKER = "---FIN_GUIÓN---";
 
-/** Quita marcadores y frases que no deben pronunciarse; ajusta nombre; pausas suaves. */
 export function prepareScriptForTts(script: string, firstName: string | undefined): string {
   let out = script.replace(/\r\n/g, "\n");
 
@@ -28,7 +18,6 @@ export function prepareScriptForTts(script: string, firstName: string | undefine
   return out.trim();
 }
 
-/** @deprecated Usar prepareScriptForTts; se mantiene por compatibilidad con imports. */
 export const sanitizeScriptForTts = prepareScriptForTts;
 
 function sanitizePersonalizationForTts(script: string, firstName: string | undefined): string {
@@ -49,7 +38,6 @@ function sanitizePersonalizationForTts(script: string, firstName: string | undef
   return out;
 }
 
-/** Refuerza saltos de párrafo para que el TTS respire entre bloques. */
 function relaxParagraphPauses(text: string): string {
   const parts = text
     .split(/\n+/)

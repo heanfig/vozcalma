@@ -10,7 +10,7 @@ export const onRequest = clerkMiddleware((auth, context, next) => {
   const { userId, redirectToSignIn } = auth();
 
   if (isAuthPageRoute(context.request) && userId) {
-    return Response.redirect(new URL("/app", context.request.url), 302);
+    return context.redirect("/app", 302);
   }
 
   if (!isProtectedRoute(context.request)) {
