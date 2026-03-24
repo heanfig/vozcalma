@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { synthesizeSpeech } from "../../../lib/elevenlabs";
 import { getSupabaseAdmin } from "../../../lib/supabase-server";
-import { sanitizeScriptForTts } from "../../../lib/meditation/script-post";
+import { prepareScriptForTts } from "../../../lib/meditation/script-post";
 
 type Body = { sessionId?: string; text?: string; displayName?: string };
 const SCRIPT_PREFIX = "SCRIPT::";
@@ -75,7 +75,7 @@ export const POST: APIRoute = async (context) => {
     });
   }
 
-  scriptText = sanitizeScriptForTts(scriptText, firstNameForTts || undefined);
+  scriptText = prepareScriptForTts(scriptText, firstNameForTts || undefined);
 
   try {
     const buf = await synthesizeSpeech(scriptText);

@@ -53,11 +53,40 @@ export async function synthesizeSpeech(text: string): Promise<ArrayBuffer> {
     body: JSON.stringify({
       text,
       model_id: "eleven_multilingual_v2",
+      voice_settings: {
+        stability: 0.52,
+        similarity_boost: 0.72,
+        style: 0.28,
+        use_speaker_boost: true,
+        speed: 0.86,
+      },
     }),
   });
 
-  if (!res.ok) {
-    const errText = await res.text();
+  let res2 = res;
+  if (!res2.ok && res2.status === 400) {
+    res2 = await fetch(url, {
+      method: "POST",
+      headers: {
+        "xi-api-key": apiKey,
+        "Content-Type": "application/json",
+        Accept: "audio/mpeg",
+      },
+      body: JSON.stringify({
+        text,
+        model_id: "eleven_multilingual_v2",
+        voice_settings: {
+          stability: 0.52,
+          similarity_boost: 0.72,
+          style: 0.28,
+          use_speaker_boost: true,
+        },
+      }),
+    });
+  }
+
+  if (!res2.ok) {
+    const errText = await res2.text();
     let extra = "";
     try {
       const j = JSON.parse(errText) as {
@@ -70,8 +99,8 @@ export async function synthesizeSpeech(text: string): Promise<ArrayBuffer> {
     } catch {
       /* ignore */
     }
-    throw new Error(`ElevenLabs ${res.status}: ${errText.slice(0, 500)}${extra}`);
+    throw new Error(`ElevenLabs ${res2.status}: ${errText.slice(0, 500)}${extra}`);
   }
 
-  return res.arrayBuffer();
+  return res2.arrayBuffer();
 }

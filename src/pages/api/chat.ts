@@ -9,7 +9,7 @@ import {
 } from "../../lib/meditation/intake";
 import { buildMeditationPlan } from "../../lib/meditation/planner";
 import { generateMeditationScript } from "../../lib/meditation/script-writer";
-import { sanitizeScriptForTts } from "../../lib/meditation/script-post";
+import { prepareScriptForTts } from "../../lib/meditation/script-post";
 
 type Body = {
   sessionId?: string | null;
@@ -145,11 +145,10 @@ export const POST: APIRoute = async (context) => {
     try {
       const plan = buildMeditationPlan(updatedIntake);
       generatedPlan = plan;
-      let rawScript = await generateMeditationScript(updatedIntake, plan);
+      const rawScript = await generateMeditationScript(updatedIntake, plan);
+      scriptReady = rawScript.includes("---FIN_GUIÓN---");
       const nameForTts = (updatedIntake.name || safeDisplayName || "").trim();
-      rawScript = sanitizeScriptForTts(rawScript, nameForTts);
-      generatedScript = rawScript;
-      scriptReady = generatedScript.includes("---FIN_GUIÓN---");
+      generatedScript = prepareScriptForTts(rawScript, nameForTts);
       assistantText =
         "Gracias por abrirte conmigo. Estoy preparando tu meditación personalizada y en unos segundos tendrás el audio listo.";
     } catch (e) {

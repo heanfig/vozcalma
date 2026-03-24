@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import ChatSidebar from "./ChatSidebar";
+import MeditationPlayer from "./MeditationPlayer";
 
 type Msg = { id: string; role: "user" | "assistant"; content: string };
 type Session = { id: string; title: string | null; created_at: string };
@@ -345,8 +346,6 @@ export default function ChatApp() {
     await generateAudio(item.sessionId, undefined, { playAfterLoad: true });
   }
 
-  const dockAudioTop = Boolean(audioUrl && audioPlaying && !stickyPlayerDismissed);
-
   return (
     <div className="flex min-h-screen bg-[#faf9fb] text-[#1b1c1e]">
       <div className="hidden h-screen w-72 shrink-0 md:flex">
@@ -408,31 +407,6 @@ export default function ChatApp() {
             </div>
           </div>
         </header>
-
-        {dockAudioTop && (
-          <div className="z-50 flex items-center gap-3 border-b border-outline-variant/20 bg-[#faf9fb]/95 px-4 py-3 backdrop-blur-md md:px-8">
-            <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                Reproduciendo
-              </p>
-              <p className="truncate font-headline text-sm font-semibold text-on-surface">
-                {nowPlayingTitle}
-              </p>
-            </div>
-            <button
-              type="button"
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 hover:bg-[#f3f2f5]"
-              aria-label="Cerrar barra de reproducción"
-              onClick={() => {
-                chatAudioRef.current?.pause();
-                setStickyPlayerDismissed(true);
-                setAudioPlaying(false);
-              }}
-            >
-              <span className="material-symbols-outlined text-[20px]">close</span>
-            </button>
-          </div>
-        )}
 
         {activeTab === "library" ? (
           <section className="flex-1 overflow-y-auto px-6 py-8 md:px-12">
@@ -543,31 +517,6 @@ export default function ChatApp() {
                     </div>
                   ),
                 )}
-                {audioUrl && (
-                  <div
-                    className={
-                      dockAudioTop
-                        ? "fixed inset-x-0 top-[7.25rem] z-[45] border-y border-outline-variant/15 bg-white/95 px-4 py-3 shadow-md backdrop-blur md:top-[7.5rem] md:px-12"
-                        : "rounded-2xl border border-outline-variant/20 bg-white p-4 shadow-sm"
-                    }
-                  >
-                    {!dockAudioTop && (
-                      <p className="mb-2 text-sm font-semibold text-on-surface">{nowPlayingTitle}</p>
-                    )}
-                    <audio
-                      ref={chatAudioRef}
-                      className="mx-auto w-full max-w-2xl"
-                      controls
-                      src={audioUrl}
-                      onPlay={() => {
-                        setAudioPlaying(true);
-                        setStickyPlayerDismissed(false);
-                      }}
-                      onPause={() => setAudioPlaying(false)}
-                      onEnded={() => setAudioPlaying(false)}
-                    />
-                  </div>
-                )}
                 {loading && <p className="animate-pulse text-sm text-tertiary">Escribiendo…</p>}
                 <div ref={listEndRef} />
               </div>
@@ -629,6 +578,17 @@ export default function ChatApp() {
             </footer>
           </>
         )}
+
+        <MeditationPlayer
+          audioUrl={audioUrl}
+          title={nowPlayingTitle}
+          audioRef={chatAudioRef}
+          isPlaying={audioPlaying}
+          onPlayingChange={setAudioPlaying}
+          minimized={stickyPlayerDismissed}
+          onMinimize={() => setStickyPlayerDismissed(true)}
+          onExpand={() => setStickyPlayerDismissed(false)}
+        />
       </main>
 
       {renameDialog.open && (
