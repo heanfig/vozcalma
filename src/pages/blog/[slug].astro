@@ -1,4 +1,5 @@
 ---
+import PublicSiteLayout from "../../layouts/PublicSiteLayout.astro";
 import { blogPosts } from "../../lib/blog";
 
 const { slug } = Astro.params;
@@ -8,34 +9,58 @@ if (!post) {
   return Astro.redirect("/blog", 302);
 }
 
-const canonical = `https://vozcalma.app/blog/${post.slug}`;
 ---
 
-<!doctype html>
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{post.title} | VozCalma</title>
-    <meta name="description" content={post.description} />
-    <meta property="og:title" content={post.title} />
-    <meta property="og:description" content={post.description} />
-    <meta property="og:type" content="article" />
-    <meta property="og:url" content={canonical} />
-    <meta property="og:site_name" content="VozCalma" />
-    <link rel="canonical" href={canonical} />
-  </head>
-  <body style="font-family: Inter, system-ui, sans-serif; margin: 0; background: #faf9fb; color: #1b1c1e;">
-    <main style="max-width: 760px; margin: 0 auto; padding: 40px 20px 80px;">
-      <a href="/blog" style="color: #4f17ce; text-decoration: none; font-weight: 600;">← Volver al blog</a>
-      <article style="margin-top: 18px; background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 18px rgba(0,0,0,.05);">
-        <p style="margin: 0; color: #777; font-size: .84rem;">{new Date(post.date).toLocaleDateString("es-CO")}</p>
-        <h1 style="margin: 8px 0 16px; font-size: 2rem; line-height: 1.15;">{post.title}</h1>
-        <p style="font-size: 1.08rem; color: #484455; margin-top: 0;">{post.description}</p>
-        {post.content.map((paragraph) => (
-          <p style="line-height: 1.75; color: #202124;">{paragraph}</p>
-        ))}
-      </article>
-    </main>
-  </body>
-</html>
+<PublicSiteLayout
+  title={`${post.title} | VozCalma`}
+  description={post.description}
+  canonicalPath={`/blog/${post.slug}`}
+  ogType="article"
+>
+  <style>
+    .post-wrap{max-width:900px;margin:0 auto;padding:40px 24px 80px}
+    .post-back{display:inline-flex;color:#4f17ce;text-decoration:none;font-weight:700;font-size:14px}
+    .post-head{margin-top:14px;border:1px solid #e3e2e4;border-radius:28px;background:linear-gradient(140deg,#fff,#f5f3f5);padding:30px;box-shadow:0 8px 30px rgba(0,0,0,.04)}
+    .post-date{margin:0;color:#7a7a85;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+    .post-title{margin:10px 0 0;font-family:"Noto Serif",serif;font-size:50px;line-height:1.06}
+    .post-desc{margin-top:16px;font-size:21px;color:#484455;line-height:1.5}
+    .post-body{margin-top:24px;border:1px solid #e3e2e4;border-radius:28px;background:#fff;padding:34px;box-shadow:0 8px 28px rgba(0,0,0,.03)}
+    .post-note{margin-bottom:18px;border-left:4px solid #4f17ce;background:#f5f3f5;border-radius:14px;padding:14px;color:#484455;font-size:14px}
+    .post-body p{color:#1b1c1e;font-size:18px;line-height:1.9;margin:0 0 18px}
+    .post-cta{margin-top:22px;border-radius:18px;background:#f5f3f5;padding:18px}
+    .post-cta p{margin:0;color:#484455;font-size:14px}
+    .post-cta a{display:inline-flex;margin-top:10px;border-radius:999px;background:#4f17ce;color:#fff;text-decoration:none;padding:9px 16px;font-size:14px;font-weight:700}
+    .post-divider{margin:22px 0;border:none;border-top:1px solid #e3e2e4}
+    @media (max-width: 900px){
+      .post-title{font-size:36px}
+      .post-desc{font-size:18px}
+      .post-body p{font-size:16px}
+    }
+  </style>
+
+  <section class="post-wrap">
+    <a href="/blog" class="post-back">← Volver al blog</a>
+    <header class="post-head">
+      <p class="post-date">
+        {new Date(post.date).toLocaleDateString("es-CO")}
+      </p>
+      <h1 class="post-title">{post.title}</h1>
+      <p class="post-desc">{post.description}</p>
+    </header>
+    <article class="post-body">
+      <blockquote class="post-note">
+        Respira lento: este artículo está pensado para aplicarse en pocos minutos.
+      </blockquote>
+      {post.content.map((paragraph) => (
+        <p>{paragraph}</p>
+      ))}
+      <hr class="post-divider" />
+      <div class="post-cta">
+        <p>¿Te gustó este contenido?</p>
+        <a href="/app">
+          Crear mi sesión ahora
+        </a>
+      </div>
+    </article>
+  </section>
+</PublicSiteLayout>

@@ -53,6 +53,7 @@ export default function ChatApp() {
   const [welcome, setWelcome] = useState("");
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [stickyPlayerDismissed, setStickyPlayerDismissed] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const listEndRef = useRef<HTMLDivElement | null>(null);
   const chatAudioRef = useRef<HTMLAudioElement | null>(null);
   const generatedAudioForSession = useRef<Set<string>>(new Set());
@@ -81,6 +82,18 @@ export default function ChatApp() {
       window.clearTimeout(stop);
     };
   }, []);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("vozcalma-theme");
+    const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+    const dark = saved ? saved === "dark" : !!prefersDark;
+    setIsDarkMode(dark);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", isDarkMode);
+    window.localStorage.setItem("vozcalma-theme", isDarkMode ? "dark" : "light");
+  }, [isDarkMode]);
 
   useEffect(() => {
     if (hasMessages) return;
@@ -346,8 +359,13 @@ export default function ChatApp() {
     await generateAudio(item.sessionId, undefined, { playAfterLoad: true });
   }
 
+  function openClerkMenu() {
+    const clerk = (window as { Clerk?: { openUserProfile?: () => void } }).Clerk;
+    clerk?.openUserProfile?.();
+  }
+
   return (
-    <div className="flex min-h-screen bg-[#faf9fb] text-[#1b1c1e]">
+    <div className="flex min-h-screen bg-surface text-on-surface transition-colors duration-200 dark:bg-[#0c0d10] dark:text-[#e8eaed]">
       <div className="hidden h-screen w-72 shrink-0 md:flex">
         <ChatSidebar
           sessions={sessions}
@@ -359,16 +377,16 @@ export default function ChatApp() {
         />
       </div>
       <main className="relative flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="sticky top-0 z-40 flex items-center justify-between bg-[#faf9fb] px-6 py-4 md:px-8">
-          <h1 className="font-headline text-2xl italic text-[#4f17ce]">Calma</h1>
+        <header className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-200/70 bg-surface px-6 py-4 dark:border-white/[0.07] dark:bg-[#0c0d10] md:px-8">
+          <h1 className="font-headline text-2xl italic text-[#4f17ce] dark:text-[#c4b5fd]">Calma</h1>
           <div className="flex items-center gap-6">
             <nav className="hidden gap-8 md:flex">
               <button
                 type="button"
                 className={
                   activeTab === "session"
-                    ? "text-sm font-bold text-[#4f17ce]"
-                    : "text-sm text-slate-500"
+                    ? "text-sm font-bold text-[#4f17ce] dark:text-[#c4b5fd]"
+                    : "text-sm text-slate-500 dark:text-slate-400"
                 }
                 onClick={() => setActiveTab("session")}
               >
@@ -378,30 +396,30 @@ export default function ChatApp() {
                 type="button"
                 className={
                   activeTab === "library"
-                    ? "text-sm font-bold text-[#4f17ce]"
-                    : "text-sm text-slate-500"
+                    ? "text-sm font-bold text-[#4f17ce] dark:text-[#c4b5fd]"
+                    : "text-sm text-slate-500 dark:text-slate-400"
                 }
                 onClick={() => void loadLibrary().then(() => setActiveTab("library"))}
               >
                 Biblioteca
               </button>
-              <a href="/#precios" className="text-sm text-slate-500 hover:text-[#4f17ce]">
-                Precios
-              </a>
-              <a href="/blog" className="text-sm text-slate-500 hover:text-[#4f17ce]">
-                Blog
-              </a>
             </nav>
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-[#f3f2f5]"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-[#f3f2f5] dark:text-slate-300 dark:hover:bg-white/[0.08]"
+                onClick={() => setIsDarkMode((v) => !v)}
+                aria-label={isDarkMode ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
               >
-                <span className="material-symbols-outlined text-[20px]">settings</span>
+                <span className="material-symbols-outlined text-[20px]">
+                  {isDarkMode ? "light_mode" : "dark_mode"}
+                </span>
               </button>
               <button
                 type="button"
-                className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-[#f3f2f5]"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-[#f3f2f5] dark:text-slate-300 dark:hover:bg-white/[0.08]"
+                onClick={openClerkMenu}
+                aria-label="Abrir menú de perfil"
               >
                 {profileImageUrl ? (
                   <img src={profileImageUrl} alt="Perfil" className="h-8 w-8 rounded-full object-cover" />
@@ -416,20 +434,29 @@ export default function ChatApp() {
         {activeTab === "library" ? (
           <section className="flex-1 overflow-y-auto px-6 py-8 md:px-12">
             <div className="mx-auto max-w-4xl">
-              <h2 className="mb-5 font-headline text-2xl text-[#4f17ce]">Biblioteca de audios</h2>
+              <h2 className="mb-5 font-headline text-2xl text-[#4f17ce] dark:text-[#c4b5fd]">
+                Biblioteca de audios
+              </h2>
               {library.length === 0 ? (
-                <p className="text-slate-500">Aún no tienes audios guardados.</p>
+                <p className="text-slate-500 dark:text-slate-400">Aún no tienes audios guardados.</p>
               ) : (
                 <div className="grid gap-3">
                   {library.map((item) => (
-                    <div key={item.sessionId} className="rounded-2xl bg-white p-4 shadow-sm">
+                    <div
+                      key={item.sessionId}
+                      className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm dark:border-white/[0.08] dark:bg-[#16181f] dark:shadow-none"
+                    >
                       <div className="flex items-center justify-between gap-4">
                         <div className="min-w-0">
-                          <p className="truncate font-semibold text-on-surface">{item.title}</p>
-                          <p className="mt-1 text-xs text-slate-500">
+                          <p className="truncate font-semibold text-on-surface dark:text-[#e8eaed]">
+                            {item.title}
+                          </p>
+                          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                             {new Date(item.createdAt).toLocaleString("es-ES")}
                           </p>
-                          <p className="mt-2 line-clamp-2 text-sm text-slate-600">{item.preview}</p>
+                          <p className="mt-2 line-clamp-2 text-sm text-slate-600 dark:text-slate-400">
+                            {item.preview}
+                          </p>
                         </div>
                         <button
                           type="button"
@@ -449,19 +476,19 @@ export default function ChatApp() {
           <>
             <section className="flex-1 overflow-y-auto px-6 py-8 md:px-12 md:py-8">
               <div className="mb-6 flex justify-center">
-                <span className="rounded-full bg-surface-container-low px-4 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                <span className="rounded-full bg-surface-container-low px-4 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:bg-white/[0.06] dark:text-slate-500">
                   Hoy
                 </span>
               </div>
               {!hasMessages && (
                 <div className="mx-auto max-w-2xl space-y-4">
                   <div className="flex gap-4">
-                    <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-fixed">
-                      <span className="material-symbols-outlined text-[18px] text-primary">
+                    <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-fixed dark:bg-[#2d2654]">
+                      <span className="material-symbols-outlined text-[18px] text-primary dark:text-[#c4b5fd]">
                         auto_awesome
                       </span>
                     </div>
-                    <div className="rounded-2xl rounded-tl-none bg-surface-container-high p-5 shadow-sm">
+                    <div className="rounded-2xl rounded-tl-none bg-surface-container-high p-5 shadow-sm dark:bg-[#16181f] dark:shadow-none dark:ring-1 dark:ring-white/[0.06]">
                       <p className="whitespace-pre-wrap text-sm leading-relaxed md:text-base">
                         {welcome}
                       </p>
@@ -473,11 +500,15 @@ export default function ChatApp() {
                         <button
                           key={option}
                           type="button"
-                          className="rounded-xl border border-outline-variant/25 bg-white px-3 py-3 text-left text-sm hover:bg-primary-fixed"
+                          className="rounded-xl border border-outline-variant/25 bg-white px-3 py-3 text-left text-sm hover:bg-primary-fixed dark:border-white/[0.08] dark:bg-[#16181f] dark:hover:bg-[#1f2330]"
                           onClick={() => quickSend(option)}
                         >
-                          <p className="text-xs text-on-surface-variant">¿Cómo te sientes?</p>
-                          <p className="mt-1 font-medium text-on-surface">{option}</p>
+                          <p className="text-xs text-on-surface-variant dark:text-slate-400">
+                            ¿Cómo te sientes?
+                          </p>
+                          <p className="mt-1 font-medium text-on-surface dark:text-[#e8eaed]">
+                            {option}
+                          </p>
                         </button>
                       ))}
                     </div>
@@ -488,12 +519,12 @@ export default function ChatApp() {
                 {messages.map((m) =>
                   m.role === "assistant" ? (
                     <div key={m.id} className="flex max-w-2xl gap-4">
-                      <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-fixed">
-                        <span className="material-symbols-outlined text-[18px] text-primary">
+                      <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-fixed dark:bg-[#2d2654]">
+                        <span className="material-symbols-outlined text-[18px] text-primary dark:text-[#c4b5fd]">
                           auto_awesome
                         </span>
                       </div>
-                      <div className="rounded-2xl rounded-tl-none bg-surface-container-high p-5 shadow-sm">
+                      <div className="rounded-2xl rounded-tl-none bg-surface-container-high p-5 shadow-sm dark:bg-[#16181f] dark:shadow-none dark:ring-1 dark:ring-white/[0.06]">
                         <p className="whitespace-pre-wrap text-sm leading-relaxed md:text-base">
                           {m.content}
                         </p>
@@ -501,7 +532,7 @@ export default function ChatApp() {
                     </div>
                   ) : (
                     <div key={m.id} className="ml-auto flex max-w-2xl flex-row-reverse gap-4">
-                      <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-container-highest">
+                      <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-container-highest dark:bg-[#252830]">
                         {profileImageUrl ? (
                           <img
                             src={profileImageUrl}
@@ -509,12 +540,12 @@ export default function ChatApp() {
                             className="h-8 w-8 rounded-full object-cover"
                           />
                         ) : (
-                          <span className="material-symbols-outlined text-[18px] text-slate-500">
+                          <span className="material-symbols-outlined text-[18px] text-slate-500 dark:text-slate-400">
                             account_circle
                           </span>
                         )}
                       </div>
-                      <div className="rounded-2xl rounded-tr-none bg-primary-container p-5 text-white shadow-sm">
+                      <div className="rounded-2xl rounded-tr-none bg-primary-container p-5 text-white shadow-sm dark:bg-[#5b3ddb] dark:shadow-[0_8px_30px_rgba(91,61,219,0.25)]">
                         <p className="whitespace-pre-wrap text-sm leading-relaxed md:text-base">
                           {m.content}
                         </p>
@@ -522,19 +553,21 @@ export default function ChatApp() {
                     </div>
                   ),
                 )}
-                {loading && <p className="animate-pulse text-sm text-tertiary">Escribiendo…</p>}
+                {loading && (
+                  <p className="animate-pulse text-sm text-tertiary dark:text-[#8fb39e]">Escribiendo…</p>
+                )}
                 <div ref={listEndRef} />
               </div>
             </section>
             <footer className="bg-transparent p-6 md:px-12 md:pb-10">
               <div className="mx-auto flex max-w-4xl flex-col gap-3">
                 {audioStatus === "generating" && loading === false && (
-                  <p className="mb-2 text-xs text-tertiary">
+                  <p className="mb-2 text-xs text-tertiary dark:text-[#8fb39e]">
                     Preparando tu meditación y generando audio…
                   </p>
                 )}
                 {audioStatus === "error" && (
-                  <p className="mb-2 text-xs text-error">
+                  <p className="mb-2 text-xs text-error dark:text-red-300">
                     No se pudo generar el audio. Probá de nuevo desde Biblioteca o enviando otro
                     mensaje.
                   </p>
@@ -545,7 +578,7 @@ export default function ChatApp() {
                       <button
                         key={option}
                         type="button"
-                        className="shrink-0 rounded-full border border-outline-variant/20 bg-white px-4 py-2 text-xs font-medium hover:bg-primary-fixed"
+                        className="shrink-0 rounded-full border border-outline-variant/20 bg-white px-4 py-2 text-xs font-medium hover:bg-primary-fixed dark:border-white/[0.08] dark:bg-[#16181f] dark:hover:bg-[#1f2330]"
                         onClick={() => quickSend(option)}
                       >
                         {option}
@@ -555,7 +588,7 @@ export default function ChatApp() {
                 )}
                 <div className="relative flex items-center">
                   <textarea
-                    className="min-h-[3.4rem] max-h-32 w-full resize-none rounded-[20px] border-none bg-surface-container-highest py-4 pl-6 pr-16 text-sm text-on-surface outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-primary-fixed"
+                    className="min-h-[3.4rem] max-h-32 w-full resize-none rounded-[20px] border-none bg-surface-container-highest py-4 pl-6 pr-16 text-sm text-on-surface outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-primary-fixed dark:bg-[#16181f] dark:text-[#e8eaed] dark:placeholder:text-slate-500 dark:focus:ring-[#3d2a6b]"
                     placeholder="Cuéntame, ¿cómo te sientes en este momento?"
                     rows={1}
                     value={input}
@@ -576,7 +609,7 @@ export default function ChatApp() {
                     <span className="material-symbols-outlined text-[20px]">send</span>
                   </button>
                 </div>
-                <p className="text-center text-[10px] font-medium text-slate-400">
+                <p className="text-center text-[10px] font-medium text-slate-400 dark:text-slate-500">
                   VozCalma es una guía de acompañamiento, no reemplaza la terapia profesional.
                 </p>
               </div>
@@ -598,19 +631,19 @@ export default function ChatApp() {
 
       {renameDialog.open && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/30 p-4"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 dark:bg-black/60"
           onClick={() => setRenameDialog({ open: false, sessionId: null, value: "" })}
         >
           <div
-            className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl"
+            className="w-full max-w-md rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xl dark:border-white/[0.08] dark:bg-[#16181f]"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="font-headline text-xl text-[#4f17ce]">Renombrar sesión</h3>
-            <p className="mt-1 text-sm text-slate-500">
+            <h3 className="font-headline text-xl text-[#4f17ce] dark:text-[#c4b5fd]">Renombrar sesión</h3>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Elige un nombre claro para identificar esta conversación.
             </p>
             <input
-              className="mt-4 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-primary"
+              className="mt-4 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-primary dark:border-white/[0.1] dark:bg-[#0c0d10] dark:text-[#e8eaed] dark:focus:border-[#c4b5fd]"
               value={renameDialog.value}
               onChange={(e) => setRenameDialog((prev) => ({ ...prev, value: e.target.value }))}
               onKeyDown={(e) => {
@@ -620,7 +653,7 @@ export default function ChatApp() {
             <div className="mt-4 flex justify-end gap-2">
               <button
                 type="button"
-                className="rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100"
+                className="rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/[0.06]"
                 onClick={() => setRenameDialog({ open: false, sessionId: null, value: "" })}
               >
                 Cancelar

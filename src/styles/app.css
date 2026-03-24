@@ -8,6 +8,11 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+.dark .glass-player {
+  background: rgba(22, 24, 30, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .material-symbols-outlined {
   font-variation-settings:
     "FILL" 0,

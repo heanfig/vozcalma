@@ -1,15 +1,15 @@
-<!doctype html>
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Términos del servicio | VozCalma</title>
-    <meta name="description" content="Términos del servicio de VozCalma para usuarios en Colombia." />
-    <link rel="canonical" href="https://vozcalma.app/terminos-del-servicio" />
-  </head>
-  <body style="font-family: Inter, system-ui, sans-serif; margin: 0; background: #faf9fb; color: #1b1c1e;">
-    <main style="max-width: 900px; margin: 0 auto; padding: 40px 20px 80px;">
-      <a href="/" style="color: #4f17ce; text-decoration: none; font-weight: 600;">← Inicio</a>
+---
+import PublicSiteLayout from "../layouts/PublicSiteLayout.astro";
+---
+
+<PublicSiteLayout
+  title="Términos del servicio | VozCalma"
+  description="Términos del servicio de VozCalma para usuarios en Colombia."
+  canonicalPath="/terminos-del-servicio"
+>
+    <section class="mx-auto max-w-4xl px-6 py-10 md:px-8">
+      <a href="/" class="text-sm font-semibold text-primary hover:underline">← Inicio</a>
+      <div class="mt-4 rounded-3xl border border-outline-variant/25 bg-white p-8 shadow-sm">
       <h1>Términos del servicio</h1>
       <p>Última actualización: 24 de marzo de 2026</p>
       <h2>1. Aceptación</h2>
@@ -28,6 +28,6 @@
       <p>VozCalma no garantiza disponibilidad ininterrumpida y no responde por daños indirectos derivados del uso del servicio.</p>
       <h2>8. Ley aplicable</h2>
       <p>Estos términos se interpretan conforme a la legislación colombiana.</p>
-    </main>
-  </body>
-</html>
+      </div>
+    </section>
+</PublicSiteLayout>

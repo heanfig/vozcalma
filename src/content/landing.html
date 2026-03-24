@@ -12,6 +12,10 @@
 <meta property="og:image" content="https://lh3.googleusercontent.com/aida-public/AB6AXuCJVeX03go6ZEv92TQphTQL11wzXdyYS_L7m2m-ZWJWcV3YsRgyvvjw0Uhnqji8Omtyaw5CiBSf4RmotbkFzpn8LVNtLidLHfk7Sg0rBLU987v4qtKCpgLUP7Qwfpg98Kcm95_PTPyTgjZFpirmy2D7blkDYMR4SehB8_bKwFsFZJ3Npt576q7mSzqEzE5rbkFdy6E3ac48wUlnhqHKPB96Sx6drXWbSoVtrGS9j6rOyG5gTdcQLOu4xeDkQiHkk7UuRiZGqVdj3aMM"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <link rel="canonical" href="https://vozcalma.app/"/>
+<script is:inline>
+!function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once register_for_session unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group identify setPersonProperties setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags resetGroups onFeatureFlags addFeatureFlagsHandler onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey getNextSurveyStep".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+posthog.init("phc_On69zKEx14Hc6CSQLJShaQsEmbIV8p3gH6S4BFYvjaC",{api_host:"https://us.i.posthog.com",defaults:"2026-01-30"});
+</script>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
@@ -21,6 +25,14 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{"tertiary-fixed":"#c2ec
 <style>
 .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
 .glass-card{background:rgba(255,255,255,.76);backdrop-filter:blur(14px)}
+.eq-live{animation:eqPulse .45s ease-in-out infinite}
+@keyframes eqPulse{
+  0%{transform:translateY(0) scale(1);opacity:.65}
+  25%{transform:translateY(-1px) scale(1.16);opacity:1}
+  50%{transform:translateY(1px) scale(.9);opacity:.75}
+  75%{transform:translateY(-2px) scale(1.24);opacity:1}
+  100%{transform:translateY(0) scale(1);opacity:.7}
+}
 </style>
 </head>
 <body class="bg-surface font-body text-on-surface">
@@ -29,14 +41,14 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{"tertiary-fixed":"#c2ec
 <div class="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
 <div class="text-2xl font-headline font-bold text-primary">VozCalma</div>
 <div class="hidden md:flex gap-8 items-center">
-<a class="text-primary font-bold border-b-2 border-primary font-headline tracking-tight" href="#como-funciona">Cómo funciona</a>
-<a class="text-slate-600 font-medium font-headline tracking-tight hover:text-primary transition-colors duration-300" href="#precios">Precios</a>
+<a class="text-primary font-bold border-b-2 border-primary font-headline tracking-tight" href="#como-funciona" data-soft-scroll="true">Cómo funciona</a>
+<a class="text-slate-600 font-medium font-headline tracking-tight hover:text-primary transition-colors duration-300" href="#precios" data-soft-scroll="true">Precios</a>
 <a class="text-slate-600 font-medium font-headline tracking-tight hover:text-primary transition-colors duration-300" href="/blog">Blog</a>
-<a class="text-slate-600 font-medium font-headline tracking-tight hover:text-primary transition-colors duration-300" href="/sign-in">Iniciar sesión</a>
+<a id="nav-auth-link" class="text-slate-600 font-medium font-headline tracking-tight hover:text-primary transition-colors duration-300" href="/sign-in">Iniciar sesión</a>
 </div>
 <div class="md:hidden flex items-center gap-3">
-<a class="text-sm font-semibold text-primary" href="#precios">Precios</a>
-<a class="text-sm font-semibold text-primary" href="/sign-in">Entrar</a>
+<a class="text-sm font-semibold text-primary" href="#precios" data-soft-scroll="true">Precios</a>
+<a id="mobile-auth-link" class="text-sm font-semibold text-primary" href="/sign-in">Entrar</a>
 </div>
 </div>
 </nav>
@@ -59,7 +71,7 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{"tertiary-fixed":"#c2ec
                     </p>
 </div>
 <div class="flex flex-col sm:flex-row gap-4 pt-4">
-<a href="/sign-in" class="bg-primary text-on-primary px-8 py-4 rounded-full font-semibold text-lg hover:scale-[0.98] transition-all active:opacity-80 inline-block text-center">
+<a id="hero-auth-cta" href="/sign-in" class="bg-primary text-on-primary px-8 py-4 rounded-full font-semibold text-lg hover:scale-[0.98] transition-all active:opacity-80 inline-block text-center">
                         Empieza ahora - 3 sesiones gratis
                     </a>
 </div>
@@ -72,18 +84,23 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{"tertiary-fixed":"#c2ec
 <div class="absolute -bottom-8 -left-8 md:-left-16 p-6 glass-card rounded-2xl shadow-lg max-w-xs">
 <div class="flex items-center gap-4 mb-3">
 <div class="w-10 h-10 bg-tertiary-container rounded-full flex items-center justify-center text-on-tertiary-container">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">graphic_eq</span>
+<span id="now-playing-eq" class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">graphic_eq</span>
 </div>
 <div>
 <p class="text-xs font-bold uppercase tracking-widest text-tertiary">Ahora sonando</p>
 <p class="font-headline font-semibold text-on-surface">Calma Profunda</p>
 </div>
 </div>
-<audio controls preload="none" class="w-full mb-3 rounded-lg" aria-label="Reproductor de muestra">
+<audio id="hero-audio" preload="none" class="hidden" aria-label="Reproductor de muestra">
 <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg"/>
 </audio>
-<div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
-<div class="bg-primary h-full w-1/3"></div>
+<div class="mb-1 flex items-center gap-2">
+  <button id="hero-audio-toggle" type="button" class="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white shadow-sm transition active:scale-95" aria-label="Reproducir muestra">
+    <span id="hero-audio-icon" class="material-symbols-outlined text-[20px]" style="font-variation-settings:'FILL' 1">play_arrow</span>
+  </button>
+  <div id="hero-progress-track" class="relative h-1.5 flex-1 cursor-pointer rounded-full bg-surface-variant overflow-hidden">
+    <div id="hero-progress-fill" class="h-full w-0 bg-primary transition-[width] duration-150"></div>
+  </div>
 </div>
 </div>
 </div>
@@ -214,7 +231,7 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{"tertiary-fixed":"#c2ec
 <span>Modo offline próximamente</span>
 </li>
 </ul>
-<a href="/sign-in" class="w-full py-4 rounded-full bg-on-primary-container text-primary-container font-bold text-lg hover:scale-[0.98] transition-all block text-center">
+<a href="https://wa.me/573137071964" target="_blank" rel="noopener noreferrer" class="w-full py-4 rounded-full bg-on-primary-container text-primary-container font-bold text-lg hover:scale-[0.98] transition-all block text-center">
                         Suscribirme ahora
                     </a>
 </div>
@@ -255,7 +272,7 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{"tertiary-fixed":"#c2ec
 <a href="/blog" class="flex flex-col items-center justify-center text-slate-500 p-2 hover:bg-slate-100 rounded-full transition-all">
 <span class="material-symbols-outlined" data-icon="play_circle">play_circle</span>
 </a>
-<a href="#precios" class="flex flex-col items-center justify-center text-slate-500 p-2 hover:bg-slate-100 rounded-full transition-all">
+<a href="#precios" data-soft-scroll="true" class="flex flex-col items-center justify-center text-slate-500 p-2 hover:bg-slate-100 rounded-full transition-all">
 <span class="material-symbols-outlined" data-icon="payments">payments</span>
 </a>
 </div>
@@ -280,6 +297,98 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{"tertiary-fixed":"#c2ec
   };
   document.getElementById("cookies-accept")?.addEventListener("click", () => save("accepted"));
   document.getElementById("cookies-reject")?.addEventListener("click", () => save("rejected"));
+})();
+
+(() => {
+  const nav = document.getElementById("nav-auth-link");
+  const mobile = document.getElementById("mobile-auth-link");
+  const hero = document.getElementById("hero-auth-cta");
+  if (!nav || !mobile || !hero) return;
+  fetch("/api/auth-state", { credentials: "include" })
+    .then((r) => r.json())
+    .then((data) => {
+      const signedIn = !!data?.signedIn;
+      if (!signedIn) return;
+      nav.setAttribute("href", "/app");
+      nav.textContent = "Ir a la app";
+      mobile.setAttribute("href", "/app");
+      mobile.textContent = "Ir a la app";
+      hero.setAttribute("href", "/app");
+      hero.textContent = "Ir a mi sesión";
+    })
+    .catch(() => {});
+})();
+
+(() => {
+  const links = document.querySelectorAll('a[data-soft-scroll="true"]');
+  const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+  links.forEach((link) => {
+    link.addEventListener("click", (event) => {
+      const href = link.getAttribute("href");
+      if (!href || !href.startsWith("#")) return;
+      const target = document.querySelector(href);
+      if (!target) return;
+      event.preventDefault();
+      const start = window.scrollY;
+      const end = target.getBoundingClientRect().top + window.scrollY - 20;
+      const duration = 260;
+      const startTime = performance.now();
+      const tick = (now) => {
+        const progress = Math.min(1, (now - startTime) / duration);
+        const pos = start + (end - start) * easeOut(progress);
+        window.scrollTo({ top: pos });
+        if (progress < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  });
+})();
+
+(() => {
+  const audio = document.getElementById("hero-audio");
+  const toggle = document.getElementById("hero-audio-toggle");
+  const icon = document.getElementById("hero-audio-icon");
+  const track = document.getElementById("hero-progress-track");
+  const fill = document.getElementById("hero-progress-fill");
+  const eq = document.getElementById("now-playing-eq");
+  if (!audio || !toggle || !icon || !track || !fill || !eq) return;
+  const sync = () => {
+    const duration = audio.duration || 0;
+    const current = audio.currentTime || 0;
+    const pct = duration > 0 ? Math.min(100, (current / duration) * 100) : 0;
+    fill.style.width = `${pct}%`;
+  };
+  const updateState = () => {
+    const playing = !audio.paused;
+    icon.textContent = playing ? "pause" : "play_arrow";
+    eq.classList.toggle("eq-live", playing);
+  };
+
+  toggle.addEventListener("click", async () => {
+    if (audio.paused) {
+      await audio.play().catch(() => {});
+    } else {
+      audio.pause();
+    }
+    updateState();
+  });
+  track.addEventListener("click", (event) => {
+    const rect = track.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const ratio = Math.max(0, Math.min(1, x / rect.width));
+    const duration = audio.duration || 0;
+    if (duration > 0) {
+      audio.currentTime = duration * ratio;
+      sync();
+    }
+  });
+  audio.addEventListener("timeupdate", sync);
+  audio.addEventListener("loadedmetadata", sync);
+  audio.addEventListener("play", updateState);
+  audio.addEventListener("pause", updateState);
+  audio.addEventListener("ended", updateState);
+  sync();
+  updateState();
 })();
 </script>
 </body></html>

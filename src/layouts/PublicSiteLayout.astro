@@ -1,0 +1,177 @@
+---
+import PostHog from "../components/posthog.astro";
+
+type Props = {
+  title: string;
+  description?: string;
+  canonicalPath?: string;
+  ogType?: "website" | "article";
+};
+
+const {
+  title,
+  description = "Meditaciones guiadas en español para ayudarte a vivir con más calma.",
+  canonicalPath = "/",
+  ogType = "website",
+} = Astro.props;
+
+const canonical = `https://vozcalma.app${canonicalPath}`;
+---
+
+<!doctype html>
+<html class="light" lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href={canonical} />
+    <PostHog />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root{
+        --primary:#4f17ce;
+        --surface:#faf9fb;
+        --surface-low:#f5f3f5;
+        --outline:#cac3d8;
+        --text:#1b1c1e;
+        --muted:#484455;
+      }
+      body{
+        margin:0;
+        background:var(--surface);
+        color:var(--text);
+        font-family:"Plus Jakarta Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      }
+      .site-nav{
+        position:sticky;
+        top:0;
+        z-index:50;
+        background:rgba(245,243,245,.95);
+        backdrop-filter:blur(8px);
+        border-bottom:1px solid rgba(202,195,216,.35);
+      }
+      .site-nav-inner,.site-footer-inner{
+        max-width:1120px;
+        margin:0 auto;
+        padding:16px 24px;
+      }
+      .site-nav-row{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:18px;
+      }
+      .site-brand{
+        font-family:"Noto Serif",serif;
+        font-size:30px;
+        line-height:1;
+        font-weight:700;
+        color:var(--primary);
+        text-decoration:none;
+      }
+      .site-links{
+        display:flex;
+        align-items:center;
+        gap:26px;
+        flex-wrap:wrap;
+      }
+      .site-link{
+        text-decoration:none;
+        color:var(--muted);
+        font-family:"Noto Serif",serif;
+        font-size:15px;
+        font-weight:600;
+      }
+      .site-link:hover{color:var(--primary)}
+      .site-link-cta{color:var(--primary);font-weight:700}
+      .site-footer{
+        margin-top:60px;
+        border-top:1px solid rgba(202,195,216,.35);
+        background:var(--surface-low);
+      }
+      .site-footer-inner{
+        padding-top:42px;
+        padding-bottom:42px;
+        text-align:center;
+      }
+      .site-footer-brand{
+        margin:0;
+        font-family:"Noto Serif",serif;
+        font-size:30px;
+        font-weight:700;
+      }
+      .site-footer-links{
+        margin-top:18px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        flex-wrap:wrap;
+        gap:22px;
+      }
+      .site-footer-links a{
+        text-decoration:none;
+        font-size:12px;
+        letter-spacing:.08em;
+        text-transform:uppercase;
+        color:#6f6c78;
+        font-weight:600;
+      }
+      .site-footer-links a:hover{color:var(--primary)}
+      .site-copyright{
+        margin:18px 0 0;
+        font-size:12px;
+        color:#6f6c78;
+      }
+      @media (max-width: 860px){
+        .site-nav-inner,.site-footer-inner{padding-left:16px;padding-right:16px}
+        .site-brand,.site-footer-brand{font-size:25px}
+        .site-links{gap:14px}
+        .site-link{font-size:14px}
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="site-nav">
+      <div class="site-nav-inner">
+        <div class="site-nav-row">
+          <a href="/" class="site-brand">VozCalma</a>
+          <div class="site-links">
+            <a href="/#como-funciona" class="site-link">Cómo funciona</a>
+            <a href="/#precios" class="site-link">Precios</a>
+            <a href="/blog" class="site-link">Blog</a>
+            <a href="/sign-in" class="site-link site-link-cta">Iniciar sesión</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <p class="site-footer-brand">VozCalma</p>
+        <div class="site-footer-links">
+          <a href="/politica-de-privacidad">Política de privacidad</a>
+          <a href="/terminos-del-servicio">Términos del servicio</a>
+          <a href="/aviso-legal">Aviso legal</a>
+        </div>
+        <p class="site-copyright">© 2026 VozCalma. Diseñado para tu bienestar.</p>
+      </div>
+    </footer>
+  </body>
+</html>

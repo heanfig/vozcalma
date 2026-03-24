@@ -1,18 +1,15 @@
-<!doctype html>
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Política de privacidad | VozCalma</title>
-    <meta
-      name="description"
-      content="Política de privacidad de VozCalma para usuarios en Colombia."
-    />
-    <link rel="canonical" href="https://vozcalma.app/politica-de-privacidad" />
-  </head>
-  <body style="font-family: Inter, system-ui, sans-serif; margin: 0; background: #faf9fb; color: #1b1c1e;">
-    <main style="max-width: 900px; margin: 0 auto; padding: 40px 20px 80px;">
-      <a href="/" style="color: #4f17ce; text-decoration: none; font-weight: 600;">← Inicio</a>
+---
+import PublicSiteLayout from "../layouts/PublicSiteLayout.astro";
+---
+
+<PublicSiteLayout
+  title="Política de privacidad | VozCalma"
+  description="Política de privacidad de VozCalma para usuarios en Colombia."
+  canonicalPath="/politica-de-privacidad"
+>
+    <section class="mx-auto max-w-4xl px-6 py-10 md:px-8">
+      <a href="/" class="text-sm font-semibold text-primary hover:underline">← Inicio</a>
+      <div class="mt-4 rounded-3xl border border-outline-variant/25 bg-white p-8 shadow-sm">
       <h1>Política de privacidad</h1>
       <p>Última actualización: 24 de marzo de 2026</p>
       <p>
@@ -35,6 +32,6 @@
       <p>Para consultas de privacidad, escríbenos por los canales oficiales de soporte publicados en el sitio.</p>
       <h2>8. Cambios</h2>
       <p>Podemos actualizar esta política. Publicaremos la versión vigente en esta misma URL.</p>
-    </main>
-  </body>
-</html>
+      </div>
+    </section>
+</PublicSiteLayout>

@@ -66,7 +66,7 @@ export default function MeditationPlayer({
             {isPlaying ? "pause" : "play_arrow"}
           </span>
         </span>
-        <span className="max-w-[140px] truncate font-headline text-sm font-semibold text-on-surface md:max-w-[200px]">
+        <span className="max-w-[140px] truncate font-headline text-sm font-semibold text-on-surface dark:text-[#e8eaed] md:max-w-[200px]">
           {title}
         </span>
       </button>
@@ -86,12 +86,16 @@ export default function MeditationPlayer({
             </span>
           </button>
           <div className="min-w-0 flex-1 pt-0.5">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-primary">Tu meditación</p>
-            <p className="truncate font-headline text-sm font-semibold text-on-surface">{title}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-primary dark:text-[#c4b5fd]">
+              Tu meditación
+            </p>
+            <p className="truncate font-headline text-sm font-semibold text-on-surface dark:text-[#e8eaed]">
+              {title}
+            </p>
           </div>
           <button
             type="button"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 hover:bg-white/60"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 hover:bg-white/60 dark:text-slate-400 dark:hover:bg-white/10"
             aria-label="Minimizar reproductor"
             onClick={onMinimize}
           >
@@ -101,7 +105,7 @@ export default function MeditationPlayer({
 
         <div>
           <div
-            className="relative h-1.5 w-full cursor-pointer rounded-full bg-surface-container-highest"
+            className="relative h-1.5 w-full cursor-pointer rounded-full bg-surface-container-highest dark:bg-[#2a2d38]"
             onClick={(e) => {
               const a = audioRef.current;
               if (!a || !duration) return;
@@ -121,7 +125,7 @@ export default function MeditationPlayer({
               style={{ width: `${pct}%` }}
             />
           </div>
-          <div className="mt-1 flex justify-between font-mono text-[10px] text-slate-500">
+          <div className="mt-1 flex justify-between font-mono text-[10px] text-slate-500 dark:text-slate-400">
             <span>{formatTime(progress)}</span>
             <span>{formatTime(duration)}</span>
           </div>
