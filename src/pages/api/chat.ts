@@ -1,3 +1,7 @@
+/**
+ * Orquestación LLM + Supabase en Node (Astro server). Un solo deploy y secretos unificados.
+ * Tareas batch o export JSONL: scripts/ con cron o ejecución manual; no flujo crítico en n8n.
+ */
 import type { APIRoute } from "astro";
 import { getSupabaseAdmin } from "../../lib/supabase-server";
 import {
@@ -7,9 +11,11 @@ import {
   isIntakeComplete,
   type IntakeData,
 } from "../../lib/meditation/intake";
+import { fetchKnowledgeStyleHints } from "../../lib/meditation/knowledge-retrieval";
 import { buildMeditationPlan } from "../../lib/meditation/planner";
 import { generateMeditationScript } from "../../lib/meditation/script-writer";
 import { prepareScriptForTts } from "../../lib/meditation/script-post";
+import { saveMeditationScriptReviewFile } from "../../lib/meditation/save-script-review";
 
 type Body = {
   sessionId?: string | null;
@@ -145,10 +151,22 @@ export const POST: APIRoute = async (context) => {
     try {
       const plan = buildMeditationPlan(updatedIntake);
       generatedPlan = plan;
-      const rawScript = await generateMeditationScript(updatedIntake, plan);
+      const { styleHints } = await fetchKnowledgeStyleHints(
+        supabase,
+        updatedIntake,
+      );
+      const rawScript = await generateMeditationScript(updatedIntake, plan, {
+        styleHints,
+      });
       scriptReady = rawScript.includes("---FIN_GUIÓN---");
       const nameForTts = (updatedIntake.name || safeDisplayName || "").trim();
       generatedScript = prepareScriptForTts(rawScript, nameForTts);
+      if (sessionId) {
+        void saveMeditationScriptReviewFile({
+          sessionId,
+          scriptText: generatedScript,
+        }).catch(() => {});
+      }
       assistantText =
         "Gracias por abrirte conmigo. Estoy preparando tu meditación personalizada y en unos segundos tendrás el audio listo.";
     } catch (e) {

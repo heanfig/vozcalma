@@ -10,7 +10,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "db:migrate": "node --env-file=.env scripts/apply-migration.mjs"
+    "db:migrate": "node --env-file=.env scripts/apply-migration.mjs",
+    "export:training-jsonl": "node --env-file=.env scripts/export-training-jsonl.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^10.0.3",

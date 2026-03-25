@@ -13,6 +13,9 @@ yarn-error.log*
 pnpm-debug.log*
 
 
+# guiones exportados para revisión (servidor)
+var/
+
 # environment variables
 .env
 .env.local

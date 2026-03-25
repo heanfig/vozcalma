@@ -14,11 +14,15 @@ interface ImportMetaEnv {
   readonly SUPABASE_SECRET_KEY?: string;
   readonly OPENROUTER_API_KEY: string;
   readonly OPENROUTER_MODEL: string;
+  /** Max tokens de salida por defecto para `completeChat` (p. ej. 4096). La generación de guion pasa un tope propio. */
+  readonly OPENROUTER_MAX_TOKENS?: string;
   readonly ELEVENLABS_API_KEY: string;
   readonly ELEVENLABS_VOICE_ID: string;
   readonly ADMIN_API_SECRET: string;
   /** Origen público (playUrl); por defecto `site` de Astro (vozcalma.app) */
   readonly PUBLIC_SITE_URL?: string;
+  /** Carpeta absoluta o relativa al cwd para guardar .txt de revisión de guiones */
+  readonly MEDITATION_SCRIPT_EXPORT_DIR?: string;
 }
 
 interface ImportMeta {
