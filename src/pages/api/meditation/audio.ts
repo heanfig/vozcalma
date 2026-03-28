@@ -2,27 +2,20 @@ import type { APIRoute } from "astro";
 import { synthesizeSpeech } from "../../../lib/elevenlabs";
 import { getSupabaseAdmin } from "../../../lib/supabase-server";
 import { prepareScriptForTts } from "../../../lib/meditation/script-post";
+import { json, requireAuth } from "../../../lib/api-utils";
+import { SCRIPT_PREFIX, extractScript } from "../../../lib/constants";
 
 type Body = { sessionId?: string; text?: string; displayName?: string };
-const SCRIPT_PREFIX = "SCRIPT::";
 
 export const POST: APIRoute = async (context) => {
-  const { userId } = context.locals.auth();
-  if (!userId) {
-    return new Response(JSON.stringify({ error: "No autorizado" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  const auth = requireAuth(context);
+  if (auth instanceof Response) return auth;
 
   let body: Body;
   try {
     body = (await context.request.json()) as Body;
   } catch {
-    return new Response(JSON.stringify({ error: "JSON inválido" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: "JSON inválido" }, 400);
   }
 
   const sessionId = body.sessionId?.trim();
@@ -31,10 +24,7 @@ export const POST: APIRoute = async (context) => {
   const firstNameForTts =
     displayName && !/^usuario$/i.test(displayName) ? displayName.split(/\s+/)[0] : "";
   if (!sessionId && !inlineText) {
-    return new Response(JSON.stringify({ error: "sessionId o text requerido" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: "sessionId o text requerido" }, 400);
   }
 
   const supabase = getSupabaseAdmin();
@@ -44,14 +34,9 @@ export const POST: APIRoute = async (context) => {
       .from("sessions")
       .select("id")
       .eq("id", sessionId)
-      .eq("clerk_user_id", userId)
+      .eq("clerk_user_id", auth)
       .maybeSingle();
-    if (!session) {
-      return new Response(JSON.stringify({ error: "Sesión no encontrada" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+    if (!session) return json({ error: "Sesión no encontrada" }, 404);
 
     const { data: systemMessages } = await supabase
       .from("messages")
@@ -63,17 +48,9 @@ export const POST: APIRoute = async (context) => {
     const scriptMessage = (systemMessages || []).find((m) =>
       (m.content || "").startsWith(SCRIPT_PREFIX),
     );
-    scriptText = (scriptMessage?.content || "")
-      .replace(SCRIPT_PREFIX, "")
-      .split("---FIN_GUIÓN---")[0]
-      .trim();
+    scriptText = extractScript(scriptMessage?.content || "");
   }
-  if (!scriptText) {
-    return new Response(JSON.stringify({ error: "Guion no disponible" }), {
-      status: 409,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  if (!scriptText) return json({ error: "Guion no disponible" }, 409);
 
   scriptText = prepareScriptForTts(scriptText, firstNameForTts || undefined);
 
@@ -88,9 +65,6 @@ export const POST: APIRoute = async (context) => {
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Error TTS";
-    return new Response(JSON.stringify({ error: msg }), {
-      status: 502,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: msg }, 502);
   }
 };

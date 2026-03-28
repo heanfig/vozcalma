@@ -1,39 +1,24 @@
 import type { APIRoute } from "astro";
 import { getSupabaseAdmin } from "../../lib/supabase-server";
-
-const SCRIPT_PREFIX = "SCRIPT::";
+import { json, requireAuth } from "../../lib/api-utils";
+import { SCRIPT_PREFIX, extractScript } from "../../lib/constants";
 
 export const GET: APIRoute = async (context) => {
-  const { userId } = context.locals.auth();
-  if (!userId) {
-    return new Response(JSON.stringify({ error: "No autorizado" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  const auth = requireAuth(context);
+  if (auth instanceof Response) return auth;
 
   const supabase = getSupabaseAdmin();
   const { data: sessions, error: sessionsError } = await supabase
     .from("sessions")
     .select("id, title, created_at")
-    .eq("clerk_user_id", userId)
+    .eq("clerk_user_id", auth)
     .order("created_at", { ascending: false })
     .limit(200);
 
-  if (sessionsError) {
-    return new Response(JSON.stringify({ error: sessionsError.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  if (sessionsError) return json({ error: sessionsError.message }, 500);
 
   const ids = (sessions || []).map((s) => s.id);
-  if (ids.length === 0) {
-    return new Response(JSON.stringify({ items: [] }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  if (ids.length === 0) return json({ items: [] });
 
   const { data: systemMessages } = await supabase
     .from("messages")
@@ -57,7 +42,7 @@ export const GET: APIRoute = async (context) => {
     .filter((s) => bySession.has(s.id))
     .map((s) => {
       const scriptRaw = bySession.get(s.id)?.content || "";
-      const scriptText = scriptRaw.replace(SCRIPT_PREFIX, "").split("---FIN_GUIÓN---")[0].trim();
+      const scriptText = extractScript(scriptRaw);
       return {
         sessionId: s.id,
         title: s.title || "Meditación personalizada",
@@ -66,8 +51,5 @@ export const GET: APIRoute = async (context) => {
       };
     });
 
-  return new Response(JSON.stringify({ items }), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+  return json({ items });
 };

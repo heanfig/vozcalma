@@ -16,6 +16,8 @@ import { buildMeditationPlan } from "../../lib/meditation/planner";
 import { generateMeditationScript } from "../../lib/meditation/script-writer";
 import { prepareScriptForTts } from "../../lib/meditation/script-post";
 import { saveMeditationScriptReviewFile } from "../../lib/meditation/save-script-review";
+import { json, requireAuth } from "../../lib/api-utils";
+import { SCRIPT_PREFIX } from "../../lib/constants";
 
 type Body = {
   sessionId?: string | null;
@@ -30,8 +32,6 @@ type ArtifactRow = {
   audio_status: "pending" | "ready" | "failed" | null;
 };
 
-const SCRIPT_PREFIX = "SCRIPT::";
-
 function rebuildIntakeFromUserHistory(
   userHistory: Array<{ role: string; content: string }>,
 ): IntakeData {
@@ -43,22 +43,14 @@ function rebuildIntakeFromUserHistory(
 }
 
 export const POST: APIRoute = async (context) => {
-  const { userId } = context.locals.auth();
-  if (!userId) {
-    return new Response(JSON.stringify({ error: "No autorizado" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  const auth = requireAuth(context);
+  if (auth instanceof Response) return auth;
 
   let body: Body;
   try {
     body = (await context.request.json()) as Body;
   } catch {
-    return new Response(JSON.stringify({ error: "JSON inválido" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: "JSON inválido" }, 400);
   }
 
   const text = (body.message || "").trim();
@@ -66,10 +58,7 @@ export const POST: APIRoute = async (context) => {
   const firstToken = rawDisplay.split(/\s+/)[0] || "";
   const safeDisplayName = /^usuario$/i.test(firstToken) ? "" : firstToken;
   if (!text || text.length > 12000) {
-    return new Response(JSON.stringify({ error: "Mensaje inválido" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: "Mensaje inválido" }, 400);
   }
 
   const supabase = getSupabaseAdmin();
@@ -78,14 +67,11 @@ export const POST: APIRoute = async (context) => {
   if (!sessionId) {
     const { data: s, error: e1 } = await supabase
       .from("sessions")
-      .insert({ clerk_user_id: userId, title: null })
+      .insert({ clerk_user_id: auth, title: null })
       .select("id")
       .single();
     if (e1 || !s) {
-      return new Response(
-        JSON.stringify({ error: "No se pudo crear la sesión", detail: e1?.message }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      );
+      return json({ error: "No se pudo crear la sesión", detail: e1?.message }, 500);
     }
     sessionId = s.id;
   } else {
@@ -93,14 +79,9 @@ export const POST: APIRoute = async (context) => {
       .from("sessions")
       .select("id")
       .eq("id", sessionId)
-      .eq("clerk_user_id", userId)
+      .eq("clerk_user_id", auth)
       .maybeSingle();
-    if (!check) {
-      return new Response(JSON.stringify({ error: "Sesión no encontrada" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+    if (!check) return json({ error: "Sesión no encontrada" }, 404);
   }
 
   await supabase.from("messages").insert({
@@ -171,10 +152,7 @@ export const POST: APIRoute = async (context) => {
         "Gracias por abrirte conmigo. Estoy preparando tu meditación personalizada y en unos segundos tendrás el audio listo.";
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Error al generar meditación";
-      return new Response(JSON.stringify({ error: msg }), {
-        status: 502,
-        headers: { "Content-Type": "application/json" },
-      });
+      return json({ error: msg }, 502);
     }
   } else {
     const callName = (previousIntake.name || safeDisplayName || "").trim();
@@ -209,15 +187,9 @@ export const POST: APIRoute = async (context) => {
     audio_status: scriptReady ? "pending" : (artifact?.audio_status ?? "pending"),
     updated_at: new Date().toISOString(),
   };
-  const { error: artifactUpsertError } = await supabase
+  await supabase
     .from("meditation_artifacts")
-    .upsert(artifactPayload, {
-      onConflict: "session_id",
-    });
-
-  if (artifactUpsertError) {
-    // Keep flow resilient if optional artifacts table is unavailable.
-  }
+    .upsert(artifactPayload, { onConflict: "session_id" });
 
   if (!artifact?.intake_json?.name && updatedIntake.name) {
     await supabase
@@ -231,15 +203,12 @@ export const POST: APIRoute = async (context) => {
       .eq("id", sessionId);
   }
 
-  return new Response(
-    JSON.stringify({
-      sessionId,
-      message: assistantText,
-      scriptReady,
-      scriptText: generatedScript ?? undefined,
-      uiStep: nextStep?.key ?? "completed",
-      quickOptions: nextStep?.quickOptions ?? [],
-    }),
-    { status: 200, headers: { "Content-Type": "application/json" } }
-  );
+  return json({
+    sessionId,
+    message: assistantText,
+    scriptReady,
+    scriptText: generatedScript ?? undefined,
+    uiStep: nextStep?.key ?? "completed",
+    quickOptions: nextStep?.quickOptions ?? [],
+  });
 };

@@ -4,6 +4,8 @@ import { completeChat, type ChatMessage } from "../../../../lib/openrouter";
 import { getSupabaseAdmin } from "../../../../lib/supabase-server";
 import { MEDITATION_SYSTEM_PROMPT } from "../../../../lib/system-prompt";
 import { synthesizeSpeech } from "../../../../lib/elevenlabs";
+import { json } from "../../../../lib/api-utils";
+import { SCRIPT_END_MARKER } from "../../../../lib/constants";
 
 type Body = {
   /** Guion ya listo (tras revisión humana) */
@@ -18,20 +20,14 @@ export const POST: APIRoute = async ({ request }) => {
   const secret = import.meta.env.ADMIN_API_SECRET;
   const auth = request.headers.get("authorization");
   if (!secret || auth !== `Bearer ${secret}`) {
-    return new Response(JSON.stringify({ error: "No autorizado" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: "No autorizado" }, 401);
   }
 
   let body: Body;
   try {
     body = (await request.json()) as Body;
   } catch {
-    return new Response(JSON.stringify({ error: "JSON inválido" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: "JSON inválido" }, 400);
   }
 
   let script = (body.scriptText || "").trim();
@@ -40,29 +36,23 @@ export const POST: APIRoute = async ({ request }) => {
       { role: "system", content: MEDITATION_SYSTEM_PROMPT },
       {
         role: "user",
-        content: `Genera solo el guion final de meditación en español, terminando con ---FIN_GUIÓN---. Contexto: ${body.rawInput.trim()}`,
+        content: `Genera solo el guion final de meditación en español, terminando con ${SCRIPT_END_MARKER}. Contexto: ${body.rawInput.trim()}`,
       },
     ];
     try {
       script = await completeChat(messages);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Error LLM";
-      return new Response(JSON.stringify({ error: msg }), {
-        status: 502,
-        headers: { "Content-Type": "application/json" },
-      });
+      return json({ error: msg }, 502);
     }
   }
 
   if (!script || script.length > 100000) {
-    return new Response(JSON.stringify({ error: "Guion inválido" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: "Guion inválido" }, 400);
   }
 
-  const gui = script.includes("---FIN_GUIÓN---")
-    ? script.split("---FIN_GUIÓN---")[0].trim()
+  const gui = script.includes(SCRIPT_END_MARKER)
+    ? script.split(SCRIPT_END_MARKER)[0].trim()
     : script;
 
   let audio: ArrayBuffer;
@@ -70,10 +60,7 @@ export const POST: APIRoute = async ({ request }) => {
     audio = await synthesizeSpeech(gui);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Error TTS";
-    return new Response(JSON.stringify({ error: msg }), {
-      status: 502,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: msg }, 502);
   }
 
   const token = randomBytes(18).toString("hex");
@@ -88,13 +75,12 @@ export const POST: APIRoute = async ({ request }) => {
     });
 
   if (upErr) {
-    return new Response(
-      JSON.stringify({
-        error:
-          "No se pudo subir el audio. Crea el bucket público 'meditation-audio' en Supabase Storage.",
+    return json(
+      {
+        error: "No se pudo subir el audio. Crea el bucket público 'meditation-audio' en Supabase Storage.",
         detail: upErr.message,
-      }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      },
+      500,
     );
   }
 
@@ -112,20 +98,12 @@ export const POST: APIRoute = async ({ request }) => {
     source: "admin",
   });
 
-  if (insErr) {
-    return new Response(JSON.stringify({ error: insErr.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  if (insErr) return json({ error: insErr.message }, 500);
 
   const base =
     import.meta.env.PUBLIC_SITE_URL?.replace(/\/$/, "") ||
     "https://vozcalma.app";
   const playUrl = `${base}/p/${token}`;
 
-  return new Response(JSON.stringify({ playUrl, token, expiresAt: expiresAt.toISOString() }), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+  return json({ playUrl, token, expiresAt: expiresAt.toISOString() });
 };

@@ -1,33 +1,23 @@
 import type { APIRoute } from "astro";
 import { synthesizeSpeech } from "../../../lib/elevenlabs";
+import { json, requireAuth } from "../../../lib/api-utils";
 
 type Body = { text: string };
 
 export const POST: APIRoute = async (context) => {
-  const { userId } = context.locals.auth();
-  if (!userId) {
-    return new Response(JSON.stringify({ error: "No autorizado" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  const auth = requireAuth(context);
+  if (auth instanceof Response) return auth;
 
   let body: Body;
   try {
     body = (await context.request.json()) as Body;
   } catch {
-    return new Response(JSON.stringify({ error: "JSON inválido" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: "JSON inválido" }, 400);
   }
 
   const text = (body.text || "").trim();
   if (!text || text.length > 50000) {
-    return new Response(JSON.stringify({ error: "Texto inválido" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: "Texto inválido" }, 400);
   }
 
   try {
@@ -41,9 +31,6 @@ export const POST: APIRoute = async (context) => {
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Error TTS";
-    return new Response(JSON.stringify({ error: msg }), {
-      status: 502,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: msg }, 502);
   }
 };
