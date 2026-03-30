@@ -6,6 +6,7 @@ import { MEDITATION_SYSTEM_PROMPT } from "../../../../lib/system-prompt";
 import { synthesizeSpeech } from "../../../../lib/elevenlabs";
 import { json } from "../../../../lib/api-utils";
 import { SCRIPT_END_MARKER } from "../../../../lib/constants";
+import { mixVoiceWithBackground } from "../../../../lib/audio-mixer";
 
 type Body = {
   /** Guion ya listo (tras revisión humana) */
@@ -55,12 +56,19 @@ export const POST: APIRoute = async ({ request }) => {
     ? script.split(SCRIPT_END_MARKER)[0].trim()
     : script;
 
-  let audio: ArrayBuffer;
+  let voiceBuf: ArrayBuffer;
   try {
-    audio = await synthesizeSpeech(gui);
+    voiceBuf = await synthesizeSpeech(gui);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Error TTS";
     return json({ error: msg }, 502);
+  }
+
+  let finalAudio: Buffer;
+  try {
+    finalAudio = await mixVoiceWithBackground(voiceBuf);
+  } catch {
+    finalAudio = Buffer.from(voiceBuf);
   }
 
   const token = randomBytes(18).toString("hex");
@@ -69,7 +77,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   const { error: upErr } = await supabase.storage
     .from(BUCKET)
-    .upload(path, Buffer.from(audio), {
+    .upload(path, finalAudio, {
       contentType: "audio/mpeg",
       upsert: false,
     });

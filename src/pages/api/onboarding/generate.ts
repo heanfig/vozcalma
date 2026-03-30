@@ -5,6 +5,8 @@ import { prepareScriptForTts } from "../../../lib/meditation/script-post";
 import { synthesizeSpeech } from "../../../lib/elevenlabs";
 import { buildPrompt, type OnboardingType } from "../../../components/onboarding/onboarding-data";
 import { json } from "../../../lib/api-utils";
+import { mixVoiceWithBackground } from "../../../lib/audio-mixer";
+import { saveMeditationScriptReviewFile, saveMeditationAudioFile } from "../../../lib/meditation/save-script-review";
 
 const BUCKET = "meditation-audio";
 
@@ -37,7 +39,7 @@ export const POST: APIRoute = async ({ request }) => {
   if (body.sessionId) {
     const { data: existing } = await supabase
       .from("onboarding_sessions")
-      .select("id, is_paid, audio_url")
+      .select("id, is_paid, audio_url, script_text")
       .eq("id", body.sessionId)
       .maybeSingle();
     if (existing) {
@@ -47,6 +49,7 @@ export const POST: APIRoute = async ({ request }) => {
           sessionId: existing.id,
           audioUrl: existing.audio_url,
           isPaid: existingPaid,
+          scriptText: existing.script_text ?? "",
         });
       }
     }
@@ -61,7 +64,8 @@ export const POST: APIRoute = async ({ request }) => {
 
   let rawScript: string;
   try {
-    rawScript = await completeChat(messages, { maxTokens: 3200 });
+    const maxTokens = type === "deep" ? 6000 : 3200;
+    rawScript = await completeChat(messages, { maxTokens });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Error LLM";
     return json({ error: msg }, 502);
@@ -71,13 +75,27 @@ export const POST: APIRoute = async ({ request }) => {
   const cleanScript = prepareScriptForTts(rawScript, firstName);
 
   // --- TTS ---
-  let audioBuf: ArrayBuffer;
+  let voiceBuf: ArrayBuffer;
   try {
-    audioBuf = await synthesizeSpeech(cleanScript);
+    voiceBuf = await synthesizeSpeech(cleanScript);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Error TTS";
     return json({ error: msg }, 502);
   }
+
+  // --- Mezclar voz + música de fondo ---
+  let finalAudio: Buffer;
+  try {
+    finalAudio = await mixVoiceWithBackground(voiceBuf);
+  } catch {
+    // Fallback: si la mezcla falla, usar solo la voz
+    finalAudio = Buffer.from(voiceBuf);
+  }
+
+  // --- Guardar script + audio en filesystem ---
+  const tempSessionId = crypto.randomUUID().slice(0, 8);
+  void saveMeditationScriptReviewFile({ sessionId: tempSessionId, scriptText: cleanScript }).catch(() => {});
+  void saveMeditationAudioFile({ sessionId: tempSessionId, audioBuffer: finalAudio }).catch(() => {});
 
   // --- Upload to Supabase Storage ---
   const token = crypto.randomUUID().replace(/-/g, "").slice(0, 24);
@@ -85,7 +103,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   const { error: upErr } = await supabase.storage
     .from(BUCKET)
-    .upload(path, new Uint8Array(audioBuf), {
+    .upload(path, new Uint8Array(finalAudio), {
       contentType: "audio/mpeg",
       upsert: false,
     });
@@ -138,10 +156,29 @@ export const POST: APIRoute = async ({ request }) => {
     existingPaid = !!row.is_paid;
   }
 
+  // --- Create shareable play link (fire-and-forget) ---
+  const playToken = crypto.randomUUID().replace(/-/g, "").slice(0, 24);
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 30);
+
+  void supabase.from("play_links").insert({
+    token: playToken,
+    audio_url: publicUrl,
+    expires_at: expiresAt.toISOString(),
+    source: "onboarding",
+  }).then(() => {}).catch(() => {});
+
+  const base =
+    import.meta.env.PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+    "https://vozcalma.app";
+  const playUrl = `${base}/p/${playToken}`;
+
   return json({
     sessionId,
     audioUrl: publicUrl,
     isPaid: existingPaid,
+    scriptText: cleanScript,
+    playUrl,
   });
 };
 

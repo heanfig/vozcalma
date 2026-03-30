@@ -1,10 +1,12 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Props {
   audioUrl: string;
   userName: string;
+  scriptText?: string;
   sessionTitle?: string;
+  playUrl?: string;
 }
 
 function fmt(s: number): string {
@@ -13,24 +15,41 @@ function fmt(s: number): string {
   return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
 }
 
+/** Divide el guion en párrafos, limpiando líneas vacías. */
+function splitParagraphs(text: string): string[] {
+  return text
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+}
+
 export default function OnboardingPlayer({
   audioUrl,
   userName,
+  scriptText,
   sessionTitle,
+  playUrl,
 }: Props) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [showScript, setShowScript] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const copyLink = useCallback(() => {
+    if (!playUrl) return;
+    navigator.clipboard.writeText(playUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [playUrl]);
 
   const toggle = useCallback(() => {
     const el = audioRef.current;
     if (!el) return;
-    if (playing) {
-      el.pause();
-    } else {
-      el.play();
-    }
+    if (playing) el.pause();
+    else el.play();
   }, [playing]);
 
   const seek = useCallback(
@@ -77,7 +96,8 @@ export default function OnboardingPlayer({
 
   const pct = duration > 0 ? (current / duration) * 100 : 0;
   const safeName = userName?.trim() || "";
-  const title = sessionTitle || "Sesión personalizada";
+  const title = sessionTitle || "Sesion personalizada";
+  const paragraphs = scriptText ? splitParagraphs(scriptText) : [];
 
   return (
     <motion.div
@@ -85,32 +105,108 @@ export default function OnboardingPlayer({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0 }}
       transition={{ type: "spring", stiffness: 200, damping: 22 }}
-      className="min-h-screen ethereal-bg text-on-surface flex flex-col items-center justify-between"
+      className="min-h-screen ethereal-bg text-on-surface flex flex-col"
     >
       <audio ref={audioRef} src={audioUrl} preload="metadata" />
 
-      <main className="max-w-screen-md mx-auto px-6 py-12 flex flex-col items-center justify-between min-h-screen w-full">
-        {/* Header */}
-        <header className="text-center mt-8 mb-12">
-          <h1 className="font-headline text-[2.5rem] md:text-[3rem] leading-[1.1] text-on-surface mb-4">
-            Tu santuario está listo
-            {safeName ? (
-              <>
-                ,{" "}
-                <span className="text-primary-container">{safeName}</span>
-              </>
-            ) : null}
-          </h1>
-          <p className="text-on-surface-variant font-body text-lg">
-            {title}
-          </p>
-        </header>
+      {/* ── Header ── */}
+      <header className="text-center pt-12 pb-6 px-6">
+        <motion.h1
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+          className="font-headline text-3xl md:text-[2.75rem] leading-tight text-on-surface mb-2"
+        >
+          Tu sesion esta lista
+          {safeName ? (
+            <>, <span className="text-primary italic">{safeName}</span></>
+          ) : null}
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.7 }}
+          transition={{ delay: 0.2 }}
+          className="text-on-surface-variant font-body text-base"
+        >
+          {title}
+        </motion.p>
 
-        {/* Player area */}
-        <section className="w-full flex flex-col items-center gap-12">
-          {/* Orb visual */}
+        {playUrl && (
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            onClick={copyLink}
+            className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant text-sm font-label hover:bg-surface-container-high transition-colors"
+          >
+            <span className="material-symbols-outlined text-lg">
+              {copied ? "check" : "link"}
+            </span>
+            <span>{copied ? "Enlace copiado" : "Copiar enlace para volver a escuchar"}</span>
+          </motion.button>
+        )}
+      </header>
+
+      {/* ── Script content ── */}
+      {paragraphs.length > 0 && (
+        <div className="flex-1 overflow-y-auto px-4 md:px-6 pb-48">
           <motion.div
-            className="w-64 h-64 rounded-full overflow-hidden diffusion-shadow mb-4 bg-gradient-to-br from-primary-fixed via-surface to-tertiary-fixed flex items-center justify-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="max-w-2xl mx-auto"
+          >
+            {/* Toggle script visibility */}
+            <button
+              onClick={() => setShowScript((s) => !s)}
+              className="flex items-center gap-2 mx-auto mb-6 text-sm font-label text-on-surface-variant/70 hover:text-primary transition-colors"
+            >
+              <span className="material-symbols-outlined text-lg">
+                {showScript ? "visibility_off" : "visibility"}
+              </span>
+              {showScript ? "Ocultar guion" : "Ver guion"}
+            </button>
+
+            <AnimatePresence>
+              {showScript && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 md:p-10 border border-white/40 shadow-sm">
+                    <div className="flex items-center gap-2 mb-6 text-primary/50">
+                      <span className="material-symbols-outlined text-lg">auto_stories</span>
+                      <span className="text-xs font-label uppercase tracking-widest">Tu meditacion guiada</span>
+                    </div>
+                    <div className="space-y-5">
+                      {paragraphs.map((p, i) => (
+                        <motion.p
+                          key={i}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.35 + i * 0.04 }}
+                          className="font-body text-base md:text-lg leading-relaxed text-on-surface/85 font-light"
+                        >
+                          {p}
+                        </motion.p>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Spacer if no script */}
+      {paragraphs.length === 0 && (
+        <div className="flex-1 flex items-center justify-center">
+          <motion.div
+            className="w-48 h-48 rounded-full overflow-hidden diffusion-shadow bg-gradient-to-br from-primary-fixed via-surface to-tertiary-fixed flex items-center justify-center"
             animate={
               playing
                 ? { scale: [1, 1.04, 1], opacity: [0.9, 1, 0.9] }
@@ -122,69 +218,79 @@ export default function OnboardingPlayer({
                 : { duration: 0.4 }
             }
           >
-            <div className="w-24 h-24 rounded-full bg-white/60 backdrop-blur-sm" />
+            <div className="w-20 h-20 rounded-full bg-white/60 backdrop-blur-sm" />
           </motion.div>
+        </div>
+      )}
 
-          {/* Controls */}
-          <div className="glass-player diffusion-shadow rounded-[2rem] p-8 w-full max-w-lg border border-white/20">
-            <div className="flex flex-col gap-8">
-              {/* Progress */}
-              <div className="w-full">
-                <div
-                  className="relative w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden cursor-pointer"
-                  onClick={seek}
-                >
-                  <motion.div
-                    className="absolute top-0 left-0 h-full bg-primary rounded-full"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-                <div className="flex justify-between mt-3 text-xs font-label text-on-surface-variant tracking-wider uppercase">
-                  <span>{fmt(current)}</span>
-                  <span>{fmt(duration)}</span>
-                </div>
-              </div>
+      {/* ── Sticky Player Bar ── */}
+      <motion.div
+        initial={{ y: 60, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.4, type: "spring", stiffness: 200, damping: 24 }}
+        className="fixed bottom-0 left-0 right-0 z-50"
+      >
+        <div className="max-w-2xl mx-auto px-4 pb-4">
+          <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-5 md:p-6 shadow-xl border border-white/50">
+            {/* Progress bar */}
+            <div
+              className="relative w-full h-1.5 bg-surface-container-highest/50 rounded-full overflow-hidden cursor-pointer mb-4"
+              onClick={seek}
+            >
+              <motion.div
+                className="absolute top-0 left-0 h-full bg-primary rounded-full"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
 
-              {/* Buttons */}
-              <div className="flex items-center justify-center gap-10">
+            <div className="flex items-center justify-between">
+              {/* Time left */}
+              <span className="text-xs font-label text-on-surface-variant tabular-nums w-14">
+                {fmt(current)}
+              </span>
+
+              {/* Controls */}
+              <div className="flex items-center gap-6">
                 <button
                   onClick={() => skip(-10)}
                   className="text-on-surface-variant hover:text-primary transition-colors"
+                  aria-label="Retroceder 10 segundos"
                 >
-                  <span className="material-symbols-outlined text-3xl">
-                    replay_10
-                  </span>
+                  <span className="material-symbols-outlined text-2xl">replay_10</span>
                 </button>
                 <button
                   onClick={toggle}
-                  className="w-20 h-20 bg-primary-container rounded-full flex items-center justify-center text-on-primary-container hover:scale-[0.98] transition-all diffusion-shadow"
+                  className="w-14 h-14 bg-primary rounded-full flex items-center justify-center text-on-primary hover:scale-[0.97] active:scale-95 transition-all shadow-lg shadow-primary/20"
+                  aria-label={playing ? "Pausar" : "Reproducir"}
                 >
-                  <span className="material-symbols-outlined text-5xl">
+                  <span className="material-symbols-outlined text-3xl">
                     {playing ? "pause" : "play_arrow"}
                   </span>
                 </button>
                 <button
                   onClick={() => skip(30)}
                   className="text-on-surface-variant hover:text-primary transition-colors"
+                  aria-label="Adelantar 30 segundos"
                 >
-                  <span className="material-symbols-outlined text-3xl">
-                    forward_30
-                  </span>
+                  <span className="material-symbols-outlined text-2xl">forward_30</span>
                 </button>
               </div>
+
+              {/* Time right */}
+              <span className="text-xs font-label text-on-surface-variant tabular-nums w-14 text-right">
+                {fmt(duration)}
+              </span>
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* Footer disclaimer */}
-        <footer className="w-full text-center pb-8 opacity-60 mt-16">
-          <p className="text-[0.65rem] font-body text-on-surface-variant max-w-sm mx-auto uppercase tracking-widest leading-relaxed">
-            Este contenido tiene fines informativos y no sustituye el consejo,
-            diagnóstico o tratamiento médico profesional. VozCalma no es un
-            servicio médico de emergencia.
+        {/* Disclaimer */}
+        <div className="text-center pb-3 px-6">
+          <p className="text-[0.6rem] font-body text-on-surface-variant/40 max-w-sm mx-auto uppercase tracking-widest leading-relaxed">
+            Contenido informativo. No sustituye consejo medico profesional.
           </p>
-        </footer>
-      </main>
+        </div>
+      </motion.div>
     </motion.div>
   );
 }

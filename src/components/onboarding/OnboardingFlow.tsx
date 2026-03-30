@@ -11,8 +11,9 @@ import SessionTypeSelector from "./SessionTypeSelector";
 import GeneratingScreen from "./GeneratingScreen";
 import PaymentGate from "./PaymentGate";
 import OnboardingPlayer from "./OnboardingPlayer";
+import ConfirmationStep from "./ConfirmationStep";
 
-type Phase = "intake" | "selectType" | "generating" | "payment" | "player";
+type Phase = "intake" | "selectType" | "confirmation" | "generating" | "payment" | "player";
 
 const NAME_STEP: OnboardingStepDef = {
   key: "nombre",
@@ -24,9 +25,7 @@ const NAME_STEP: OnboardingStepDef = {
 };
 
 interface Props {
-  /** Optional: skip the type-selector and go straight to this flow. */
   type?: OnboardingType;
-  /** If an admin pre-created a paid session, pass its id here. */
   sessionId?: string;
 }
 
@@ -42,32 +41,30 @@ export default function OnboardingFlow({
   const [direction, setDirection] = useState(1);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [scriptText, setScriptText] = useState<string>("");
+  const [playUrl, setPlayUrl] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(
     initialSid ?? null,
   );
   const [isPaid, setIsPaid] = useState(!!initialSid);
   const [error, setError] = useState<string | null>(null);
 
-  // Steps for the selected type (excluding the shared name step)
   const flowSteps = useMemo<OnboardingStepDef[]>(() => {
     if (!chosenType) return [];
     return getSteps(chosenType).filter((s) => s.key !== "nombre");
   }, [chosenType]);
 
-  // Combined steps: name first, then flow-specific questions
   const allSteps = useMemo<OnboardingStepDef[]>(
     () => [NAME_STEP, ...flowSteps],
     [flowSteps],
   );
 
-  // After answering the name step we show the type selector (if type not preset)
   const handleAnswer = useCallback(
     (value: string) => {
       const step = allSteps[stepIdx];
       const next = { ...answers, [step.key]: value };
       setAnswers(next);
 
-      // Just finished the name step and type hasn't been chosen yet → show selector
       if (step.key === "nombre" && !chosenType) {
         setPhase("selectType");
         return;
@@ -77,24 +74,41 @@ export default function OnboardingFlow({
         setDirection(1);
         setStepIdx(stepIdx + 1);
       } else {
-        startGeneration(next, chosenType!);
+        // All questions answered → go to confirmation
+        setPhase("confirmation");
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [stepIdx, answers, allSteps, chosenType],
   );
 
+  const handleBack = useCallback(() => {
+    if (stepIdx > 0) {
+      setDirection(-1);
+      setStepIdx(stepIdx - 1);
+    }
+  }, [stepIdx]);
+
   const handleTypeSelect = useCallback(
     (type: OnboardingType) => {
       setChosenType(type);
       setPhase("intake");
       setDirection(1);
-      // Name was already step 0; now we jump to step 1 (first flow-specific question)
-      // But allSteps will re-compute once chosenType changes, so we set to 1
       setStepIdx(1);
     },
     [],
   );
+
+  const handleConfirm = useCallback(() => {
+    startGeneration(answers, chosenType!);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [answers, chosenType, sessionId]);
+
+  const handleConfirmBack = useCallback(() => {
+    setPhase("intake");
+    setDirection(-1);
+    setStepIdx(allSteps.length - 1);
+  }, [allSteps.length]);
 
   async function startGeneration(
     intake: Record<string, string>,
@@ -118,11 +132,16 @@ export default function OnboardingFlow({
         sessionId: string;
         audioUrl: string;
         isPaid: boolean;
+        scriptText: string;
+        playUrl?: string;
       };
       setSessionId(data.sessionId);
       setAudioUrl(data.audioUrl);
+      setScriptText(data.scriptText || "");
+      setPlayUrl(data.playUrl || null);
       setIsPaid(data.isPaid);
-      setPhase(data.isPaid ? "player" : "payment");
+      // TEMP: payment gate disabled — go directly to player
+      setPhase("player");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error al generar");
       setPhase("intake");
@@ -147,10 +166,24 @@ export default function OnboardingFlow({
     );
   }
 
+  if (phase === "confirmation") {
+    return (
+      <AnimatePresence mode="wait">
+        <ConfirmationStep
+          answers={answers}
+          chosenType={chosenType!}
+          onConfirm={handleConfirm}
+          onBack={handleConfirmBack}
+        />
+      </AnimatePresence>
+    );
+  }
+
   if (phase === "generating") {
     return <GeneratingScreen />;
   }
 
+  // TEMP: payment gate disabled — kept for future production use
   if (phase === "payment") {
     return (
       <AnimatePresence mode="wait">
@@ -165,6 +198,8 @@ export default function OnboardingFlow({
         <OnboardingPlayer
           audioUrl={audioUrl}
           userName={answers.nombre || ""}
+          scriptText={scriptText}
+          playUrl={playUrl || undefined}
           sessionTitle={
             chosenType === "quick"
               ? "Alivio rápido personalizado"
@@ -179,7 +214,6 @@ export default function OnboardingFlow({
   const currentStep = allSteps[stepIdx];
   if (!currentStep) return null;
 
-  // Progress: after type selection the user sees "Paso X de Y" for the flow-specific steps only
   const showProgress = chosenType != null;
   const progressCurrent = showProgress ? stepIdx - 1 : 0;
   const progressTotal = showProgress ? flowSteps.length : 1;
@@ -205,6 +239,7 @@ export default function OnboardingFlow({
             step={currentStep}
             value={answers[currentStep.key] || ""}
             onAnswer={handleAnswer}
+            onBack={stepIdx > 0 ? handleBack : undefined}
             direction={direction}
           />
         </AnimatePresence>

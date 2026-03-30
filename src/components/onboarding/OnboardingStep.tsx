@@ -6,6 +6,7 @@ interface Props {
   step: OnboardingStepDef;
   value: string;
   onAnswer: (value: string) => void;
+  onBack?: () => void;
   direction: number;
 }
 
@@ -161,6 +162,7 @@ export default function OnboardingStep({
   step,
   value,
   onAnswer,
+  onBack,
   direction,
 }: Props) {
   const [text, setText] = useState(value);
@@ -201,6 +203,20 @@ export default function OnboardingStep({
         wideLayout ? "max-w-4xl" : "max-w-2xl",
       ].join(" ")}
     >
+      {onBack && (
+        <motion.button
+          type="button"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+          onClick={onBack}
+          className="self-start flex items-center gap-1 text-on-surface-variant/60 hover:text-primary transition-colors font-label text-sm"
+        >
+          <span className="material-symbols-outlined text-lg">arrow_back</span>
+          <span>Atrás</span>
+        </motion.button>
+      )}
+
       <motion.div
         className="space-y-3 md:space-y-5"
         initial={{ opacity: 0, y: 12 }}

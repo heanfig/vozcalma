@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from "../../../lib/supabase-server";
 import { prepareScriptForTts } from "../../../lib/meditation/script-post";
 import { json, requireAuth } from "../../../lib/api-utils";
 import { SCRIPT_PREFIX, extractScript } from "../../../lib/constants";
+import { mixVoiceWithBackground } from "../../../lib/audio-mixer";
 
 type Body = { sessionId?: string; text?: string; displayName?: string };
 
@@ -55,8 +56,14 @@ export const POST: APIRoute = async (context) => {
   scriptText = prepareScriptForTts(scriptText, firstNameForTts || undefined);
 
   try {
-    const buf = await synthesizeSpeech(scriptText);
-    return new Response(buf, {
+    const voiceBuf = await synthesizeSpeech(scriptText);
+    let finalAudio: Buffer;
+    try {
+      finalAudio = await mixVoiceWithBackground(voiceBuf);
+    } catch {
+      finalAudio = Buffer.from(voiceBuf);
+    }
+    return new Response(finalAudio, {
       status: 200,
       headers: {
         "Content-Type": "audio/mpeg",
