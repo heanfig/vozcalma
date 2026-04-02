@@ -33,3 +33,6 @@ elevenlabs.txt
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+# deploy keys and secrets
+.deploy/

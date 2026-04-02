@@ -10,8 +10,6 @@ export function prepareScriptForTts(script: string, firstName: string | undefine
   out = out.replace(/\bfin\s+del\s+gui[óo]n\b/gi, "");
   out = out.replace(/\bfin\s+del\s+guion\b/gi, "");
   out = out.replace(/\bmarca\s+de\s+fin\b/gi, "");
-  out = out.replace(/\s*\n{3,}\s*/g, "\n\n");
-
   out = sanitizePersonalizationForTts(out, firstName);
   out = relaxParagraphPauses(out);
 

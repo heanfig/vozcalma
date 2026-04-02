@@ -1,0 +1,7 @@
+vozcalma.app {
+	reverse_proxy vozcalma:8080
+}
+
+www.vozcalma.app {
+	redir https://vozcalma.app{uri} permanent
+}
