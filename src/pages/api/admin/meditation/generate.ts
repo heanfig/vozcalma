@@ -18,7 +18,7 @@ type Body = {
 const BUCKET = "meditation-audio";
 
 export const POST: APIRoute = async ({ request }) => {
-  const secret = import.meta.env.ADMIN_API_SECRET;
+  const secret = (import.meta.env.ADMIN_API_SECRET || process.env.ADMIN_API_SECRET);
   const auth = request.headers.get("authorization");
   if (!secret || auth !== `Bearer ${secret}`) {
     return json({ error: "No autorizado" }, 401);
@@ -109,7 +109,7 @@ export const POST: APIRoute = async ({ request }) => {
   if (insErr) return json({ error: insErr.message }, 500);
 
   const base =
-    import.meta.env.PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+    ((import.meta.env.PUBLIC_SITE_URL || process.env.PUBLIC_SITE_URL || "") as string)?.replace(/\/$/, "") ||
     "https://vozcalma.app";
   const playUrl = `${base}/p/${token}`;
 

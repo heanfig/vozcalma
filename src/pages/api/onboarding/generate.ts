@@ -169,7 +169,7 @@ export const POST: APIRoute = async ({ request }) => {
   }).then(() => {}).catch(() => {});
 
   const base =
-    import.meta.env.PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+    ((import.meta.env.PUBLIC_SITE_URL || process.env.PUBLIC_SITE_URL || "") as string)?.replace(/\/$/, "") ||
     "https://vozcalma.app";
   const playUrl = `${base}/p/${playToken}`;
 

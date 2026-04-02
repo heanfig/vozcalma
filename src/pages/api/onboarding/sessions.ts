@@ -20,7 +20,7 @@ function json(data: unknown, status = 200) {
 }
 
 function authorize(request: Request): boolean {
-  const secret = import.meta.env.ADMIN_API_SECRET;
+  const secret = (import.meta.env.ADMIN_API_SECRET || process.env.ADMIN_API_SECRET);
   if (!secret) return false;
   const auth = request.headers.get("authorization");
   return auth === `Bearer ${secret}`;
@@ -58,7 +58,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const base =
-    import.meta.env.PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+    ((import.meta.env.PUBLIC_SITE_URL || process.env.PUBLIC_SITE_URL || "") as string)?.replace(/\/$/, "") ||
     "https://vozcalma.app";
   const slug = type === "quick" ? "alivio-rapido" : "reprogramacion-profunda";
   const url = `${base}/onboarding/${slug}?session=${data.id}`;

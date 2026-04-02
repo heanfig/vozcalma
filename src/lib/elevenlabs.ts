@@ -2,7 +2,7 @@
 let cachedNonPremadeVoiceId: string | null = null;
 
 async function resolveVoiceId(apiKey: string): Promise<string> {
-  const fromEnv = import.meta.env.ELEVENLABS_VOICE_ID?.trim();
+  const fromEnv = (import.meta.env.ELEVENLABS_VOICE_ID || process.env.ELEVENLABS_VOICE_ID || "").trim();
   if (fromEnv) return fromEnv;
   if (cachedNonPremadeVoiceId) return cachedNonPremadeVoiceId;
 
@@ -34,7 +34,7 @@ async function resolveVoiceId(apiKey: string): Promise<string> {
 
 /** Genera audio MP3 a partir de texto (servidor). */
 export async function synthesizeSpeech(text: string): Promise<ArrayBuffer> {
-  const apiKey = import.meta.env.ELEVENLABS_API_KEY;
+  const apiKey = import.meta.env.ELEVENLABS_API_KEY || process.env.ELEVENLABS_API_KEY;
 
   if (!apiKey) {
     throw new Error("ELEVENLABS_API_KEY no configurada");

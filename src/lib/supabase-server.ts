@@ -4,10 +4,8 @@ let admin: SupabaseClient | null = null;
 
 export function getSupabaseAdmin(): SupabaseClient {
   if (admin) return admin;
-  const url = import.meta.env.SUPABASE_URL;
-  // Preferir el JWT service_role (necesario para Storage).
-  // SUPABASE_SECRET_KEY (sb_secret_…) solo sirve para Management API.
-  const key = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = import.meta.env.SUPABASE_URL || process.env.SUPABASE_URL;
+  const key = import.meta.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
     throw new Error(
       "Configura SUPABASE_URL y una clave de servidor: SUPABASE_SERVICE_ROLE_KEY (JWT service_role) o SUPABASE_SECRET_KEY (sb_secret_… en Project Settings → API).",
