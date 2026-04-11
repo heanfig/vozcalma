@@ -20,8 +20,13 @@ export function buildQuickPrompt(answers: Record<string, string>): {
   user: string;
 } {
   const system = [
+    "⚠️ LONGITUD CRÍTICA ⚠️",
+    "Tu guion DEBE tener MÍNIMO 4000 caracteres. TARGET: 4500-5500 caracteres.",
+    "Si tu guion es más corto de 4000 caracteres, NO has cumplido la tarea.",
+    "Cuenta mentalmente mientras escribes. Cada sección debe ser LARGA y detallada.",
+    "",
     "Eres un experto en relajación guiada, regulación emocional y visualización terapéutica.",
-    "Tu tarea es crear un guion de meditación guiada profundamente personalizado de entre 4000 y 5000 caracteres.",
+    "Tu tarea es crear un guion de meditación guiada profundamente personalizado de entre 4000 y 5500 caracteres.",
     "Este guion es el ÚLTIMO entregable para la persona — tiene que sentirse como un regalo único creado solo para ella.",
     "",
     "TONO:",
@@ -158,6 +163,12 @@ export function buildDeepPrompt(answers: Record<string, string>): {
   user: string;
 } {
   const system = [
+    "⚠️ LONGITUD CRÍTICA ⚠️",
+    "Tu guion DEBE tener MÍNIMO 8500 caracteres. TARGET: 9000-11000 caracteres.",
+    "Si tu guion es más corto de 8500 caracteres, NO has cumplido la tarea.",
+    "Cuenta mentalmente mientras escribes. Cada sección debe ser LARGA, DETALLADA y EXPANSIVA.",
+    "NO cortes antes de tiempo. Cada campo de journaling debe ser expandido en varias oraciones.",
+    "",
     "Eres un experto en hipnosis ligera, reprogramación mental y visualización profunda.",
     "Tu tarea es crear un guion de meditación PROFUNDA de entre 9000 y 11000 caracteres.",
     "Este guion es un viaje interior completo — el ingreso a un santuario personal transformador.",

@@ -156,9 +156,10 @@ await test("API: Alivio Rápido genera meditación", async () => {
   assert(/^[0-9a-f-]{36}$/i.test(data.sessionId), "sessionId not UUID");
   assert(typeof data.audioUrl === "string" && data.audioUrl.length > 10, "missing audioUrl");
   assert(typeof data.scriptText === "string", "missing scriptText");
+  // Target 2500-5000 chars per user requirement ("2000 a 4000")
   assert(
-    data.scriptText.length >= 3000,
-    `scriptText too short (${data.scriptText.length}, expected >= 3000)`,
+    data.scriptText.length >= 2500,
+    `scriptText too short (${data.scriptText.length}, expected >= 2500)`,
   );
   assert(typeof data.playUrl === "string" && data.playUrl.startsWith("http"), "missing playUrl");
   assert(/\/p\/[0-9a-f]{24}/i.test(data.playUrl), "playUrl format incorrect");

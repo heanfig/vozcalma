@@ -14,8 +14,10 @@ export async function completeChat(
   const apiKey = import.meta.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY;
   if (!apiKey) throw new Error("OPENROUTER_API_KEY no configurada");
 
+  // Claude 3.5 Haiku era muy conservador con la longitud — usamos Sonnet por default
+  // para scripts de meditación largos y detallados.
   const model =
-    import.meta.env.OPENROUTER_MODEL || process.env.OPENROUTER_MODEL || "anthropic/claude-3.5-haiku";
+    import.meta.env.OPENROUTER_MODEL || process.env.OPENROUTER_MODEL || "anthropic/claude-sonnet-4";
 
   const envMax = import.meta.env.OPENROUTER_MAX_TOKENS || process.env.OPENROUTER_MAX_TOKENS;
   const parsedEnv =
