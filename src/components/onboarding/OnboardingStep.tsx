@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import type { OnboardingStepDef, RichSelectOption } from "./onboarding-data";
+import MultiSelectStep from "./MultiSelectStep";
 
 interface Props {
   step: OnboardingStepDef;
@@ -432,6 +433,16 @@ export default function OnboardingStep({
           value={value}
           onAnswer={onAnswer}
           grid={step.key === "areaVida" ? "area" : "sounds"}
+        />
+      )}
+
+      {step.inputType === "multi-select" && step.richOptions && (
+        <MultiSelectStep
+          options={step.richOptions}
+          value={value}
+          onAnswer={onAnswer}
+          minSelections={step.minSelections ?? 1}
+          maxSelections={step.maxSelections}
         />
       )}
 

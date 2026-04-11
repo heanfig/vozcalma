@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { synthesizeSpeech } from "../../../lib/elevenlabs";
+import { synthesizeLongSpeech } from "../../../lib/elevenlabs";
 import { json, requireAuth } from "../../../lib/api-utils";
 
 type Body = { text: string };
@@ -21,7 +21,7 @@ export const POST: APIRoute = async (context) => {
   }
 
   try {
-    const buf = await synthesizeSpeech(text);
+    const buf = await synthesizeLongSpeech(text);
     return new Response(buf, {
       status: 200,
       headers: {

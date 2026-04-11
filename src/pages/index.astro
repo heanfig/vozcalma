@@ -1,9 +1,347 @@
 ---
-import landingHtml from "../content/landing.html?raw";
-
-return new Response(landingHtml, {
-  headers: {
-    "Content-Type": "text/html; charset=utf-8",
-  },
-});
+// Landing Page Persuasiva — VozCalma
+// Diseño basado en Stitch project 15344559829188899043 screen f29b71c9d6...
+// Estática (Astro), sin React hydration para primera impresión rápida.
+import "../styles/onboarding.css";
 ---
+
+<!doctype html>
+<html lang="es" class="h-full">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VozCalma — El Santuario Digital</title>
+    <meta
+      name="description"
+      content="No todos están listos para cambiar su mente. Meditaciones personalizadas que transforman tu estado emocional en minutos. Tu ritual de activación comienza aquí."
+    />
+    <meta property="og:title" content="VozCalma — El Santuario Digital" />
+    <meta
+      property="og:description"
+      content="No todos están listos para cambiar su mente… pero si estás aquí, algo en ti ya comenzó."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://vozcalma.app/" />
+    <link rel="canonical" href="https://vozcalma.app/" />
+
+    <!-- PostHog (analytics) -->
+    <script is:inline>
+      !(function (t, e) {
+        var o, n, p, r;
+        e.__SV ||
+          ((window.posthog = e),
+          (e._i = []),
+          (e.init = function (i, s, a) {
+            function g(t, e) {
+              var o = e.split(".");
+              2 == o.length && ((t = t[o[0]]), (e = o[1])),
+                (t[e] = function () {
+                  t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
+                });
+            }
+            ((p = t.createElement("script")).type = "text/javascript"),
+              (p.async = !0),
+              (p.src =
+                s.api_host.replace(".i.posthog.com", "-assets.i.posthog.com") +
+                "/static/array.js"),
+              (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r);
+            var u = e;
+            for (
+              void 0 !== a ? (u = e[a] = []) : (a = "posthog"),
+                u.people = u.people || [],
+                u.toString = function (t) {
+                  var e = "posthog";
+                  return (
+                    "posthog" !== a && (e += "." + a),
+                    t || (e += " (stub)"),
+                    e
+                  );
+                },
+                u.people.toString = function () {
+                  return u.toString(1) + ".people (stub)";
+                },
+                o =
+                  "init capture register register_once register_for_session unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group identify setPersonProperties setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags resetGroups onFeatureFlags addFeatureFlagsHandler onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey getNextSurveyStep".split(
+                    " ",
+                  ),
+                n = 0;
+              n < o.length;
+              n++
+            )
+              g(u, o[n]);
+            e._i.push([i, s, a]);
+          }),
+          (e.__SV = 1));
+      })(document, window.posthog || []);
+      posthog.init("phc_On69zKEx14Hc6CSQLJShaQsEmbIV8p3gH6S4BFYvjaC", {
+        api_host: "https://us.i.posthog.com",
+        defaults: "2026-01-30",
+      });
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body class="bg-surface font-body text-on-surface antialiased">
+    <!-- ================= HEADER ================= -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/10">
+      <div class="max-w-6xl mx-auto px-6 md:px-10 py-4 flex items-center justify-between">
+        <a href="#" class="font-headline text-xl md:text-2xl font-semibold text-primary tracking-tight">
+          VozCalma
+        </a>
+        <nav class="hidden md:flex items-center gap-8 text-sm font-label text-on-surface-variant">
+          <a href="#experience" class="hover:text-primary transition-colors">Experiencia</a>
+          <a href="#paths" class="hover:text-primary transition-colors">Los Caminos</a>
+          <a href="#activation" class="hover:text-primary transition-colors">Activación</a>
+        </nav>
+        <a
+          href="/onboarding"
+          data-begin-ritual
+          class="bg-primary text-on-primary px-5 py-2.5 rounded-full text-sm font-label font-semibold hover:opacity-90 transition-all shadow-md shadow-primary/10"
+        >
+          Begin Ritual
+        </a>
+      </div>
+    </header>
+
+    <!-- ================= HERO ================= -->
+    <section
+      id="experience"
+      class="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 md:px-10 overflow-hidden"
+    >
+      <!-- Ambient background blurs -->
+      <div class="absolute inset-0 -z-10 pointer-events-none">
+        <div class="absolute top-0 right-0 w-[60%] h-[70%] bg-gradient-to-bl from-primary-fixed/40 via-primary-fixed/10 to-transparent blur-3xl rounded-full"></div>
+        <div class="absolute bottom-0 left-0 w-[50%] h-[60%] bg-gradient-to-tr from-tertiary-fixed/30 to-transparent blur-3xl rounded-full"></div>
+      </div>
+
+      <div class="max-w-4xl mx-auto text-center space-y-8">
+        <p class="font-label text-xs md:text-sm uppercase tracking-[0.3em] text-tertiary/80">
+          El Santuario Digital
+        </p>
+        <h1 class="font-headline text-[2.25rem] sm:text-5xl md:text-6xl lg:text-7xl leading-[1.05] tracking-tight text-on-surface">
+          No todos están listos para cambiar su mente...
+          <span class="block italic text-primary mt-2">
+            pero si estás aquí, algo en ti ya comenzó.
+          </span>
+        </h1>
+        <p class="font-body text-base md:text-xl text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
+          Este no es otro app de meditación. Es un portal de transformación mental creado
+          para quienes buscan reprogramar sus patrones desde adentro. Cada sesión es única,
+          creada por IA al detalle de tu historia.
+        </p>
+        <div class="pt-4">
+          <a
+            href="#activation"
+            class="inline-flex items-center gap-3 bg-primary text-on-primary px-8 py-4 rounded-full font-label font-semibold text-base md:text-lg hover:opacity-90 transition-all shadow-xl shadow-primary/15"
+          >
+            <span>Descubre tu camino</span>
+            <span class="material-symbols-outlined text-xl">expand_more</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= MANIFESTO ================= -->
+    <section class="relative px-6 md:px-10 py-20 md:py-32 bg-surface-container-low">
+      <div class="max-w-4xl mx-auto space-y-12">
+        <div class="text-center space-y-4">
+          <p class="font-label text-xs md:text-sm uppercase tracking-[0.3em] text-tertiary/80">
+            El Manifiesto
+          </p>
+          <h2 class="font-headline text-3xl md:text-5xl lg:text-6xl text-on-surface leading-tight tracking-tight">
+            Esto no es para{" "}
+            <span class="italic text-primary">cualquiera</span>.
+          </h2>
+        </div>
+
+        <div class="max-w-2xl mx-auto text-center space-y-6">
+          <p class="font-body text-lg md:text-xl text-on-surface-variant leading-relaxed">
+            Este programa fue diseñado para quienes buscan reprogramar su subconsciente.
+            Para quienes están listos a soltar las viejas historias y construir
+            una nueva forma de habitarse.
+          </p>
+          <p class="font-body text-lg md:text-xl text-on-surface-variant leading-relaxed">
+            Cada meditación que creamos para ti es un acto íntimo. Tu historia, tus palabras,
+            tu voz interior... se convierten en el material desde donde nace la transformación.
+          </p>
+        </div>
+
+        <div class="text-center pt-8">
+          <p class="font-label text-xs md:text-sm uppercase tracking-[0.3em] text-primary">
+            ¿Qué vas a experimentar?
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= FEATURE CARDS ================= -->
+    <section id="paths" class="px-6 md:px-10 py-20 md:py-28 bg-surface">
+      <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+        <!-- Card 1 -->
+        <div class="bg-surface-container-low rounded-[2rem] p-8 md:p-10 space-y-5 hover:shadow-xl transition-shadow duration-500">
+          <div class="w-14 h-14 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+            <span class="material-symbols-outlined text-3xl">graphic_eq</span>
+          </div>
+          <h3 class="font-headline text-2xl md:text-3xl text-on-surface italic">
+            Susurros Subconscientes
+          </h3>
+          <p class="font-body text-base text-on-surface-variant leading-relaxed">
+            Audios diseñados para hablarle directamente a las capas más profundas de tu mente.
+            No es una voz que te habla: es una presencia que te guía.
+          </p>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-surface-container-low rounded-[2rem] p-8 md:p-10 space-y-5 hover:shadow-xl transition-shadow duration-500">
+          <div class="w-14 h-14 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary">
+            <span class="material-symbols-outlined text-3xl">psychology_alt</span>
+          </div>
+          <h3 class="font-headline text-2xl md:text-3xl text-on-surface italic">
+            Guía Intuitiva
+          </h3>
+          <p class="font-body text-base text-on-surface-variant leading-relaxed">
+            No hay fórmulas. Cada sesión entiende tu momento presente y te acompaña
+            exactamente donde estás. Los miedos se disuelven en presencia.
+          </p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-surface-container-low rounded-[2rem] p-8 md:p-10 space-y-5 hover:shadow-xl transition-shadow duration-500">
+          <div class="w-14 h-14 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+            <span class="material-symbols-outlined text-3xl">auto_awesome</span>
+          </div>
+          <h3 class="font-headline text-2xl md:text-3xl text-on-surface italic">
+            El Nacimiento
+          </h3>
+          <p class="font-body text-base text-on-surface-variant leading-relaxed">
+            No se trata de relajarte. Se trata de renacer. Cada meditación es
+            el inicio de la identidad que siempre estuvo esperándote.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ACTIVATION (NAME FORM) ================= -->
+    <section
+      id="activation"
+      class="relative px-6 md:px-10 py-24 md:py-36 bg-gradient-to-b from-surface-container-low via-surface to-primary-fixed/20 overflow-hidden"
+    >
+      <!-- Ambient glow -->
+      <div class="absolute inset-0 -z-10 pointer-events-none">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[80%] bg-primary/5 blur-3xl rounded-full"></div>
+      </div>
+
+      <div class="max-w-2xl mx-auto text-center space-y-10">
+        <div class="space-y-4">
+          <p class="font-label text-xs md:text-sm uppercase tracking-[0.3em] text-primary">
+            Ritual de Activación
+          </p>
+          <h2 class="font-headline text-3xl md:text-5xl lg:text-6xl text-on-surface leading-tight tracking-tight">
+            Al entrar aquí, algo se mueve en tu interior y{" "}
+            <span class="italic text-primary">no hay vuelta atrás</span>.
+          </h2>
+          <p class="font-body text-base md:text-lg text-on-surface-variant max-w-lg mx-auto pt-4 leading-relaxed">
+            Escribe tu nombre. Este es el primer paso del ritual.
+            Desde aquí empieza tu camino.
+          </p>
+        </div>
+
+        <form
+          id="activation-form"
+          class="space-y-6 max-w-md mx-auto"
+          novalidate
+        >
+          <label class="block">
+            <span class="sr-only">Tu nombre</span>
+            <input
+              type="text"
+              name="name"
+              id="activation-name"
+              maxlength="50"
+              required
+              autocomplete="given-name"
+              placeholder="¿Cómo te llamas?"
+              class="w-full bg-surface-container-lowest border-none rounded-2xl py-5 px-8 text-xl md:text-2xl font-body text-on-surface placeholder:text-on-surface-variant/30 focus:ring-2 focus:ring-primary-fixed transition-all text-center shadow-sm outline-none"
+            />
+          </label>
+
+          <button
+            type="submit"
+            class="w-full bg-primary text-on-primary px-8 py-5 rounded-full font-label font-semibold text-base md:text-lg hover:opacity-90 transition-all shadow-xl shadow-primary/15 disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-3"
+          >
+            <span>ESTOY LISTO PARA CAMBIAR</span>
+            <span class="material-symbols-outlined text-xl">arrow_forward</span>
+          </button>
+        </form>
+
+        <p class="font-body text-xs text-on-surface-variant/60 italic">
+          Al continuar, aceptas nuestros{" "}
+          <a href="/terminos-del-servicio" class="underline hover:text-primary">Términos</a>
+          {" "}y{" "}
+          <a href="/politica-de-privacidad" class="underline hover:text-primary">Política de Privacidad</a>.
+        </p>
+      </div>
+    </section>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="bg-surface-container-low px-6 md:px-10 py-12">
+      <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+        <p class="font-body text-xs text-on-surface-variant/70">
+          © {new Date().getFullYear()} VozCalma. El Santuario Digital.
+        </p>
+        <nav class="flex items-center gap-6 text-xs font-label text-on-surface-variant/70">
+          <a href="/politica-de-privacidad" class="hover:text-primary transition-colors">Privacidad</a>
+          <a href="/terminos-del-servicio" class="hover:text-primary transition-colors">Términos</a>
+          <a href="/aviso-legal" class="hover:text-primary transition-colors">Aviso Legal</a>
+        </nav>
+      </div>
+    </footer>
+
+    <!-- Interactive wiring -->
+    <script is:inline>
+      (function () {
+        // Activation form: name → /onboarding?name=X
+        const form = document.getElementById("activation-form");
+        if (form) {
+          form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const input = document.getElementById("activation-name");
+            const name = (input && input.value ? input.value : "").trim();
+            if (!name) {
+              input && input.focus();
+              return;
+            }
+            const encoded = encodeURIComponent(name);
+            if (window.posthog && typeof window.posthog.capture === "function") {
+              window.posthog.capture("landing_activation_submit", { name_length: name.length });
+            }
+            window.location.href = "/onboarding?name=" + encoded;
+          });
+        }
+
+        // Begin Ritual button: track click
+        document.querySelectorAll("[data-begin-ritual]").forEach(function (el) {
+          el.addEventListener("click", function () {
+            if (window.posthog && typeof window.posthog.capture === "function") {
+              window.posthog.capture("landing_begin_ritual_click");
+            }
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>

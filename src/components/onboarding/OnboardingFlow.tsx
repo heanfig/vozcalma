@@ -27,19 +27,32 @@ const NAME_STEP: OnboardingStepDef = {
 interface Props {
   type?: OnboardingType;
   sessionId?: string;
+  /** Nombre pre-cargado desde la landing page (via ?name=). Si está presente, salta el paso de nombre. */
+  initialName?: string;
 }
 
 export default function OnboardingFlow({
   type: initialType,
   sessionId: initialSid,
+  initialName,
 }: Props) {
+  const hasPrefilledName = Boolean(initialName && initialName.trim());
+
   const [chosenType, setChosenType] = useState<OnboardingType | null>(
     initialType ?? null,
   );
-  const [phase, setPhase] = useState<Phase>("intake");
-  const [stepIdx, setStepIdx] = useState(0);
+  // Si hay nombre pre-cargado y NO hay type pre-seleccionado → ir directo al selectType
+  // Si hay nombre pre-cargado Y type → ir directo al primer step del flow (stepIdx 1)
+  const initialPhase: Phase =
+    hasPrefilledName && !initialType ? "selectType" : "intake";
+  const initialStepIdx = hasPrefilledName && initialType ? 1 : 0;
+
+  const [phase, setPhase] = useState<Phase>(initialPhase);
+  const [stepIdx, setStepIdx] = useState(initialStepIdx);
   const [direction, setDirection] = useState(1);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [answers, setAnswers] = useState<Record<string, string>>(
+    hasPrefilledName ? { nombre: initialName!.trim() } : {},
+  );
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [scriptText, setScriptText] = useState<string>("");
   const [playUrl, setPlayUrl] = useState<string | null>(null);
@@ -58,6 +71,18 @@ export default function OnboardingFlow({
     () => [NAME_STEP, ...flowSteps],
     [flowSteps],
   );
+
+  const currentRawStep = allSteps[stepIdx];
+
+  // Resolver dynamicOptions del paso actual (para pasos que dependen de respuestas previas)
+  const currentStep = useMemo<OnboardingStepDef | undefined>(() => {
+    if (!currentRawStep) return undefined;
+    if (currentRawStep.dynamicOptions) {
+      const dynamic = currentRawStep.dynamicOptions(answers);
+      return { ...currentRawStep, ...dynamic };
+    }
+    return currentRawStep;
+  }, [currentRawStep, answers]);
 
   const handleAnswer = useCallback(
     (value: string) => {
@@ -83,11 +108,13 @@ export default function OnboardingFlow({
   );
 
   const handleBack = useCallback(() => {
-    if (stepIdx > 0) {
+    // No permitir back al paso de nombre si fue pre-llenado desde landing
+    const minIdx = hasPrefilledName ? 1 : 0;
+    if (stepIdx > minIdx) {
       setDirection(-1);
       setStepIdx(stepIdx - 1);
     }
-  }, [stepIdx]);
+  }, [stepIdx, hasPrefilledName]);
 
   const handleTypeSelect = useCallback(
     (type: OnboardingType) => {
@@ -211,26 +238,25 @@ export default function OnboardingFlow({
   }
 
   // ---- Intake (questions) ----
-  const currentStep = allSteps[stepIdx];
   if (!currentStep) return null;
 
   const showProgress = chosenType != null;
   const progressCurrent = showProgress ? stepIdx - 1 : 0;
   const progressTotal = showProgress ? flowSteps.length : 1;
 
+  const minBackIdx = hasPrefilledName ? 1 : 0;
+
   return (
     <>
       <OnboardingProgress
         current={Math.max(0, progressCurrent)}
         total={Math.max(1, progressTotal)}
-        sectionLabel={
-          chosenType === "deep" ? currentStep.sectionLabel : undefined
-        }
+        sectionLabel={currentStep.sectionLabel}
       />
 
       <div
         className={`grid place-items-center w-full min-h-screen px-6 pb-8 ${
-          chosenType === "deep" && currentStep.sectionLabel ? "pt-14" : "pt-8"
+          currentStep.sectionLabel ? "pt-14" : "pt-8"
         }`}
       >
         <AnimatePresence mode="wait" custom={direction}>
@@ -239,7 +265,7 @@ export default function OnboardingFlow({
             step={currentStep}
             value={answers[currentStep.key] || ""}
             onAnswer={handleAnswer}
-            onBack={stepIdx > 0 ? handleBack : undefined}
+            onBack={stepIdx > minBackIdx ? handleBack : undefined}
             direction={direction}
           />
         </AnimatePresence>

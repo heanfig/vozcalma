@@ -11,7 +11,9 @@
     "preview": "astro preview",
     "astro": "astro",
     "db:migrate": "node --env-file=.env scripts/apply-migration.mjs",
-    "export:training-jsonl": "node --env-file=.env scripts/export-training-jsonl.mjs"
+    "export:training-jsonl": "node --env-file=.env scripts/export-training-jsonl.mjs",
+    "smoke": "node scripts/smoke-test.mjs",
+    "smoke:prod": "node scripts/smoke-test.mjs https://vozcalma.app"
   },
   "dependencies": {
     "@astrojs/node": "^10.0.3",

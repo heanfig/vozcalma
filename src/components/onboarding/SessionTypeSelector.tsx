@@ -44,16 +44,18 @@ export default function SessionTypeSelector({ userName, onSelect }: Props) {
           <h1 className="font-headline text-[1.35rem] leading-tight sm:text-3xl md:text-5xl lg:text-6xl text-on-surface tracking-tight">
             {safeName ? (
               <>
-                Hola, <span className="italic text-primary">{safeName}</span>
+                Hola, <span className="italic text-primary">{safeName}</span>.
+                <br />
+                ¿Qué necesita tu interior hoy?
               </>
             ) : (
               <>
-                Elige tu <span className="italic text-primary">camino</span>
+                ¿Qué necesita tu <span className="italic text-primary">interior</span> hoy?
               </>
             )}
           </h1>
           <p className="font-body text-on-surface-variant text-sm sm:text-base md:text-lg tracking-wide opacity-80">
-            Elige tu camino hacia la paz
+            Elige el ritmo de tu práctica. Desde una pausa breve hasta una transformación consciente.
           </p>
         </motion.header>
 
@@ -82,14 +84,16 @@ export default function SessionTypeSelector({ userName, onSelect }: Props) {
               />
               <div className="mt-auto p-3 sm:p-5 md:p-8 relative z-20">
                 <span className="inline-block px-2.5 py-1 sm:px-4 sm:py-1.5 bg-white/20 backdrop-blur-md text-white rounded-full text-[10px] sm:text-xs font-semibold tracking-widest uppercase mb-1.5 sm:mb-4">
-                  Básico
+                  Inmediato
                 </span>
-                <h2 className="font-headline text-lg sm:text-2xl md:text-3xl text-white mb-1 sm:mb-3">
+                <h2 className="font-headline text-lg sm:text-2xl md:text-3xl text-white mb-0.5 sm:mb-1">
                   Alivio Rápido
                 </h2>
+                <p className="font-body italic text-white/80 text-xs sm:text-sm mb-1 sm:mb-3">
+                  $3 USD
+                </p>
                 <p className="font-body text-white/85 text-xs sm:text-sm leading-snug sm:leading-relaxed max-w-xs line-clamp-3 sm:line-clamp-none">
-                  Ayuda a calmar tu estado emocional actual en pocos minutos
-                  mediante un audio corto y personalizado.
+                  Para calmar tu mente en minutos. Audios cortos para ansiedad o saturación inmediata.
                 </p>
               </div>
             </div>
@@ -103,7 +107,7 @@ export default function SessionTypeSelector({ userName, onSelect }: Props) {
                 </span>
               </div>
               <span className="font-semibold text-xs sm:text-sm tracking-wide text-on-surface-variant text-left">
-                Comenzar sesión corta
+                Comenzar ahora
               </span>
             </div>
           </motion.button>
@@ -126,14 +130,16 @@ export default function SessionTypeSelector({ userName, onSelect }: Props) {
               />
               <div className="mt-auto p-3 sm:p-5 md:p-8 relative z-20">
                 <span className="inline-block px-2.5 py-1 sm:px-4 sm:py-1.5 bg-white/20 backdrop-blur-md text-white rounded-full text-[10px] sm:text-xs font-semibold tracking-widest uppercase mb-1.5 sm:mb-4">
-                  Avanzado
+                  Inmersivo
                 </span>
-                <h2 className="font-headline text-lg sm:text-2xl md:text-3xl text-white mb-1 sm:mb-3">
+                <h2 className="font-headline text-lg sm:text-2xl md:text-3xl text-white mb-0.5 sm:mb-1">
                   Reprogramación Profunda
                 </h2>
+                <p className="font-body italic text-white/80 text-xs sm:text-sm mb-1 sm:mb-3">
+                  $6 USD
+                </p>
                 <p className="font-body text-white/85 text-xs sm:text-sm leading-snug sm:leading-relaxed max-w-xs line-clamp-3 sm:line-clamp-none">
-                  Transforma tu identidad, creencias y estado emocional mediante
-                  un audio más profundo y guiado.
+                  Para transformar tus patrones internos. Un viaje inmersivo para reconstruir tu identidad.
                 </p>
               </div>
             </div>
@@ -147,7 +153,7 @@ export default function SessionTypeSelector({ userName, onSelect }: Props) {
                 </span>
               </div>
               <span className="font-semibold text-xs sm:text-sm tracking-wide text-on-surface-variant text-left">
-                Explorar guía profunda
+                Iniciar viaje
               </span>
             </div>
           </motion.button>

@@ -3,7 +3,7 @@ import { randomBytes } from "node:crypto";
 import { completeChat, type ChatMessage } from "../../../../lib/openrouter";
 import { getSupabaseAdmin } from "../../../../lib/supabase-server";
 import { MEDITATION_SYSTEM_PROMPT } from "../../../../lib/system-prompt";
-import { synthesizeSpeech } from "../../../../lib/elevenlabs";
+import { synthesizeLongSpeech } from "../../../../lib/elevenlabs";
 import { json } from "../../../../lib/api-utils";
 import { SCRIPT_END_MARKER } from "../../../../lib/constants";
 import { mixVoiceWithBackground } from "../../../../lib/audio-mixer";
@@ -58,7 +58,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   let voiceBuf: ArrayBuffer;
   try {
-    voiceBuf = await synthesizeSpeech(gui);
+    voiceBuf = await synthesizeLongSpeech(gui);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Error TTS";
     return json({ error: msg }, 502);

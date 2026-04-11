@@ -188,3 +188,61 @@ export async function mixVoiceWithBackground(
     await rm(tempDir, { recursive: true, force: true }).catch(() => {});
   }
 }
+
+/**
+ * Concatena múltiples buffers MP3 en un solo MP3 usando ffmpeg.
+ *
+ * Útil para unir chunks de TTS que fueron sintetizados por separado
+ * (cuando el script excede el límite por request de ElevenLabs).
+ *
+ * @param buffers - Array de buffers MP3 a concatenar en orden
+ * @param timeout - Timeout en ms para ffmpeg (default: 120_000)
+ * @returns Buffer del MP3 concatenado
+ */
+export async function concatenateMp3Buffers(
+  buffers: ArrayBuffer[],
+  timeout = 120_000,
+): Promise<Buffer> {
+  if (buffers.length === 0) {
+    throw new Error("concatenateMp3Buffers: no hay buffers para concatenar");
+  }
+  if (buffers.length === 1) {
+    return Buffer.from(buffers[0]);
+  }
+
+  const tempDir = await mkdtemp(join(tmpdir(), "vozcalma-concat-"));
+  const outputPath = join(tempDir, "output.mp3");
+  const listPath = join(tempDir, "list.txt");
+
+  try {
+    // Escribir cada chunk a disco
+    const chunkPaths: string[] = [];
+    for (let i = 0; i < buffers.length; i++) {
+      const chunkPath = join(tempDir, `chunk-${String(i).padStart(3, "0")}.mp3`);
+      await writeFile(chunkPath, Buffer.from(buffers[i]));
+      chunkPaths.push(chunkPath);
+    }
+
+    // Crear el archivo de lista para ffmpeg concat demuxer
+    const listContent = chunkPaths.map((p) => `file '${p.replace(/'/g, "'\\''")}'`).join("\n");
+    await writeFile(listPath, listContent);
+
+    // Usar concat demuxer de ffmpeg (método más robusto que filter_complex)
+    // -safe 0 permite paths absolutos
+    // -c copy evita re-encoding (mantiene calidad y es rápido)
+    const args = [
+      "-y",
+      "-f", "concat",
+      "-safe", "0",
+      "-i", listPath,
+      "-c", "copy",
+      outputPath,
+    ];
+
+    await runFfmpeg(args, timeout);
+
+    return await readFile(outputPath);
+  } finally {
+    await rm(tempDir, { recursive: true, force: true }).catch(() => {});
+  }
+}

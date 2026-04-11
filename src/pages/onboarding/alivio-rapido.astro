@@ -3,6 +3,7 @@ import OnboardingFlow from "../../components/onboarding/OnboardingFlow";
 import "../../styles/onboarding.css";
 
 const sessionId = Astro.url.searchParams.get("session") || undefined;
+const initialName = Astro.url.searchParams.get("name")?.trim() || undefined;
 ---
 
 <!doctype html>
@@ -27,7 +28,7 @@ const sessionId = Astro.url.searchParams.get("session") || undefined;
   </head>
   <body class="m-0 p-0 w-full min-h-full font-body text-on-surface overflow-y-auto bg-soft-gradient">
     <div id="app" class="w-full min-h-screen">
-      <OnboardingFlow type="quick" sessionId={sessionId} client:load />
+      <OnboardingFlow type="quick" sessionId={sessionId} initialName={initialName} client:load />
     </div>
   </body>
 </html>

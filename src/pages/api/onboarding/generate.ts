@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import { getSupabaseAdmin } from "../../../lib/supabase-server";
 import { completeChat, type ChatMessage } from "../../../lib/openrouter";
 import { prepareScriptForTts } from "../../../lib/meditation/script-post";
-import { synthesizeSpeech } from "../../../lib/elevenlabs";
+import { synthesizeLongSpeech } from "../../../lib/elevenlabs";
 import { buildPrompt, type OnboardingType } from "../../../components/onboarding/onboarding-data";
 import { json } from "../../../lib/api-utils";
 import { mixVoiceWithBackground } from "../../../lib/audio-mixer";
@@ -64,7 +64,9 @@ export const POST: APIRoute = async ({ request }) => {
 
   let rawScript: string;
   try {
-    const maxTokens = type === "deep" ? 6000 : 3200;
+    // Quick target ~4000-5000 chars (~1500 tokens), deep target ~9000-11000 chars (~3500 tokens)
+    // Ampliamos los máximos para tener holgura y evitar truncado antes del ---FIN_GUIÓN---
+    const maxTokens = type === "deep" ? 8000 : 5000;
     rawScript = await completeChat(messages, { maxTokens });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Error LLM";
@@ -77,7 +79,7 @@ export const POST: APIRoute = async ({ request }) => {
   // --- TTS ---
   let voiceBuf: ArrayBuffer;
   try {
-    voiceBuf = await synthesizeSpeech(cleanScript);
+    voiceBuf = await synthesizeLongSpeech(cleanScript);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Error TTS";
     return json({ error: msg }, 502);

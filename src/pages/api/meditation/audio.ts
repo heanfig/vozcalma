@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { synthesizeSpeech } from "../../../lib/elevenlabs";
+import { synthesizeLongSpeech } from "../../../lib/elevenlabs";
 import { getSupabaseAdmin } from "../../../lib/supabase-server";
 import { prepareScriptForTts } from "../../../lib/meditation/script-post";
 import { json, requireAuth } from "../../../lib/api-utils";
@@ -56,7 +56,7 @@ export const POST: APIRoute = async (context) => {
   scriptText = prepareScriptForTts(scriptText, firstNameForTts || undefined);
 
   try {
-    const voiceBuf = await synthesizeSpeech(scriptText);
+    const voiceBuf = await synthesizeLongSpeech(scriptText);
     let finalAudio: Buffer;
     try {
       finalAudio = await mixVoiceWithBackground(voiceBuf);
