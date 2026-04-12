@@ -8,6 +8,8 @@ interface Props {
   value: string;
   onAnswer: (value: string) => void;
   onBack?: () => void;
+  /** R1: Volver al selector de tipo (con confirmación) */
+  onAbortToSelectType?: () => void;
   direction: number;
 }
 
@@ -50,17 +52,17 @@ function BentoSelect({
   options,
   value,
   onAnswer,
-  grid,
+  columns = 3,
 }: {
   options: RichSelectOption[];
   value: string;
   onAnswer: (v: string) => void;
-  grid: "area" | "sounds";
+  columns?: 2 | 3;
 }) {
   const gridClass =
-    grid === "area"
-      ? "grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 auto-rows-fr"
-      : "grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 auto-rows-fr";
+    columns === 2
+      ? "grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 auto-rows-fr"
+      : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 auto-rows-fr";
 
   return (
     <motion.div
@@ -164,6 +166,7 @@ export default function OnboardingStep({
   value,
   onAnswer,
   onBack,
+  onAbortToSelectType,
   direction,
 }: Props) {
   const [text, setText] = useState(value);
@@ -204,18 +207,35 @@ export default function OnboardingStep({
         wideLayout ? "max-w-4xl" : "max-w-2xl",
       ].join(" ")}
     >
-      {onBack && (
-        <motion.button
-          type="button"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          onClick={onBack}
-          className="self-start flex items-center gap-1 text-on-surface-variant/60 hover:text-primary transition-colors font-label text-sm"
-        >
-          <span className="material-symbols-outlined text-lg">arrow_back</span>
-          <span>Atrás</span>
-        </motion.button>
+      {(onBack || onAbortToSelectType) && (
+        <div className="self-start flex items-center gap-4">
+          {onBack && (
+            <motion.button
+              type="button"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              onClick={onBack}
+              className="flex items-center gap-1 text-on-surface-variant/60 hover:text-primary transition-colors font-label text-sm"
+            >
+              <span className="material-symbols-outlined text-lg">arrow_back</span>
+              <span>Atrás</span>
+            </motion.button>
+          )}
+          {onAbortToSelectType && (
+            <motion.button
+              type="button"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.15 }}
+              onClick={onAbortToSelectType}
+              className="flex items-center gap-1 text-on-surface-variant/50 hover:text-primary transition-colors font-label text-xs"
+            >
+              <span className="material-symbols-outlined text-base">swap_horiz</span>
+              <span>Cambiar tipo</span>
+            </motion.button>
+          )}
+        </div>
       )}
 
       <motion.div
@@ -289,62 +309,22 @@ export default function OnboardingStep({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.12, duration: 0.5 }}
         >
-          {step.textareaVariant === "quote" ? (
-            <div className="relative w-full group">
-              <span className="material-symbols-outlined absolute -top-4 -left-2 md:-left-6 text-6xl md:text-8xl text-primary/10 select-none pointer-events-none">
-                format_quote
-              </span>
-              <div className="glass-panel rounded-[2rem] p-8 md:p-12 diffusion-shadow transition-shadow duration-500 group-focus-within:shadow-lg border border-outline-variant/10">
-                <textarea
-                  className="w-full border-none bg-transparent font-headline text-2xl md:text-3xl text-primary focus:ring-0 placeholder:text-outline-variant placeholder:italic resize-none text-center leading-relaxed min-h-[8rem]"
-                  placeholder={step.placeholder || ""}
-                  rows={step.minRows ?? 5}
-                  maxLength={maxLen}
-                  value={text}
-                  onChange={(e) => handleTextChange(e.target.value)}
-                  autoFocus
-                />
-              </div>
-              <span className="material-symbols-outlined absolute -bottom-4 -right-2 md:-right-6 text-6xl md:text-8xl text-primary/10 rotate-180 select-none pointer-events-none">
-                format_quote
-              </span>
-              <div className="mt-2 px-2">
-                <CharCounter current={text.length} max={maxLen} />
-              </div>
+          {/* Textarea unificado — un solo look para todos los pasos */}
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/15 via-primary/5 to-primary/15 rounded-[2rem] blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-700 pointer-events-none" />
+            <textarea
+              className="w-full min-h-[12rem] p-6 md:p-8 glass-panel border border-outline-variant/10 rounded-[2rem] text-lg md:text-xl font-body font-light leading-relaxed placeholder:text-on-surface-variant/45 focus:ring-2 focus:ring-primary-fixed focus:outline-none text-on-surface relative z-10 shadow-sm resize-none transition-shadow duration-300"
+              placeholder={step.placeholder || ""}
+              rows={step.minRows ?? 6}
+              maxLength={maxLen}
+              value={text}
+              onChange={(e) => handleTextChange(e.target.value)}
+              autoFocus
+            />
+            <div className="mt-2 px-2 relative z-10">
+              <CharCounter current={text.length} max={maxLen} />
             </div>
-          ) : step.textareaVariant === "centered" ? (
-            <div className="relative w-full group">
-              <textarea
-                className="w-full bg-transparent border-none text-center font-headline text-xl md:text-2xl placeholder:text-surface-variant text-on-surface resize-none py-4 focus:ring-0 focus:outline-none min-h-[7rem]"
-                placeholder={step.placeholder || ""}
-                rows={step.minRows ?? 5}
-                maxLength={maxLen}
-                value={text}
-                onChange={(e) => handleTextChange(e.target.value)}
-                autoFocus
-              />
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-px w-24 bg-primary/25 group-focus-within:w-full group-focus-within:bg-primary/45 transition-all duration-700" />
-              <div className="mt-2 px-2">
-                <CharCounter current={text.length} max={maxLen} />
-              </div>
-            </div>
-          ) : (
-            <div className="relative group">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/15 via-primary/5 to-primary/15 rounded-[2rem] blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-700 pointer-events-none" />
-              <textarea
-                className="w-full min-h-[12rem] p-6 md:p-8 glass-panel border border-outline-variant/10 rounded-[2rem] text-lg md:text-xl font-body font-light leading-relaxed placeholder:text-on-surface-variant/45 focus:ring-0 focus:outline-none text-on-surface relative z-10 shadow-sm resize-none"
-                placeholder={step.placeholder || ""}
-                rows={step.minRows ?? 6}
-                maxLength={maxLen}
-                value={text}
-                onChange={(e) => handleTextChange(e.target.value)}
-                autoFocus
-              />
-              <div className="mt-2 px-2 relative z-10">
-                <CharCounter current={text.length} max={maxLen} />
-              </div>
-            </div>
-          )}
+          </div>
 
           {step.suggestions && step.suggestions.length > 0 && (
             <motion.div
@@ -432,7 +412,7 @@ export default function OnboardingStep({
           options={step.richOptions!}
           value={value}
           onAnswer={onAnswer}
-          grid={step.key === "areaVida" ? "area" : "sounds"}
+          columns={step.key === "categoria" ? 3 : 2}
         />
       )}
 

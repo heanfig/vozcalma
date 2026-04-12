@@ -1,0 +1,109 @@
+/**
+ * Cookie HTTP-only firmada con HMAC-SHA256 para pasar el nombre de usuario
+ * desde la landing page al onboarding sin exponerlo en la URL.
+ *
+ * Format del valor: `${base64url(JSON payload)}.${base64url(hmac)}`
+ * Payload: `{ name, sessionId, createdAt }` con TTL de 1 hora.
+ *
+ * Cookie config: HttpOnly, Secure, SameSite=Lax, path=/
+ *
+ * COOKIE_SECRET es SEPARADO de CSRF_SECRET (defense-in-depth).
+ */
+import { createHmac, timingSafeEqual, randomUUID } from "node:crypto";
+import type { AstroCookies } from "astro";
+
+const COOKIE_NAME = "vc_session";
+const TTL_SECONDS = 60 * 60; // 1 hora
+
+export interface SessionPayload {
+  name: string;
+  sessionId: string;
+  createdAt: number;
+}
+
+function getSecret(): string {
+  const s = import.meta.env.COOKIE_SECRET || process.env.COOKIE_SECRET;
+  if (!s || s.length < 32) {
+    throw new Error(
+      "COOKIE_SECRET no configurada o muy corta (mínimo 32 caracteres). Generá una con: openssl rand -hex 32",
+    );
+  }
+  return s;
+}
+
+function sign(payload: string): string {
+  return createHmac("sha256", getSecret()).update(payload).digest("base64url");
+}
+
+/**
+ * Crea una nueva sesión firmada. Retorna el cookieValue + el sessionId.
+ */
+export function createSession(name: string): SessionPayload & { cookieValue: string } {
+  const sessionId = randomUUID();
+  const payload: SessionPayload = {
+    name,
+    sessionId,
+    createdAt: Date.now(),
+  };
+  const json = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const sig = sign(json);
+  const cookieValue = `${json}.${sig}`;
+  return { ...payload, cookieValue };
+}
+
+/**
+ * Lee la cookie `vc_session` del request y valida su firma + expiración.
+ * Retorna el payload si es válido, null si no.
+ */
+export function readSession(cookies: AstroCookies): SessionPayload | null {
+  const raw = cookies.get(COOKIE_NAME)?.value;
+  if (!raw) return null;
+
+  const parts = raw.split(".");
+  if (parts.length !== 2) return null;
+  const [json, providedSig] = parts;
+
+  const expectedSig = sign(json);
+  const a = Buffer.from(providedSig);
+  const b = Buffer.from(expectedSig);
+  if (a.length !== b.length) return null;
+  try {
+    if (!timingSafeEqual(a, b)) return null;
+  } catch {
+    return null;
+  }
+
+  let payload: SessionPayload;
+  try {
+    payload = JSON.parse(Buffer.from(json, "base64url").toString("utf8")) as SessionPayload;
+  } catch {
+    return null;
+  }
+
+  // TTL check
+  if (!payload.createdAt || Date.now() - payload.createdAt > TTL_SECONDS * 1000) {
+    return null;
+  }
+  if (typeof payload.name !== "string" || typeof payload.sessionId !== "string") {
+    return null;
+  }
+
+  return payload;
+}
+
+/**
+ * Setea la cookie en la respuesta de Astro.
+ */
+export function setSessionCookie(cookies: AstroCookies, cookieValue: string): void {
+  cookies.set(COOKIE_NAME, cookieValue, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: TTL_SECONDS,
+  });
+}
+
+export function clearSessionCookie(cookies: AstroCookies): void {
+  cookies.delete(COOKIE_NAME, { path: "/" });
+}

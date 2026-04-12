@@ -1,20 +1,64 @@
+/**
+ * POST /api/onboarding/generate
+ *
+ * Genera una meditación personalizada:
+ * - Valida cookie firmada + CSRF token
+ * - Aplica rate limit por sessionId
+ * - Delega la lógica pesada a generateMeditation() (pipeline extraído)
+ *
+ * Retorna { sessionId, audioUrl, scriptText, playUrl, source }
+ */
 import type { APIRoute } from "astro";
 import { getSupabaseAdmin } from "../../../lib/supabase-server";
-import { completeChat, type ChatMessage } from "../../../lib/openrouter";
-import { prepareScriptForTts } from "../../../lib/meditation/script-post";
-import { synthesizeLongSpeech } from "../../../lib/elevenlabs";
-import { buildPrompt, type OnboardingType } from "../../../components/onboarding/onboarding-data";
+import type { OnboardingType } from "../../../components/onboarding/onboarding-data";
 import { json } from "../../../lib/api-utils";
-import { mixVoiceWithBackground } from "../../../lib/audio-mixer";
-import { saveMeditationScriptReviewFile, saveMeditationAudioFile } from "../../../lib/meditation/save-script-review";
+import { readSession } from "../../../lib/session-cookie";
+import { verifyCsrfToken } from "../../../lib/csrf";
+import { rateLimit } from "../../../lib/rate-limit";
+import { generateMeditation } from "../../../lib/meditation/generate-pipeline";
+import { sendMeditationReadyEmail, sendMeditationFailedEmail } from "../../../lib/email";
 
-const BUCKET = "meditation-audio";
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
+  // --- Security: require signed session cookie + valid CSRF token ---
+  const session = readSession(cookies);
+  if (!session) {
+    return json(
+      {
+        error:
+          "Sesión inválida. Por favor inicia el ritual desde la página principal.",
+      },
+      401,
+    );
+  }
+
+  const csrfHeader = request.headers.get("x-csrf-token");
+  const csrf = verifyCsrfToken(csrfHeader);
+  if (!csrf.valid || csrf.sessionId !== session.sessionId) {
+    return json({ error: "Token CSRF inválido o expirado" }, 403);
+  }
+
+  // Rate limit: 3 generaciones por session en 10 minutos
+  const rl = rateLimit(`gen:${session.sessionId}`, 3, 10 * 60 * 1000);
+  if (!rl.allowed) {
+    return json(
+      {
+        error:
+          "Has generado varias meditaciones recientemente. Intenta de nuevo más tarde.",
+        retryAt: rl.resetAt,
+      },
+      429,
+    );
+  }
+
+  // --- Parse body ---
   let body: {
     type?: string;
     answers?: Record<string, string>;
     sessionId?: string | null;
+    deliverByEmail?: boolean;
+    email?: string;
   };
   try {
     body = (await request.json()) as typeof body;
@@ -32,155 +76,117 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ error: "Falta el nombre" }, 400);
   }
 
-  const supabase = getSupabaseAdmin();
+  // Input validation: cap cada answer a 2000 chars (anti-abuse)
+  for (const [key, value] of Object.entries(answers)) {
+    if (typeof value !== "string") {
+      return json({ error: `Campo ${key} inválido` }, 400);
+    }
+    if (value.length > 2000) {
+      answers[key] = value.slice(0, 2000);
+    }
+  }
 
-  // If a sessionId was provided, check if it exists and is already paid
-  let existingPaid = false;
+  // --- Si ya hay sessionId con audio generado, devolver cache ---
   if (body.sessionId) {
+    const supabase = getSupabaseAdmin();
     const { data: existing } = await supabase
       .from("onboarding_sessions")
       .select("id, is_paid, audio_url, script_text")
       .eq("id", body.sessionId)
       .maybeSingle();
-    if (existing) {
-      existingPaid = !!existing.is_paid;
-      if (existing.audio_url) {
-        return json({
-          sessionId: existing.id,
-          audioUrl: existing.audio_url,
-          isPaid: existingPaid,
-          scriptText: existing.script_text ?? "",
-        });
-      }
+    if (existing?.audio_url) {
+      return json({
+        sessionId: existing.id,
+        audioUrl: existing.audio_url,
+        isPaid: !!existing.is_paid,
+        scriptText: existing.script_text ?? "",
+        source: "cache",
+      });
     }
   }
 
-  // --- Generate script via LLM ---
-  const { system, user } = buildPrompt(type, answers);
-  const messages: ChatMessage[] = [
-    { role: "system", content: system },
-    { role: "user", content: user },
-  ];
+  // --- Async mode: deliverByEmail ---
+  // El usuario prefirió recibir un email cuando esté listo. Respondemos
+  // inmediatamente con status "queued" y lanzamos un background job que
+  // sigue ejecutando después del HTTP response (Node long-lived process).
+  if (body.deliverByEmail) {
+    const email = (body.email || "").trim();
+    if (!email || !EMAIL_REGEX.test(email) || email.length > 254) {
+      return json({ error: "Email inválido" }, 400);
+    }
 
-  let rawScript: string;
-  try {
-    // Quick target ~4000-5000 chars (~1500 tokens), deep target ~9000-11000 chars (~3500 tokens)
-    // Ampliamos los máximos para tener holgura y evitar truncado antes del ---FIN_GUIÓN---
-    const maxTokens = type === "deep" ? 8000 : 5000;
-    rawScript = await completeChat(messages, { maxTokens });
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : "Error LLM";
-    return json({ error: msg }, 502);
+    // Rate limit extra: 2 emails por session en 1 hora
+    const emailRl = rateLimit(`email:${session.sessionId}`, 2, 60 * 60 * 1000);
+    if (!emailRl.allowed) {
+      return json({ error: "Demasiados envíos por email recientes" }, 429);
+    }
+
+    // Lanzar job en background (NO awaited — la Promise sigue corriendo)
+    void runAsyncJob({ type, answers, email, name: answers.nombre || session.name });
+
+    return json({
+      sessionId: session.sessionId,
+      status: "queued",
+      message: "Tu meditación se está creando. Revisa tu correo en unos minutos.",
+    });
   }
 
-  const firstName = answers.nombre?.trim() || "";
-  const cleanScript = prepareScriptForTts(rawScript, firstName);
-
-  // --- TTS ---
-  let voiceBuf: ArrayBuffer;
+  // --- Sync mode: delegate to pipeline ---
   try {
-    voiceBuf = await synthesizeLongSpeech(cleanScript);
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : "Error TTS";
-    return json({ error: msg }, 502);
-  }
-
-  // --- Mezclar voz + música de fondo ---
-  let finalAudio: Buffer;
-  try {
-    finalAudio = await mixVoiceWithBackground(voiceBuf);
-  } catch {
-    // Fallback: si la mezcla falla, usar solo la voz
-    finalAudio = Buffer.from(voiceBuf);
-  }
-
-  // --- Guardar script + audio en filesystem ---
-  const tempSessionId = crypto.randomUUID().slice(0, 8);
-  void saveMeditationScriptReviewFile({ sessionId: tempSessionId, scriptText: cleanScript }).catch(() => {});
-  void saveMeditationAudioFile({ sessionId: tempSessionId, audioBuffer: finalAudio }).catch(() => {});
-
-  // --- Upload to Supabase Storage ---
-  const token = crypto.randomUUID().replace(/-/g, "").slice(0, 24);
-  const path = `onboarding/${token}.mp3`;
-
-  const { error: upErr } = await supabase.storage
-    .from(BUCKET)
-    .upload(path, new Uint8Array(finalAudio), {
-      contentType: "audio/mpeg",
-      upsert: false,
+    const result = await generateMeditation({
+      type,
+      answers,
+      existingSessionId: body.sessionId || null,
     });
 
-  if (upErr) {
-    return json(
-      {
-        error: "No se pudo subir el audio. Verifica que el bucket 'meditation-audio' existe.",
-        detail: upErr.message,
-      },
-      500,
-    );
+    return json({
+      sessionId: result.sessionId,
+      audioUrl: result.audioUrl,
+      isPaid: false,
+      scriptText: result.scriptText,
+      playUrl: result.playUrl,
+      source: result.source,
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Error al generar meditación";
+    console.error("[generate] pipeline failed:", msg);
+    return json({ error: msg }, 502);
   }
-
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from(BUCKET).getPublicUrl(path);
-
-  // --- Persist session ---
-  let sessionId = body.sessionId || null;
-  if (sessionId) {
-    await supabase
-      .from("onboarding_sessions")
-      .update({
-        intake_json: answers,
-        script_text: cleanScript,
-        audio_url: publicUrl,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", sessionId);
-  } else {
-    const { data: row, error: insErr } = await supabase
-      .from("onboarding_sessions")
-      .insert({
-        type,
-        intake_json: answers,
-        script_text: cleanScript,
-        audio_url: publicUrl,
-        is_paid: false,
-      })
-      .select("id, is_paid")
-      .single();
-    if (insErr || !row) {
-      return json(
-        { error: "No se pudo guardar la sesión", detail: insErr?.message },
-        500,
-      );
-    }
-    sessionId = row.id;
-    existingPaid = !!row.is_paid;
-  }
-
-  // --- Create shareable play link (fire-and-forget) ---
-  const playToken = crypto.randomUUID().replace(/-/g, "").slice(0, 24);
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 30);
-
-  void supabase.from("play_links").insert({
-    token: playToken,
-    audio_url: publicUrl,
-    expires_at: expiresAt.toISOString(),
-    source: "onboarding",
-  }).then(() => {}).catch(() => {});
-
-  const base =
-    ((import.meta.env.PUBLIC_SITE_URL || process.env.PUBLIC_SITE_URL || "") as string)?.replace(/\/$/, "") ||
-    "https://vozcalma.app";
-  const playUrl = `${base}/p/${playToken}`;
-
-  return json({
-    sessionId,
-    audioUrl: publicUrl,
-    isPaid: existingPaid,
-    scriptText: cleanScript,
-    playUrl,
-  });
 };
 
+/**
+ * Job async: genera la meditación en background y envía por email.
+ * NO debe ser awaited por el caller — la Promise vive en el event loop.
+ */
+async function runAsyncJob(params: {
+  type: OnboardingType;
+  answers: Record<string, string>;
+  email: string;
+  name: string;
+}): Promise<void> {
+  const { type, answers, email, name } = params;
+  try {
+    console.log("[async-job] starting generation for", email);
+    const result = await generateMeditation({
+      type,
+      answers,
+      existingSessionId: null,
+    });
+    console.log("[async-job] generation complete, sending email to", email);
+    await sendMeditationReadyEmail({
+      email,
+      name,
+      playUrl: result.playUrl,
+    });
+    console.log("[async-job] email sent successfully to", email);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[async-job] failed:", msg);
+    // Intentar notificar al usuario del fallo
+    try {
+      await sendMeditationFailedEmail({ email, name });
+    } catch (emailErr) {
+      console.error("[async-job] fallback email also failed:", emailErr);
+    }
+  }
+}

@@ -63,7 +63,7 @@ export async function synthesizeSpeech(text: string): Promise<ArrayBuffer> {
         similarity_boost: 0.72,
         style: 0.28,
         use_speaker_boost: true,
-        speed: 0.72,
+        speed: 0.65,
       },
     }),
   });

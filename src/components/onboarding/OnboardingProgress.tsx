@@ -14,7 +14,7 @@ export default function OnboardingProgress({
   const pct = ((current + 1) / total) * 100;
 
   return (
-    <div className="fixed top-0 left-0 w-full z-50">
+    <div className="fixed top-0 left-0 w-full z-50 bg-surface/95 backdrop-blur-md border-b border-outline-variant/10">
       <AnimatePresence mode="wait">
         {sectionLabel ? (
           <motion.p
@@ -29,9 +29,9 @@ export default function OnboardingProgress({
           </motion.p>
         ) : null}
       </AnimatePresence>
-      <div className="h-1 w-full bg-surface-container-highest/40">
+      <div className="h-1 w-full bg-surface-container-highest/60">
         <motion.div
-          className="h-full bg-primary/50 rounded-full"
+          className="h-full bg-primary/60 rounded-full"
           initial={false}
           animate={{ width: `${pct}%` }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}

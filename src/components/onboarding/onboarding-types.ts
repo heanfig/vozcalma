@@ -58,4 +58,6 @@ export interface OnboardingStepDef {
   maxSelections?: number;
   /** Resuelve options/richOptions dinámicamente desde answers previas */
   dynamicOptions?: DynamicOptionsFn;
+  /** Si retorna false, el paso se omite del flujo (p.ej. pasos condicionales). */
+  showIf?: (answers: Record<string, string>) => boolean;
 }

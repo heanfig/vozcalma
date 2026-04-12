@@ -1,9 +1,15 @@
 ---
 import OnboardingFlow from "../../components/onboarding/OnboardingFlow";
 import "../../styles/onboarding.css";
+import { readSession } from "../../lib/session-cookie";
+import { signCsrfToken } from "../../lib/csrf";
 
-const sessionId = Astro.url.searchParams.get("session") || undefined;
-const initialName = Astro.url.searchParams.get("name")?.trim() || undefined;
+const session = readSession(Astro.cookies);
+const queryName = Astro.url.searchParams.get("name")?.trim() || undefined;
+const initialName = session?.name || queryName;
+const sessionId = session?.sessionId || "anonymous";
+const csrfToken = signCsrfToken(sessionId);
+const existingPaidSessionId = Astro.url.searchParams.get("session") || undefined;
 ---
 
 <!doctype html>
@@ -16,6 +22,8 @@ const initialName = Astro.url.searchParams.get("name")?.trim() || undefined;
       name="description"
       content="Sesión de reprogramación profunda personalizada con IA para transformar tu estado emocional."
     />
+    <meta name="csrf-token" content={csrfToken} />
+    <meta name="session-id" content={sessionId} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
@@ -28,7 +36,7 @@ const initialName = Astro.url.searchParams.get("name")?.trim() || undefined;
   </head>
   <body class="m-0 p-0 w-full min-h-full font-body text-on-surface overflow-y-auto bg-soft-gradient">
     <div id="app" class="w-full min-h-screen">
-      <OnboardingFlow type="deep" sessionId={sessionId} initialName={initialName} client:load />
+      <OnboardingFlow type="deep" sessionId={existingPaidSessionId} initialName={initialName} client:load />
     </div>
   </body>
 </html>

@@ -12,8 +12,16 @@ import GeneratingScreen from "./GeneratingScreen";
 import PaymentGate from "./PaymentGate";
 import OnboardingPlayer from "./OnboardingPlayer";
 import ConfirmationStep from "./ConfirmationStep";
+import AwaitingEmailScreen from "./AwaitingEmailScreen";
 
-type Phase = "intake" | "selectType" | "confirmation" | "generating" | "payment" | "player";
+type Phase =
+  | "intake"
+  | "selectType"
+  | "confirmation"
+  | "generating"
+  | "payment"
+  | "player"
+  | "awaitingEmail";
 
 const NAME_STEP: OnboardingStepDef = {
   key: "nombre",
@@ -61,11 +69,16 @@ export default function OnboardingFlow({
   );
   const [isPaid, setIsPaid] = useState(!!initialSid);
   const [error, setError] = useState<string | null>(null);
+  const [generationStartedAt, setGenerationStartedAt] = useState<number>(Date.now());
+  const [generationDone, setGenerationDone] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState<string>("");
 
   const flowSteps = useMemo<OnboardingStepDef[]>(() => {
     if (!chosenType) return [];
-    return getSteps(chosenType).filter((s) => s.key !== "nombre");
-  }, [chosenType]);
+    const base = getSteps(chosenType).filter((s) => s.key !== "nombre");
+    // Filtra pasos condicionales (showIf) basado en las respuestas actuales
+    return base.filter((s) => !s.showIf || s.showIf(answers));
+  }, [chosenType, answers]);
 
   const allSteps = useMemo<OnboardingStepDef[]>(
     () => [NAME_STEP, ...flowSteps],
@@ -116,6 +129,23 @@ export default function OnboardingFlow({
     }
   }, [stepIdx, hasPrefilledName]);
 
+  // R1: Volver al selector de tipo (con confirmación para no perder progreso)
+  const handleAbortToSelectType = useCallback(() => {
+    const confirmed =
+      typeof window !== "undefined"
+        ? window.confirm(
+            "¿Perder tu progreso? Se borrarán las respuestas que llevas de esta sesión.",
+          )
+        : true;
+    if (!confirmed) return;
+    const keepName = answers.nombre || "";
+    setAnswers(keepName ? { nombre: keepName } : {});
+    setChosenType(null);
+    setDirection(-1);
+    setStepIdx(hasPrefilledName ? 1 : 0);
+    setPhase("selectType");
+  }, [answers, hasPrefilledName]);
+
   const handleTypeSelect = useCallback(
     (type: OnboardingType) => {
       setChosenType(type);
@@ -126,10 +156,29 @@ export default function OnboardingFlow({
     [],
   );
 
-  const handleConfirm = useCallback(() => {
-    startGeneration(answers, chosenType!);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [answers, chosenType, sessionId]);
+  const handleConfirm = useCallback(
+    (opts: { deliverByEmail: boolean; email: string }) => {
+      startGeneration(answers, chosenType!, opts);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [answers, chosenType, sessionId],
+  );
+
+  const handleStartAnother = useCallback(() => {
+    const keepName = answers.nombre || "";
+    setAnswers(keepName ? { nombre: keepName } : {});
+    setAudioUrl(null);
+    setScriptText("");
+    setPlayUrl(null);
+    setSessionId(null);
+    setError(null);
+    setPendingEmail("");
+    setGenerationDone(false);
+    setChosenType(null);
+    setDirection(1);
+    setStepIdx(hasPrefilledName ? 1 : 0);
+    setPhase("selectType");
+  }, [answers, hasPrefilledName]);
 
   const handleConfirmBack = useCallback(() => {
     setPhase("intake");
@@ -140,14 +189,34 @@ export default function OnboardingFlow({
   async function startGeneration(
     intake: Record<string, string>,
     type: OnboardingType,
+    opts?: { deliverByEmail: boolean; email: string },
   ) {
+    setGenerationStartedAt(Date.now());
+    setGenerationDone(false);
     setPhase("generating");
     setError(null);
+    const deliverByEmail = opts?.deliverByEmail === true;
+    const email = opts?.email || "";
     try {
+      // Lee el CSRF token del meta tag que el Astro page inyectó
+      const csrfToken =
+        typeof document !== "undefined"
+          ? (document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "")
+          : "";
       const res = await fetch("/api/onboarding/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type, answers: intake, sessionId }),
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken,
+        },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          type,
+          answers: intake,
+          sessionId,
+          deliverByEmail,
+          email,
+        }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: "Error" }));
@@ -157,16 +226,28 @@ export default function OnboardingFlow({
       }
       const data = (await res.json()) as {
         sessionId: string;
-        audioUrl: string;
+        audioUrl?: string;
         isPaid: boolean;
-        scriptText: string;
+        scriptText?: string;
         playUrl?: string;
+        status?: string;
       };
+
+      // Si el backend responde con status queued → ir a awaitingEmail
+      if (data.status === "queued") {
+        setSessionId(data.sessionId);
+        setPendingEmail(email);
+        setGenerationDone(true);
+        setPhase("awaitingEmail");
+        return;
+      }
+
       setSessionId(data.sessionId);
-      setAudioUrl(data.audioUrl);
+      setAudioUrl(data.audioUrl || null);
       setScriptText(data.scriptText || "");
       setPlayUrl(data.playUrl || null);
       setIsPaid(data.isPaid);
+      setGenerationDone(true);
       // TEMP: payment gate disabled — go directly to player
       setPhase("player");
     } catch (e) {
@@ -207,7 +288,24 @@ export default function OnboardingFlow({
   }
 
   if (phase === "generating") {
-    return <GeneratingScreen />;
+    return (
+      <GeneratingScreen
+        startedAt={generationStartedAt}
+        done={generationDone}
+      />
+    );
+  }
+
+  if (phase === "awaitingEmail") {
+    return (
+      <AnimatePresence mode="wait">
+        <AwaitingEmailScreen
+          email={pendingEmail}
+          userName={answers.nombre || ""}
+          onStartAnother={handleStartAnother}
+        />
+      </AnimatePresence>
+    );
   }
 
   // TEMP: payment gate disabled — kept for future production use
@@ -266,6 +364,7 @@ export default function OnboardingFlow({
             value={answers[currentStep.key] || ""}
             onAnswer={handleAnswer}
             onBack={stepIdx > minBackIdx ? handleBack : undefined}
+            onAbortToSelectType={chosenType != null ? handleAbortToSelectType : undefined}
             direction={direction}
           />
         </AnimatePresence>
