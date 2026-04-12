@@ -17,6 +17,7 @@ const existingPaidSessionId = Astro.url.searchParams.get("session") || undefined
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>(function(){var s=localStorage.getItem('vc-theme')||'system';var d=s==='dark'||(s==='system'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('dark')})();</script>
     <title>Alivio Rápido — VozCalma</title>
     <meta
       name="description"

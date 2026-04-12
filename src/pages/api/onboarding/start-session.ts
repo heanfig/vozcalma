@@ -11,6 +11,7 @@ import type { APIRoute } from "astro";
 import { json } from "../../../lib/api-utils";
 import { createSession, setSessionCookie } from "../../../lib/session-cookie";
 import { rateLimit } from "../../../lib/rate-limit";
+import { validateName } from "../../../lib/content-moderation";
 
 export const POST: APIRoute = async ({ request, cookies, clientAddress }) => {
   const ip = clientAddress || request.headers.get("x-forwarded-for") || "unknown";
@@ -39,9 +40,13 @@ export const POST: APIRoute = async ({ request, cookies, clientAddress }) => {
     return json({ error: "Nombre requerido" }, 400);
   }
 
-  // Validación mínima: sin caracteres de control / HTML
-  if (/[<>]/.test(name)) {
-    return json({ error: "Nombre inválido" }, 400);
+  // Validación completa: longitud, caracteres, contenido inapropiado
+  const nameCheck = validateName(name);
+  if (!nameCheck.valid) {
+    return json({
+      error: nameCheck.message || "Nombre inválido",
+      reason: nameCheck.reason,
+    }, 400);
   }
 
   const session = createSession(name);

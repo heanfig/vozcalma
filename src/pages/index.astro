@@ -27,6 +27,10 @@ const formatDate = (iso: string) => {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Anti-flash: aplica dark mode ANTES del primer paint -->
+    <script is:inline>
+      (function(){var s=localStorage.getItem('vc-theme')||'system';var d=s==='dark'||(s==='system'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('dark')})();
+    </script>
     <title>VozCalma — El Santuario Digital</title>
     <meta
       name="description"
@@ -124,6 +128,15 @@ const formatDate = (iso: string) => {
           <a href="#articulos" class="hover:text-primary transition-colors">Artículos</a>
           <a href="#activation" class="hover:text-primary transition-colors">Activación</a>
         </nav>
+        <!-- Dark mode toggle -->
+        <button
+          id="theme-toggle"
+          type="button"
+          aria-label="Cambiar modo de color"
+          class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors"
+        >
+          <span class="material-symbols-outlined text-xl" id="theme-icon">dark_mode</span>
+        </button>
         <a
           href="#activation"
           data-begin-ritual
@@ -380,44 +393,97 @@ const formatDate = (iso: string) => {
     <!-- Interactive wiring -->
     <script is:inline>
       (function () {
-        // Activation form: name → POST /api/onboarding/start-session → /onboarding
-        // (Usa cookie HTTP-only firmada en vez de ?name= en URL)
-        const form = document.getElementById("activation-form");
-        const submitBtn = form ? form.querySelector("button[type='submit']") : null;
-        if (form) {
+        var form = document.getElementById("activation-form");
+        var submitBtn = form ? form.querySelector("button[type='submit']") : null;
+        var input = document.getElementById("activation-name");
+
+        // FIX R5: Reset botón cuando el browser restaura la página desde bfcache
+        window.addEventListener("pageshow", function () {
+          if (submitBtn) submitBtn.disabled = false;
+          // Limpiar cualquier error previo
+          var errEl = document.getElementById("activation-error");
+          if (errEl) errEl.remove();
+        });
+
+        if (form && submitBtn) {
           form.addEventListener("submit", async function (e) {
             e.preventDefault();
-            const input = document.getElementById("activation-name");
-            const name = (input && input.value ? input.value : "").trim();
+            var name = (input && input.value ? input.value : "").trim();
             if (!name) {
               input && input.focus();
               return;
             }
-            if (submitBtn) submitBtn.disabled = true;
+
+            submitBtn.disabled = true;
+            // Limpiar error previo
+            var errEl = document.getElementById("activation-error");
+            if (errEl) errEl.remove();
+
             if (window.posthog && typeof window.posthog.capture === "function") {
               window.posthog.capture("landing_activation_submit", { name_length: name.length });
             }
+
             try {
-              const res = await fetch("/api/onboarding/start-session", {
+              var res = await fetch("/api/onboarding/start-session", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "same-origin",
                 body: JSON.stringify({ name: name }),
               });
+
               if (!res.ok) {
-                // Fallback: si el endpoint falla, usar el flujo anterior para no bloquear al usuario
-                window.location.href = "/onboarding?name=" + encodeURIComponent(name);
+                var errData = await res.json().catch(function () { return { error: "Error" }; });
+                var errMsg = errData.error || "No se pudo iniciar la sesión";
+                showError(errMsg);
+                submitBtn.disabled = false;
                 return;
               }
+
               window.location.href = "/onboarding";
             } catch (err) {
-              // Fallback de red
-              window.location.href = "/onboarding?name=" + encodeURIComponent(name);
+              showError("No pudimos conectar con el servidor. Intenta de nuevo.");
+              submitBtn.disabled = false;
             }
           });
         }
 
-        // Begin Ritual button: track click
+        function showError(msg) {
+          var errEl = document.getElementById("activation-error");
+          if (!errEl) {
+            errEl = document.createElement("p");
+            errEl.id = "activation-error";
+            errEl.className = "text-error text-sm mt-3 text-center font-body";
+            if (form) form.appendChild(errEl);
+          }
+          errEl.textContent = msg;
+          if (window.posthog && typeof window.posthog.capture === "function") {
+            window.posthog.capture("landing_activation_error", { error: msg });
+          }
+        }
+
+        // Theme toggle (dark mode)
+        var themeBtn = document.getElementById("theme-toggle");
+        var themeIcon = document.getElementById("theme-icon");
+        function updateThemeIcon() {
+          var isDark = document.documentElement.classList.contains("dark");
+          if (themeIcon) themeIcon.textContent = isDark ? "light_mode" : "dark_mode";
+        }
+        updateThemeIcon();
+        if (themeBtn) {
+          themeBtn.addEventListener("click", function () {
+            var stored = localStorage.getItem("vc-theme") || "system";
+            var next = stored === "light" ? "dark" : stored === "dark" ? "system" : "light";
+            var isDark = next === "dark" || (next === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+            document.documentElement.classList.toggle("dark", isDark);
+            localStorage.setItem("vc-theme", next);
+            updateThemeIcon();
+            if (window.posthog && typeof window.posthog.capture === "function") {
+              window.posthog.capture("landing_theme_toggled", { from: stored, to: next });
+            }
+          });
+        }
+
+        // Begin Ritual / Empezar ritual button: track click
         document.querySelectorAll("[data-begin-ritual]").forEach(function (el) {
           el.addEventListener("click", function () {
             if (window.posthog && typeof window.posthog.capture === "function") {

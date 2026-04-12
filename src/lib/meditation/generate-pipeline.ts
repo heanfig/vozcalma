@@ -191,7 +191,7 @@ async function runPipeline(params: GenerateParams): Promise<GenerateResult> {
   // ------------------------------------------------------------
   const playToken = crypto.randomUUID().replace(/-/g, "").slice(0, 24);
   const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 30);
+  expiresAt.setDate(expiresAt.getDate() + 90);
 
   void supabase
     .from("play_links")

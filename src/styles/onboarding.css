@@ -3,11 +3,127 @@
 @tailwind utilities;
 
 /* ------------------------------------------------------------------ */
+/* Theme tokens — CSS variables que Tailwind consume via rgb(var())    */
+/* Cambiar html.dark togglea automáticamente toda la app.             */
+/* ------------------------------------------------------------------ */
+
+@layer base {
+  :root {
+    --color-primary: 79 23 206;
+    --color-primary-container: 103 61 230;
+    --color-primary-fixed: 231 222 255;
+    --color-primary-fixed-dim: 204 190 255;
+    --color-on-primary: 255 255 255;
+    --color-on-primary-container: 225 215 255;
+    --color-on-primary-fixed: 30 0 96;
+    --color-on-primary-fixed-variant: 76 16 204;
+    --color-secondary: 84 94 121;
+    --color-secondary-container: 213 223 255;
+    --color-secondary-fixed: 217 226 255;
+    --color-secondary-fixed-dim: 188 198 229;
+    --color-on-secondary: 255 255 255;
+    --color-on-secondary-container: 88 98 125;
+    --color-on-secondary-fixed: 16 27 50;
+    --color-on-secondary-fixed-variant: 60 70 96;
+    --color-tertiary: 43 81 64;
+    --color-tertiary-container: 67 105 87;
+    --color-tertiary-fixed: 194 236 213;
+    --color-tertiary-fixed-dim: 167 208 186;
+    --color-on-tertiary: 255 255 255;
+    --color-on-tertiary-container: 189 231 208;
+    --color-on-tertiary-fixed: 0 33 20;
+    --color-on-tertiary-fixed-variant: 41 78 61;
+    --color-surface: 250 249 251;
+    --color-surface-dim: 219 217 220;
+    --color-surface-bright: 250 249 251;
+    --color-surface-variant: 227 226 228;
+    --color-surface-container-lowest: 255 255 255;
+    --color-surface-container-low: 245 243 245;
+    --color-surface-container: 239 237 240;
+    --color-surface-container-high: 233 232 234;
+    --color-surface-container-highest: 227 226 228;
+    --color-surface-tint: 100 57 227;
+    --color-on-surface: 27 28 30;
+    --color-on-surface-variant: 72 68 85;
+    --color-on-background: 27 28 30;
+    --color-background: 250 249 251;
+    --color-inverse-surface: 47 48 50;
+    --color-inverse-on-surface: 242 240 243;
+    --color-inverse-primary: 204 190 255;
+    --color-outline: 121 116 135;
+    --color-outline-variant: 202 195 216;
+    --color-error: 186 26 26;
+    --color-error-container: 255 218 214;
+    --color-on-error: 255 255 255;
+    --color-on-error-container: 147 0 10;
+  }
+
+  html.dark {
+    --color-primary: 177 157 247;
+    --color-primary-container: 76 16 204;
+    --color-primary-fixed: 231 222 255;
+    --color-primary-fixed-dim: 204 190 255;
+    --color-on-primary: 30 0 96;
+    --color-on-primary-container: 225 215 255;
+    --color-on-primary-fixed: 30 0 96;
+    --color-on-primary-fixed-variant: 76 16 204;
+    --color-secondary: 188 198 229;
+    --color-secondary-container: 60 70 96;
+    --color-secondary-fixed: 217 226 255;
+    --color-secondary-fixed-dim: 188 198 229;
+    --color-on-secondary: 16 27 50;
+    --color-on-secondary-container: 213 223 255;
+    --color-on-secondary-fixed: 16 27 50;
+    --color-on-secondary-fixed-variant: 60 70 96;
+    --color-tertiary: 167 208 186;
+    --color-tertiary-container: 41 78 61;
+    --color-tertiary-fixed: 194 236 213;
+    --color-tertiary-fixed-dim: 167 208 186;
+    --color-on-tertiary: 0 33 20;
+    --color-on-tertiary-container: 194 236 213;
+    --color-on-tertiary-fixed: 0 33 20;
+    --color-on-tertiary-fixed-variant: 41 78 61;
+    --color-surface: 19 18 22;
+    --color-surface-dim: 19 18 22;
+    --color-surface-bright: 57 55 60;
+    --color-surface-variant: 72 69 78;
+    --color-surface-container-lowest: 14 13 17;
+    --color-surface-container-low: 30 29 33;
+    --color-surface-container: 39 37 41;
+    --color-surface-container-high: 50 47 52;
+    --color-surface-container-highest: 61 58 63;
+    --color-surface-tint: 177 157 247;
+    --color-on-surface: 228 225 230;
+    --color-on-surface-variant: 198 194 208;
+    --color-on-background: 228 225 230;
+    --color-background: 19 18 22;
+    --color-inverse-surface: 228 225 230;
+    --color-inverse-on-surface: 50 47 52;
+    --color-inverse-primary: 79 23 206;
+    --color-outline: 144 139 156;
+    --color-outline-variant: 72 69 78;
+    --color-error: 255 180 171;
+    --color-error-container: 147 0 10;
+    --color-on-error: 105 0 5;
+    --color-on-error-container: 255 218 214;
+  }
+
+  /* Smooth scroll global */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /* Gradientes atmosféricos                                             */
 /* ------------------------------------------------------------------ */
 
 .bg-soft-gradient {
-  background: radial-gradient(circle at 50% 50%, #faf9fb 0%, #efedf0 100%);
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgb(var(--color-surface)) 0%,
+    rgb(var(--color-surface-container)) 100%
+  );
 }
 
 .ambient-glow {
@@ -17,11 +133,21 @@
 }
 
 .ethereal-bg {
-  background: linear-gradient(15deg, #e7deff 0%, #faf9fb 40%, #c2ecd5 100%);
+  background: linear-gradient(
+    15deg,
+    rgb(var(--color-primary-fixed)) 0%,
+    rgb(var(--color-surface)) 40%,
+    rgb(var(--color-tertiary-fixed)) 100%
+  );
 }
 
 .gradient-canvas {
-  background: linear-gradient(15deg, #e7deff 0%, #faf9fb 50%, #f5f3f5 100%);
+  background: linear-gradient(
+    15deg,
+    rgb(var(--color-primary-fixed)) 0%,
+    rgb(var(--color-surface)) 50%,
+    rgb(var(--color-surface-container-low)) 100%
+  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -29,7 +155,7 @@
 /* ------------------------------------------------------------------ */
 
 .glass-panel {
-  background: rgba(250, 249, 251, 0.7);
+  background: rgb(var(--color-surface) / 0.7);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
@@ -55,7 +181,7 @@
 }
 
 .glass-player {
-  background: rgba(250, 249, 251, 0.7);
+  background: rgb(var(--color-surface) / 0.7);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
@@ -65,7 +191,7 @@
 /* ------------------------------------------------------------------ */
 
 .diffusion-shadow {
-  box-shadow: 0 10px 40px rgba(27, 28, 30, 0.06);
+  box-shadow: 0 10px 40px rgb(var(--color-on-surface) / 0.06);
 }
 
 /* ------------------------------------------------------------------ */
@@ -113,6 +239,6 @@
 /* ------------------------------------------------------------------ */
 
 ::selection {
-  background-color: #e7deff;
-  color: #1b1c1e;
+  background-color: rgb(var(--color-primary-fixed));
+  color: rgb(var(--color-on-surface));
 }

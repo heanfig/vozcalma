@@ -1,6 +1,9 @@
 export const SCRIPT_PREFIX = "SCRIPT::";
 export const SCRIPT_END_MARKER = "---FIN_GUIÓN---";
 
+/** Días de expiración para play_links compartibles. */
+export const PLAY_LINK_EXPIRATION_DAYS = 90;
+
 /** Extrae el texto limpio del guion desde el contenido raw de un mensaje system. */
 export function extractScript(raw: string): string {
   return raw

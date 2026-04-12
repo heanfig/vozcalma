@@ -97,7 +97,7 @@ export const POST: APIRoute = async ({ request }) => {
   } = supabase.storage.from(BUCKET).getPublicUrl(path);
 
   const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 30);
+  expiresAt.setDate(expiresAt.getDate() + 90);
 
   const { error: insErr } = await supabase.from("play_links").insert({
     token,

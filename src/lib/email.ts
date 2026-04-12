@@ -78,7 +78,7 @@ export async function sendMeditationReadyEmail(params: {
       </a>
     </p>
     <p style="color:#7a7a85;font-size:12px;margin:24px 0 0;line-height:1.5">
-      Este enlace expira en 30 días. Fue creado exclusivamente para ti.
+      Este enlace expira en 90 días. Fue creado exclusivamente para ti.
     </p>
   </div>
   <p style="text-align:center;color:#7a7a85;font-size:11px;margin-top:24px">
@@ -90,7 +90,7 @@ export async function sendMeditationReadyEmail(params: {
   const res = await getClient().emails.send({
     from: getFrom(),
     to: email,
-    subject: `Tu meditación está lista, ${name}`,
+    subject: `🕊️ Tu meditación está lista, ${name}`,
     html,
   });
 
@@ -136,7 +136,7 @@ export async function sendMeditationFailedEmail(params: {
   const res = await getClient().emails.send({
     from: getFrom(),
     to: email,
-    subject: `Hola ${name}, tuvimos un problema con tu meditación`,
+    subject: `🌱 Hola ${name}, tuvimos un problema con tu meditación`,
     html,
   });
 

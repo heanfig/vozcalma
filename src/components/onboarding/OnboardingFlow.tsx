@@ -108,11 +108,20 @@ export default function OnboardingFlow({
         return;
       }
 
-      if (stepIdx + 1 < allSteps.length) {
+      // CRÍTICO: recalcular allSteps con `next` (no con `answers` stale del useMemo).
+      // Sin esto, pasos con showIf (como situacionEspecifica) se saltarían porque
+      // el allSteps viejo aún no refleja la nueva respuesta.
+      const nextFlowSteps = chosenType
+        ? getSteps(chosenType)
+            .filter((s) => s.key !== "nombre")
+            .filter((s) => !s.showIf || s.showIf(next))
+        : [];
+      const nextAllSteps = [NAME_STEP, ...nextFlowSteps];
+
+      if (stepIdx + 1 < nextAllSteps.length) {
         setDirection(1);
         setStepIdx(stepIdx + 1);
       } else {
-        // All questions answered → go to confirmation
         setPhase("confirmation");
       }
     },
