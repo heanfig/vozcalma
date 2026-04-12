@@ -129,22 +129,24 @@ const formatDate = (iso: string) => {
           <a href="#articulos" class="hover:text-primary transition-colors">Artículos</a>
           <a href="#activation" class="hover:text-primary transition-colors">Activación</a>
         </nav>
-        <!-- Dark mode toggle -->
-        <button
-          id="theme-toggle"
-          type="button"
-          aria-label="Cambiar modo de color"
-          class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors"
-        >
-          <span class="material-symbols-outlined text-xl" id="theme-icon">dark_mode</span>
-        </button>
-        <a
-          href="#activation"
-          data-begin-ritual
-          class="bg-primary text-on-primary px-5 py-2.5 rounded-full text-sm font-label font-semibold hover:opacity-90 transition-all shadow-md shadow-primary/10"
-        >
-          Empezar ritual
-        </a>
+        <div class="flex items-center gap-2">
+          <!-- Dark mode toggle -->
+          <button
+            id="theme-toggle"
+            type="button"
+            aria-label="Cambiar modo de color"
+            class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors"
+          >
+            <span class="material-symbols-outlined text-lg" id="theme-icon">dark_mode</span>
+          </button>
+          <a
+            href="#activation"
+            data-begin-ritual
+            class="bg-primary text-on-primary px-5 py-2.5 rounded-full text-sm font-label font-semibold hover:opacity-90 transition-all shadow-md shadow-primary/10"
+          >
+            Empezar ritual
+          </a>
+        </div>
       </div>
     </header>
 
@@ -475,14 +477,14 @@ const formatDate = (iso: string) => {
         updateThemeIcon();
         if (themeBtn) {
           themeBtn.addEventListener("click", function () {
-            var stored = localStorage.getItem("vc-theme") || "system";
-            var next = stored === "light" ? "dark" : stored === "dark" ? "system" : "light";
-            var isDark = next === "dark" || (next === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-            document.documentElement.classList.toggle("dark", isDark);
+            // Simple toggle: light ↔ dark (sin ciclo por "system" que confunde)
+            var isDark = document.documentElement.classList.contains("dark");
+            var next = isDark ? "light" : "dark";
+            document.documentElement.classList.toggle("dark", next === "dark");
             localStorage.setItem("vc-theme", next);
             updateThemeIcon();
             if (window.posthog && typeof window.posthog.capture === "function") {
-              window.posthog.capture("landing_theme_toggled", { from: stored, to: next });
+              window.posthog.capture("landing_theme_toggled", { from: isDark ? "dark" : "light", to: next });
             }
           });
         }

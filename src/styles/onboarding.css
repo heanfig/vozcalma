@@ -124,6 +124,43 @@
     rgb(var(--color-surface)) 0%,
     rgb(var(--color-surface-container)) 100%
   );
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ondas sutiles animadas de fondo */
+.bg-soft-gradient::before,
+.bg-soft-gradient::after {
+  content: "";
+  position: fixed;
+  width: 200vw;
+  height: 200vw;
+  border-radius: 45%;
+  opacity: 0.035;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bg-soft-gradient::before {
+  background: rgb(var(--color-primary));
+  top: -120vw;
+  left: -50vw;
+  animation: waveFloat 18s ease-in-out infinite;
+}
+
+.bg-soft-gradient::after {
+  background: rgb(var(--color-tertiary));
+  bottom: -130vw;
+  right: -50vw;
+  animation: waveFloat 22s ease-in-out infinite reverse;
+}
+
+@keyframes waveFloat {
+  0% { transform: rotate(0deg) translate(0, 0); }
+  25% { transform: rotate(2deg) translate(15px, -10px); }
+  50% { transform: rotate(0deg) translate(-10px, 15px); }
+  75% { transform: rotate(-2deg) translate(10px, 5px); }
+  100% { transform: rotate(0deg) translate(0, 0); }
 }
 
 .ambient-glow {
