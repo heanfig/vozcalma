@@ -36,3 +36,7 @@ elevenlabs.txt
 
 # deploy keys and secrets
 .deploy/
+
+# docs locales (no necesarios en repo)
+docs/
+.ralphrc
