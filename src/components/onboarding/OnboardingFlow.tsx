@@ -1,5 +1,6 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
+import { track, trackError } from "../../lib/analytics";
 import {
   getSteps,
   type OnboardingType,
@@ -72,6 +73,14 @@ export default function OnboardingFlow({
   const [generationStartedAt, setGenerationStartedAt] = useState<number>(Date.now());
   const [generationDone, setGenerationDone] = useState(false);
   const [pendingEmail, setPendingEmail] = useState<string>("");
+
+  // R4: Track onboarding start
+  useEffect(() => {
+    track("onboarding_started", {
+      has_prefilled_name: hasPrefilledName,
+      initial_type: initialType || null,
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const flowSteps = useMemo<OnboardingStepDef[]>(() => {
     if (!chosenType) return [];
@@ -157,6 +166,7 @@ export default function OnboardingFlow({
 
   const handleTypeSelect = useCallback(
     (type: OnboardingType) => {
+      track("onboarding_type_selected", { type });
       setChosenType(type);
       setPhase("intake");
       setDirection(1);
@@ -200,12 +210,14 @@ export default function OnboardingFlow({
     type: OnboardingType,
     opts?: { deliverByEmail: boolean; email: string },
   ) {
-    setGenerationStartedAt(Date.now());
+    const genStartTime = Date.now();
+    setGenerationStartedAt(genStartTime);
     setGenerationDone(false);
     setPhase("generating");
     setError(null);
     const deliverByEmail = opts?.deliverByEmail === true;
     const email = opts?.email || "";
+    track("onboarding_generate_requested", { type, deliverByEmail, has_email: !!email });
     try {
       // Lee el CSRF token del meta tag que el Astro page inyectó
       const csrfToken =
@@ -244,23 +256,34 @@ export default function OnboardingFlow({
 
       // Si el backend responde con status queued → ir a awaitingEmail
       if (data.status === "queued") {
+        track("onboarding_generate_succeeded", { type, source: "queued", duration_ms: Date.now() - genStartTime });
         setSessionId(data.sessionId);
         setPendingEmail(email);
         setGenerationDone(true);
         setPhase("awaitingEmail");
+        track("onboarding_await_email_viewed", { type });
         return;
       }
 
+      const durationMs = Date.now() - genStartTime;
+      track("onboarding_generate_succeeded", {
+        type,
+        source: (data as Record<string, unknown>).source as string || "llm",
+        duration_ms: durationMs,
+        audio_url_present: !!data.audioUrl,
+      });
       setSessionId(data.sessionId);
       setAudioUrl(data.audioUrl || null);
       setScriptText(data.scriptText || "");
       setPlayUrl(data.playUrl || null);
       setIsPaid(data.isPaid);
       setGenerationDone(true);
-      // TEMP: payment gate disabled — go directly to player
       setPhase("player");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al generar");
+      const msg = e instanceof Error ? e.message : "Error al generar";
+      track("onboarding_generate_failed", { type, error: msg, duration_ms: Date.now() - genStartTime });
+      trackError(e, { context: "startGeneration", type });
+      setError(msg);
       setPhase("intake");
       setStepIdx(allSteps.length - 1);
     }

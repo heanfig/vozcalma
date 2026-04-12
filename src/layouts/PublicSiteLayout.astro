@@ -1,5 +1,7 @@
 ---
 import PostHog from "../components/posthog.astro";
+import "../styles/onboarding.css";
+import BackgroundMusicWidget from "../components/BackgroundMusicWidget";
 
 type Props = {
   title: string;
@@ -19,10 +21,14 @@ const canonical = `https://vozcalma.app${canonicalPath}`;
 ---
 
 <!doctype html>
-<html class="light" lang="es">
+<html lang="es" class="h-full">
   <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Anti-flash dark mode -->
+    <script is:inline>
+      (function(){var s=localStorage.getItem('vc-theme')||'system';var d=s==='dark'||(s==='system'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('dark')})();
+    </script>
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta property="og:title" content={title} />
@@ -32,145 +38,55 @@ const canonical = `https://vozcalma.app${canonicalPath}`;
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="canonical" href={canonical} />
     <PostHog />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
       rel="stylesheet"
     />
-    <style>
-      :root{
-        --primary:#4f17ce;
-        --surface:#faf9fb;
-        --surface-low:#f5f3f5;
-        --outline:#cac3d8;
-        --text:#1b1c1e;
-        --muted:#484455;
-      }
-      body{
-        margin:0;
-        background:var(--surface);
-        color:var(--text);
-        font-family:"Plus Jakarta Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-      }
-      .site-nav{
-        position:sticky;
-        top:0;
-        z-index:50;
-        background:rgba(245,243,245,.95);
-        backdrop-filter:blur(8px);
-        border-bottom:1px solid rgba(202,195,216,.35);
-      }
-      .site-nav-inner,.site-footer-inner{
-        max-width:1120px;
-        margin:0 auto;
-        padding:16px 24px;
-      }
-      .site-nav-row{
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:18px;
-      }
-      .site-brand{
-        font-family:"Noto Serif",serif;
-        font-size:30px;
-        line-height:1;
-        font-weight:700;
-        color:var(--primary);
-        text-decoration:none;
-      }
-      .site-links{
-        display:flex;
-        align-items:center;
-        gap:26px;
-        flex-wrap:wrap;
-      }
-      .site-link{
-        text-decoration:none;
-        color:var(--muted);
-        font-family:"Noto Serif",serif;
-        font-size:15px;
-        font-weight:600;
-      }
-      .site-link:hover{color:var(--primary)}
-      .site-link-cta{color:var(--primary);font-weight:700}
-      .site-footer{
-        margin-top:60px;
-        border-top:1px solid rgba(202,195,216,.35);
-        background:var(--surface-low);
-      }
-      .site-footer-inner{
-        padding-top:42px;
-        padding-bottom:42px;
-        text-align:center;
-      }
-      .site-footer-brand{
-        margin:0;
-        font-family:"Noto Serif",serif;
-        font-size:30px;
-        font-weight:700;
-      }
-      .site-footer-links{
-        margin-top:18px;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        flex-wrap:wrap;
-        gap:22px;
-      }
-      .site-footer-links a{
-        text-decoration:none;
-        font-size:12px;
-        letter-spacing:.08em;
-        text-transform:uppercase;
-        color:#6f6c78;
-        font-weight:600;
-      }
-      .site-footer-links a:hover{color:var(--primary)}
-      .site-copyright{
-        margin:18px 0 0;
-        font-size:12px;
-        color:#6f6c78;
-      }
-      @media (max-width: 860px){
-        .site-nav-inner,.site-footer-inner{padding-left:16px;padding-right:16px}
-        .site-brand,.site-footer-brand{font-size:25px}
-        .site-links{gap:14px}
-        .site-link{font-size:14px}
-      }
-    </style>
   </head>
-  <body>
-    <nav class="site-nav">
-      <div class="site-nav-inner">
-        <div class="site-nav-row">
-          <a href="/" class="site-brand">VozCalma</a>
-          <div class="site-links">
-            <a href="/#como-funciona" class="site-link">Cómo funciona</a>
-            <a href="/#precios" class="site-link">Precios</a>
-            <a href="/blog" class="site-link">Blog</a>
-            <a href="/sign-in" class="site-link site-link-cta">Iniciar sesión</a>
-          </div>
-        </div>
+  <body class="bg-surface font-body text-on-surface antialiased min-h-full">
+    <!-- Header — mismo estilo que landing -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-md border-b border-outline-variant/10">
+      <div class="max-w-6xl mx-auto px-6 md:px-10 py-4 flex items-center justify-between">
+        <a href="/" class="font-headline text-xl md:text-2xl font-semibold text-primary tracking-tight">
+          VozCalma
+        </a>
+        <nav class="hidden md:flex items-center gap-8 text-sm font-label text-on-surface-variant">
+          <a href="/blog" class="hover:text-primary transition-colors">Blog</a>
+          <a href="/#activation" class="hover:text-primary transition-colors">Activación</a>
+        </nav>
+        <a
+          href="/#activation"
+          class="bg-primary text-on-primary px-5 py-2.5 rounded-full text-sm font-label font-semibold hover:opacity-90 transition-all shadow-md shadow-primary/10"
+        >
+          Empezar ritual
+        </a>
       </div>
-    </nav>
+    </header>
 
-    <main>
+    <!-- Main content -->
+    <main class="pt-24 pb-16 px-6 md:px-10 min-h-[70vh]">
       <slot />
     </main>
 
-    <footer class="site-footer">
-      <div class="site-footer-inner">
-        <p class="site-footer-brand">VozCalma</p>
-        <div class="site-footer-links">
-          <a href="/politica-de-privacidad">Política de privacidad</a>
-          <a href="/terminos-del-servicio">Términos del servicio</a>
-          <a href="/aviso-legal">Aviso legal</a>
-        </div>
-        <p class="site-copyright">© 2026 VozCalma. Diseñado para tu bienestar.</p>
+    <!-- Background music widget -->
+    <BackgroundMusicWidget client:idle />
+
+    <!-- Footer — mismo estilo que landing -->
+    <footer class="bg-surface-container-low px-6 md:px-10 py-12">
+      <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+        <p class="font-body text-xs text-on-surface-variant/70">
+          © {new Date().getFullYear()} VozCalma. El Santuario Digital.
+        </p>
+        <nav class="flex items-center gap-6 text-xs font-label text-on-surface-variant/70">
+          <a href="/politica-de-privacidad" class="hover:text-primary transition-colors">Privacidad</a>
+          <a href="/terminos-del-servicio" class="hover:text-primary transition-colors">Términos</a>
+          <a href="/aviso-legal" class="hover:text-primary transition-colors">Aviso Legal</a>
+        </nav>
       </div>
     </footer>
   </body>

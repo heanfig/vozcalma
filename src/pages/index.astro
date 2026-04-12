@@ -4,6 +4,7 @@
 // Estática (Astro), sin React hydration para primera impresión rápida.
 import "../styles/onboarding.css";
 import { blogPosts } from "../lib/blog";
+import BackgroundMusicWidget from "../components/BackgroundMusicWidget";
 
 const latestPosts = [...blogPosts]
   .sort((a, b) => b.date.localeCompare(a.date))
@@ -389,6 +390,9 @@ const formatDate = (iso: string) => {
         </nav>
       </div>
     </footer>
+
+    <!-- Background music widget -->
+    <BackgroundMusicWidget client:idle />
 
     <!-- Interactive wiring -->
     <script is:inline>
