@@ -1,17 +1,8 @@
 ---
+import AdminLayout from "../../layouts/AdminLayout.astro";
 import LoginForm from "../../components/admin/LoginForm";
-import "../../styles/onboarding.css";
 ---
 
-<!doctype html>
-<html lang="es" class="h-full">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin — VozCalma</title>
-    <meta name="robots" content="noindex, nofollow" />
-  </head>
-  <body class="h-full">
-    <LoginForm client:load />
-  </body>
-</html>
+<AdminLayout title="Admin — VozCalma">
+  <LoginForm client:load />
+</AdminLayout>

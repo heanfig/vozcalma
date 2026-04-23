@@ -1,21 +1,13 @@
 ---
+import AdminLayout from "../../layouts/AdminLayout.astro";
 import AdminShell from "../../components/admin/AdminShell";
 import CouponsPage from "../../components/admin/CouponsPage";
 
 const currentPath = Astro.url.pathname;
 ---
 
-<!doctype html>
-<html lang="es" class="h-full">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cupones — VozCalma Admin</title>
-    <meta name="robots" content="noindex, nofollow" />
-  </head>
-  <body class="h-full">
-    <AdminShell client:load title="Cupones" currentPath={currentPath}>
-      <CouponsPage client:load />
-    </AdminShell>
-  </body>
-</html>
+<AdminLayout title="Cupones — VozCalma Admin">
+  <AdminShell client:load title="Cupones" currentPath={currentPath}>
+    <CouponsPage client:load />
+  </AdminShell>
+</AdminLayout>
