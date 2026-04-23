@@ -42,29 +42,79 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Sync Wompi env vars to VPS
+      # Regenera el .env completo del VPS desde GitHub Secrets.
+      # Single source of truth: rotar un secreto = gh secret set + re-run.
+      - name: Sync full .env to VPS
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
           username: root
           key: ${{ secrets.VPS_SSH_KEY }}
-          envs: WOMPI_PUBLIC_KEY,WOMPI_PRIVATE_KEY,WOMPI_EVENTS_SECRET,WOMPI_INTEGRITY_SECRET,WOMPI_ENVIRONMENT
+          envs: PUBLIC_CLERK_PUBLISHABLE_KEY,CLERK_SECRET_KEY,PUBLIC_CLERK_SIGN_IN_URL,PUBLIC_CLERK_SIGN_UP_URL,SUPABASE_URL,SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,SUPABASE_SECRET_KEY,OPENROUTER_API_KEY,ELEVENLABS_API_KEY,ELEVENLABS_VOICE_ID,ADMIN_API_SECRET,CSRF_SECRET,COOKIE_SECRET,RESEND_API_KEY,EMAIL_FROM,PUBLIC_SITE_URL,WOMPI_PUBLIC_KEY,WOMPI_PRIVATE_KEY,WOMPI_EVENTS_SECRET,WOMPI_INTEGRITY_SECRET,WOMPI_ENVIRONMENT
           script: |
             cd /opt/vozcalma
-
-            # Remove stale Wompi block (idempotent) and append current secrets
-            sed -i '/^# --- WOMPI-MANAGED-START ---$/,/^# --- WOMPI-MANAGED-END ---$/d' .env 2>/dev/null || true
-            cat >> .env <<EOF
-            # --- WOMPI-MANAGED-START --- (synced by CI, do not edit manually)
-            WOMPI_PUBLIC_KEY=${WOMPI_PUBLIC_KEY}
-            WOMPI_PRIVATE_KEY=${WOMPI_PRIVATE_KEY}
-            WOMPI_EVENTS_SECRET=${WOMPI_EVENTS_SECRET}
-            WOMPI_INTEGRITY_SECRET=${WOMPI_INTEGRITY_SECRET}
-            WOMPI_ENVIRONMENT=${WOMPI_ENVIRONMENT:-test}
-            # --- WOMPI-MANAGED-END ---
-            EOF
-            chmod 600 .env
+            TMP=$(mktemp)
+            umask 077
+            {
+              echo "# Managed by CI (.github/workflows/deploy.yml) — do not edit by hand."
+              echo "# Rotate secrets with: gh secret set <KEY> --body '<value>' --repo heanfig/vozcalma"
+              echo ""
+              echo "# Clerk"
+              echo "PUBLIC_CLERK_PUBLISHABLE_KEY=${PUBLIC_CLERK_PUBLISHABLE_KEY}"
+              echo "CLERK_SECRET_KEY=${CLERK_SECRET_KEY}"
+              echo "PUBLIC_CLERK_SIGN_IN_URL=${PUBLIC_CLERK_SIGN_IN_URL}"
+              echo "PUBLIC_CLERK_SIGN_UP_URL=${PUBLIC_CLERK_SIGN_UP_URL}"
+              echo ""
+              echo "# Supabase"
+              echo "SUPABASE_URL=${SUPABASE_URL}"
+              echo "SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}"
+              echo "SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}"
+              echo "SUPABASE_SECRET_KEY=${SUPABASE_SECRET_KEY}"
+              echo ""
+              echo "# LLM / TTS"
+              echo "OPENROUTER_API_KEY=${OPENROUTER_API_KEY}"
+              echo "ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}"
+              echo "ELEVENLABS_VOICE_ID=${ELEVENLABS_VOICE_ID}"
+              echo ""
+              echo "# Seguridad"
+              echo "ADMIN_API_SECRET=${ADMIN_API_SECRET}"
+              echo "CSRF_SECRET=${CSRF_SECRET}"
+              echo "COOKIE_SECRET=${COOKIE_SECRET}"
+              echo ""
+              echo "# Email"
+              echo "RESEND_API_KEY=${RESEND_API_KEY}"
+              echo "EMAIL_FROM=${EMAIL_FROM}"
+              echo ""
+              echo "# App"
+              echo "PUBLIC_SITE_URL=${PUBLIC_SITE_URL}"
+              echo ""
+              echo "# Wompi"
+              echo "WOMPI_PUBLIC_KEY=${WOMPI_PUBLIC_KEY}"
+              echo "WOMPI_PRIVATE_KEY=${WOMPI_PRIVATE_KEY}"
+              echo "WOMPI_EVENTS_SECRET=${WOMPI_EVENTS_SECRET}"
+              echo "WOMPI_INTEGRITY_SECRET=${WOMPI_INTEGRITY_SECRET}"
+              echo "WOMPI_ENVIRONMENT=${WOMPI_ENVIRONMENT:-test}"
+            } > "$TMP"
+            chmod 600 "$TMP"
+            mv "$TMP" .env
         env:
+          PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          PUBLIC_CLERK_SIGN_IN_URL: ${{ secrets.PUBLIC_CLERK_SIGN_IN_URL }}
+          PUBLIC_CLERK_SIGN_UP_URL: ${{ secrets.PUBLIC_CLERK_SIGN_UP_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          ELEVENLABS_VOICE_ID: ${{ secrets.ELEVENLABS_VOICE_ID }}
+          ADMIN_API_SECRET: ${{ secrets.ADMIN_API_SECRET }}
+          CSRF_SECRET: ${{ secrets.CSRF_SECRET }}
+          COOKIE_SECRET: ${{ secrets.COOKIE_SECRET }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          PUBLIC_SITE_URL: ${{ secrets.PUBLIC_SITE_URL }}
           WOMPI_PUBLIC_KEY: ${{ secrets.WOMPI_PUBLIC_KEY }}
           WOMPI_PRIVATE_KEY: ${{ secrets.WOMPI_PRIVATE_KEY }}
           WOMPI_EVENTS_SECRET: ${{ secrets.WOMPI_EVENTS_SECRET }}
