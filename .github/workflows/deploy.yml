@@ -41,6 +41,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Sync Wompi env vars to VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          envs: WOMPI_PUBLIC_KEY,WOMPI_PRIVATE_KEY,WOMPI_EVENTS_SECRET,WOMPI_INTEGRITY_SECRET,WOMPI_ENVIRONMENT
+          script: |
+            cd /opt/vozcalma
+
+            # Remove stale Wompi block (idempotent) and append current secrets
+            sed -i '/^# --- WOMPI-MANAGED-START ---$/,/^# --- WOMPI-MANAGED-END ---$/d' .env 2>/dev/null || true
+            cat >> .env <<EOF
+            # --- WOMPI-MANAGED-START --- (synced by CI, do not edit manually)
+            WOMPI_PUBLIC_KEY=${WOMPI_PUBLIC_KEY}
+            WOMPI_PRIVATE_KEY=${WOMPI_PRIVATE_KEY}
+            WOMPI_EVENTS_SECRET=${WOMPI_EVENTS_SECRET}
+            WOMPI_INTEGRITY_SECRET=${WOMPI_INTEGRITY_SECRET}
+            WOMPI_ENVIRONMENT=${WOMPI_ENVIRONMENT:-test}
+            # --- WOMPI-MANAGED-END ---
+            EOF
+            chmod 600 .env
+        env:
+          WOMPI_PUBLIC_KEY: ${{ secrets.WOMPI_PUBLIC_KEY }}
+          WOMPI_PRIVATE_KEY: ${{ secrets.WOMPI_PRIVATE_KEY }}
+          WOMPI_EVENTS_SECRET: ${{ secrets.WOMPI_EVENTS_SECRET }}
+          WOMPI_INTEGRITY_SECRET: ${{ secrets.WOMPI_INTEGRITY_SECRET }}
+          WOMPI_ENVIRONMENT: ${{ secrets.WOMPI_ENVIRONMENT }}
+
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
         with:
