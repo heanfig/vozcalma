@@ -285,22 +285,23 @@ export default function SessionDetail({ sessionId }: { sessionId: string }) {
         </pre>
       </Section>
 
-      {data.artifact?.script_text && (
-        <Section title="Script generado (LLM)">
-          <div className="flex items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400 -mt-2">
-            <span>
-              {data.artifact.script_text.length.toLocaleString()} caracteres
-              {data.artifact.updated_at
-                ? ` · actualizado ${formatDate(data.artifact.updated_at)}`
-                : ""}
-            </span>
-            <CopyButton value={data.artifact.script_text} />
-          </div>
-          <pre className="text-sm whitespace-pre-wrap bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 rounded-lg p-4 max-h-[32rem] overflow-y-auto border border-slate-200 dark:border-slate-800">
-            {data.artifact.script_text}
-          </pre>
-        </Section>
-      )}
+      {(() => {
+        const sessionScript = (s.script_text as string | null) || "";
+        const artifactScript = data.artifact?.script_text || "";
+        const scriptText = sessionScript || artifactScript;
+        if (!scriptText) return null;
+        return (
+          <Section title="Script generado (LLM)">
+            <div className="flex items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400 -mt-2">
+              <span>{scriptText.length.toLocaleString()} caracteres</span>
+              <CopyButton value={scriptText} />
+            </div>
+            <pre className="text-sm whitespace-pre-wrap bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 rounded-lg p-4 max-h-[32rem] overflow-y-auto border border-slate-200 dark:border-slate-800">
+              {scriptText}
+            </pre>
+          </Section>
+        );
+      })()}
 
       {data.artifact?.plan_json && (
         <Section title="Plan JSON">
