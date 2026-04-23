@@ -405,7 +405,7 @@ export default function WompiCheckout({
         {/* Soporte WhatsApp */}
         <section className="w-full flex flex-col items-center pt-2 pb-4">
           <p className="text-xs text-on-surface-variant/60 text-center max-w-md">
-            ¿Tienes problemas con el pago? Escríbenos por WhatsApp:
+            ¿Tienes problemas con el pago? Escríbenos por WhatsApp y te ayudamos:
           </p>
           <a
             href={WHATSAPP_SUPPORT_URL}
