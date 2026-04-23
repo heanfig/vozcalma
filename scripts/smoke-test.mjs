@@ -300,6 +300,54 @@ await test("Página /payment/return renderiza (sin session → error visible)", 
 });
 
 // ============================================================================
+// ADMIN DASHBOARD
+// ============================================================================
+
+await test("GET /admin sin cookie → redirect a /admin/login", async () => {
+  const res = await fetchWithTimeout(`${BASE}/admin`, {
+    redirect: "manual",
+  });
+  assert(
+    res.status === 302 || res.status === 301,
+    `expected redirect, got ${res.status}`,
+  );
+  const loc = res.headers.get("location") || "";
+  assert(loc.includes("/admin/login"), `expected /admin/login, got ${loc}`);
+});
+
+await test("GET /admin/login rinde (form de password)", async () => {
+  const res = await fetchWithTimeout(`${BASE}/admin/login`);
+  assert(res.ok, `status ${res.status}`);
+  const body = await res.text();
+  assert(
+    body.includes("Contraseña") || body.includes("password"),
+    "missing password field",
+  );
+});
+
+await test("POST /api/admin/login password incorrecta → 401", async () => {
+  const res = await fetchWithTimeout(`${BASE}/api/admin/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password: "wrong-smoke-password-xyz" }),
+  });
+  assert(
+    res.status === 401 || res.status === 429,
+    `expected 401 or 429, got ${res.status}`,
+  );
+});
+
+await test("GET /api/admin/overview sin auth → 401", async () => {
+  const res = await fetchWithTimeout(`${BASE}/api/admin/overview`);
+  assert(res.status === 401, `expected 401, got ${res.status}`);
+});
+
+await test("GET /api/admin/sessions sin auth → 401", async () => {
+  const res = await fetchWithTimeout(`${BASE}/api/admin/sessions`);
+  assert(res.status === 401, `expected 401, got ${res.status}`);
+});
+
+// ============================================================================
 // REPORT
 // ============================================================================
 

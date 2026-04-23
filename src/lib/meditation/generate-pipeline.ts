@@ -12,7 +12,9 @@
  * Concurrencia: limitada a 5 jobs simultáneos por proceso.
  */
 import { getSupabaseAdmin } from "../supabase-server";
-import { completeChat, type ChatMessage } from "../openrouter";
+import { completeChat, type ChatMessage, type CompleteChatResult } from "../openrouter";
+import { fetchGenerationCost } from "../openrouter-usage";
+import { estimateTtsCostUsd } from "../pricing";
 import { prepareScriptForTts } from "./script-post";
 import { synthesizeLongSpeech } from "../elevenlabs";
 import { buildPrompt, type OnboardingType } from "../../components/onboarding/onboarding-data";
@@ -87,6 +89,7 @@ export async function generateMeditation(
 async function runPipeline(params: GenerateParams): Promise<GenerateResult> {
   const { type, answers, existingSessionId } = params;
   const supabase = getSupabaseAdmin();
+  const t0 = Date.now();
 
   // ------------------------------------------------------------
   // 1. Intentar pre-gen (solo para quick flow, no "Situaciones específicas")
@@ -94,6 +97,7 @@ async function runPipeline(params: GenerateParams): Promise<GenerateResult> {
   let audioBuffer: Buffer | null = null;
   let source: "pregen" | "llm" = "llm";
   let cleanScript = "";
+  let llmUsage: CompleteChatResult | null = null;
 
   if (type === "quick" && answers.categoria) {
     const preGen = await pickPreGenMeditation(answers.categoria);
@@ -115,7 +119,8 @@ async function runPipeline(params: GenerateParams): Promise<GenerateResult> {
     ];
 
     const maxTokens = type === "deep" ? 6500 : 3500;
-    const rawScript = await completeChat(messages, { maxTokens });
+    llmUsage = await completeChat(messages, { maxTokens });
+    const rawScript = llmUsage.text;
 
     const firstName = answers.nombre?.trim() || "";
     cleanScript = prepareScriptForTts(rawScript, firstName);
@@ -200,9 +205,51 @@ async function runPipeline(params: GenerateParams): Promise<GenerateResult> {
       audio_url: publicUrl,
       expires_at: expiresAt.toISOString(),
       source: source === "pregen" ? "onboarding-pregen" : "onboarding",
+      session_id: sessionId,
     })
     .then(() => {})
     .catch(() => {});
+
+  // ------------------------------------------------------------
+  // 6. Persistir costos (fire-and-forget). LLM cost real llega con delay vía
+  //    fetchGenerationCost; por ahora insertamos tokens + TTS estimado.
+  // ------------------------------------------------------------
+  const ttsChars = cleanScript.length;
+  const ttsCostUsd = source === "pregen" ? 0 : estimateTtsCostUsd(ttsChars);
+  const generationId = llmUsage?.generationId;
+
+  void supabase
+    .from("meditation_costs")
+    .insert({
+      session_id: sessionId,
+      llm_model: llmUsage?.model,
+      llm_generation_id: generationId,
+      llm_prompt_tokens: llmUsage?.promptTokens,
+      llm_completion_tokens: llmUsage?.completionTokens,
+      llm_total_tokens: llmUsage?.totalTokens,
+      llm_cost_usd: source === "pregen" ? 0 : null,
+      tts_chars: ttsChars,
+      tts_cost_usd: ttsCostUsd,
+      duration_ms: Date.now() - t0,
+      source,
+    })
+    .then(() => {})
+    .catch(() => {});
+
+  // Backfill del costo real de OpenRouter cuando esté disponible (~1-5s delay).
+  if (generationId) {
+    void (async () => {
+      // pequeño retraso para dar tiempo a que OpenRouter registre la transacción
+      await new Promise((r) => setTimeout(r, 3000));
+      const realCost = await fetchGenerationCost(generationId);
+      if (realCost != null) {
+        await supabase
+          .from("meditation_costs")
+          .update({ llm_cost_usd: realCost })
+          .eq("llm_generation_id", generationId);
+      }
+    })().catch(() => {});
+  }
 
   const siteUrl =
     ((import.meta.env.PUBLIC_SITE_URL || process.env.PUBLIC_SITE_URL || "") as string).replace(/\/$/, "") ||

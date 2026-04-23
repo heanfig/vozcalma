@@ -41,7 +41,8 @@ export const POST: APIRoute = async ({ request }) => {
       },
     ];
     try {
-      script = await completeChat(messages);
+      const result = await completeChat(messages);
+      script = result.text;
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Error LLM";
       return json({ error: msg }, 502);

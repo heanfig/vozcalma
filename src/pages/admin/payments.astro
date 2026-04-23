@@ -1,0 +1,21 @@
+---
+import AdminShell from "../../components/admin/AdminShell";
+import PaymentsPage from "../../components/admin/PaymentsPage";
+
+const currentPath = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="es" class="h-full">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pagos — VozCalma Admin</title>
+    <meta name="robots" content="noindex, nofollow" />
+  </head>
+  <body class="h-full">
+    <AdminShell client:load title="Pagos" currentPath={currentPath}>
+      <PaymentsPage client:load />
+    </AdminShell>
+  </body>
+</html>

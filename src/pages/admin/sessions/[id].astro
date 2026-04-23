@@ -1,0 +1,22 @@
+---
+import AdminShell from "../../../components/admin/AdminShell";
+import SessionDetail from "../../../components/admin/SessionDetail";
+
+const currentPath = Astro.url.pathname;
+const { id } = Astro.params;
+---
+
+<!doctype html>
+<html lang="es" class="h-full">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sesión {id} — VozCalma Admin</title>
+    <meta name="robots" content="noindex, nofollow" />
+  </head>
+  <body class="h-full">
+    <AdminShell client:load title="Detalle de sesión" currentPath={currentPath}>
+      <SessionDetail client:load sessionId={id!} />
+    </AdminShell>
+  </body>
+</html>

@@ -7,15 +7,22 @@ export type CompleteChatOptions = {
   maxTokens?: number;
 };
 
+export type CompleteChatResult = {
+  text: string;
+  generationId?: string;
+  model?: string;
+  promptTokens?: number;
+  completionTokens?: number;
+  totalTokens?: number;
+};
+
 export async function completeChat(
   messages: ChatMessage[],
   options?: CompleteChatOptions,
-): Promise<string> {
+): Promise<CompleteChatResult> {
   const apiKey = import.meta.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY;
   if (!apiKey) throw new Error("OPENROUTER_API_KEY no configurada");
 
-  // Claude 3.5 Haiku era muy conservador con la longitud — usamos Sonnet por default
-  // para scripts de meditación largos y detallados.
   const model =
     import.meta.env.OPENROUTER_MODEL || process.env.OPENROUTER_MODEL || "anthropic/claude-sonnet-4";
 
@@ -49,9 +56,24 @@ export async function completeChat(
   }
 
   const data = (await res.json()) as {
+    id?: string;
+    model?: string;
+    usage?: {
+      prompt_tokens?: number;
+      completion_tokens?: number;
+      total_tokens?: number;
+    };
     choices?: { message?: { content?: string } }[];
   };
   const text = data.choices?.[0]?.message?.content;
   if (!text) throw new Error("Respuesta vacía del modelo");
-  return text;
+
+  return {
+    text,
+    generationId: data.id,
+    model: data.model,
+    promptTokens: data.usage?.prompt_tokens,
+    completionTokens: data.usage?.completion_tokens,
+    totalTokens: data.usage?.total_tokens,
+  };
 }

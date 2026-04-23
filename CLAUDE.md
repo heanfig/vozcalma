@@ -176,6 +176,46 @@ Webhook en dev: `ngrok http 4321`. Prod: `https://vozcalma.app/api/payment/webho
 
 ---
 
+## Dashboard Admin
+
+`/admin` es una UI web para auditar y mantener el software sin SQL directo.
+
+### Acceso
+- Login en `/admin/login` con `ADMIN_PASSWORD` (GitHub Secret).
+- Cookie `vc_admin` firmada con HMAC-SHA256 (`COOKIE_SECRET`), TTL 8h, `HttpOnly Secure SameSite=Strict`.
+- Endpoints `/api/admin/*` aceptan **dual auth**: Bearer `ADMIN_API_SECRET` (scripts/CI) O cookie `vc_admin` (UI).
+- Middleware (`src/middleware.ts`) redirige `/admin/*` sin cookie → `/admin/login?next=<path>`.
+- Rate limit: 5 intentos de login / 5 min / IP.
+
+### Páginas
+| Ruta | Propósito |
+|---|---|
+| `/admin` | Overview con métricas (paid hoy/mes, revenue COP, costo USD, margen %, gens hoy, cupones activos). |
+| `/admin/sessions` | Lista paginada con filtros (pago, tipo, rango fechas, search por nombre/email/cupón/ref). |
+| `/admin/sessions/[id]` | Detalle: pago + costos por-sesión + play_links con botón copiar + intake JSON. |
+| `/admin/payments` | Pagos (con `payment_reference`) filtrables por estado y rango. |
+| `/admin/costs` | Serie temporal day/month, top 20 sesiones más caras, breakdown LLM vs TTS. |
+| `/admin/coupons` | CRUD: listar, crear, toggle is_active. |
+| `/admin/coupons/[code]` | Editar cupón + ver redenciones. |
+| `/admin/referrals` | Vista `referral_conversions` (UTM source/campaign → conversión %). |
+
+### Captura de costos (`meditation_costs`)
+Cada generación (LLM + TTS) inserta una fila con tokens, chars, costos USD y `duration_ms` en `generate-pipeline.ts` (fire-and-forget).
+
+- **LLM**: `completeChat` retorna `CompleteChatResult` con `generationId`, `model`, `promptTokens`, `completionTokens`, `totalTokens`. El costo USD real viene del endpoint `GET openrouter.ai/api/v1/generation?id=<id>` (backfill async después de 3s vía `fetchGenerationCost`).
+- **TTS**: estimado como `chars × ELEVENLABS_USD_PER_1K_CHARS / 1000` (env var, default 0.30).
+- **Pregen**: `source="pregen"`, costo = 0.
+
+Columna generada `total_cost_usd = llm + tts`. Vista `daily_cost_summary` agrega por día.
+
+### Crear/rotar ADMIN_PASSWORD
+```bash
+gh secret set ADMIN_PASSWORD --body "nueva-password-aqui" --repo heanfig/vozcalma
+gh workflow run "Build & Deploy" --repo heanfig/vozcalma --ref main
+```
+
+---
+
 ## Referrals / UTM
 
 La session cookie firmada (`SessionPayload` en `src/lib/session-cookie.ts`) incluye `utm_source`, `utm_medium`, `utm_campaign`, `coupon_code`. Se capturan en:

@@ -79,5 +79,6 @@ export async function generateMeditationScript(
     { role: "system", content: buildSystemPrompt(plan) },
     { role: "user", content: buildUserPrompt(intake, plan, options) },
   ];
-  return completeChat(messages, { maxTokens: 2600 });
+  const { text } = await completeChat(messages, { maxTokens: 2600 });
+  return text;
 }
