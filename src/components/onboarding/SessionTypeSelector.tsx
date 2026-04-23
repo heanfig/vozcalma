@@ -1,16 +1,11 @@
 import { motion } from "framer-motion";
 import type { OnboardingType } from "./onboarding-data";
+import { CARD_QUICK_IMG, CARD_DEEP_IMG } from "./session-visuals";
 
 interface Props {
   userName: string;
   onSelect: (type: OnboardingType) => void;
 }
-
-const CARD_QUICK_IMG =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuBYtm43iJ7lYu4W1UxBA6sGExqYn6P8OipXJUntPFrhGbOPuwSmkUC2Yy5HwsxoqYwzYw5hFGKSx8H4NyJRJLJCKcCRxIx37j-TsJJzA2yD4pprY9CyoVv-UMbMqueZkXciVM8OLWdDMp0MStBhVmVJwVkcnhqDZw8aX7WkDpb8XAJ_RHHhW2Wejn8-nwtYj5mgxawo1KD2tUgOIRzHly1NTYh8jyofzOfkuuunJ0_GEth3WLfAy33BWiEh6I25_N0QNZ1RCzjoIb5h";
-
-const CARD_DEEP_IMG =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuB02yFXYu_MUGI_LSbAUxQ5Qu--XbyKLkbZcq5tFfvAEbguoEnfcy3LX75qC70Gttgdj6K67bnwRdPhcR0zxtG7wmTTs_ZmDdXfIJaXE-7ARTkNZ3g5d1YaKkp3PRXkfat1qRqTCzx-X8i6PN5EN2KQTXX8Qa6jQLK8mkCDJjwDaWInjWBcafafZggXpSIrC_IuuT1qvcQA9CkbweZEFnHhHGd-tQQIiiVXFmSzG7zpUMm5AgM_J1Z2wA1qX-q69Rz3XM8IGVvibDpW";
 
 const containerVariants = {
   hidden: {},
@@ -90,7 +85,7 @@ export default function SessionTypeSelector({ userName, onSelect }: Props) {
                   Alivio Rápido
                 </h2>
                 <p className="font-body italic text-white/80 text-xs sm:text-sm mb-1 sm:mb-3">
-                  $3 USD
+                  $13.000 COP
                 </p>
                 <p className="font-body text-white/85 text-xs sm:text-sm leading-snug sm:leading-relaxed max-w-xs line-clamp-3 sm:line-clamp-none">
                   Para calmar tu mente en minutos. Audios cortos para ansiedad o saturación inmediata.
@@ -136,7 +131,7 @@ export default function SessionTypeSelector({ userName, onSelect }: Props) {
                   Reprogramación Profunda
                 </h2>
                 <p className="font-body italic text-white/80 text-xs sm:text-sm mb-1 sm:mb-3">
-                  $6 USD
+                  $26.000 COP
                 </p>
                 <p className="font-body text-white/85 text-xs sm:text-sm leading-snug sm:leading-relaxed max-w-xs line-clamp-3 sm:line-clamp-none">
                   Para transformar tus patrones internos. Un viaje inmersivo para reconstruir tu identidad.

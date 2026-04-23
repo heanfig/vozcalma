@@ -1,0 +1,66 @@
+---
+import PaymentReturn from "../../components/PaymentReturn";
+import { readSession } from "../../lib/session-cookie";
+import { signCsrfToken } from "../../lib/csrf";
+
+const sessionParam = Astro.url.searchParams.get("session") || "";
+const wompiTxId = Astro.url.searchParams.get("id") || undefined;
+const typeParam = Astro.url.searchParams.get("type");
+const onboardingType: "quick" | "deep" | undefined =
+  typeParam === "quick" || typeParam === "deep" ? typeParam : undefined;
+
+const session = readSession(Astro.cookies);
+const cookieSessionId = session?.sessionId || "anonymous";
+const csrfToken = signCsrfToken(cookieSessionId);
+
+// Si no llega session_id en query, el componente mostrará error. Validamos
+// que exista al menos algo para propagar.
+---
+
+<!doctype html>
+<html lang="es" class="h-full w-full">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>(function(){var s=localStorage.getItem('vc-theme')||'system';var d=s==='dark'||(s==='system'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('dark')})();</script>
+    <title>Verificando pago — VozCalma</title>
+    <meta name="description" content="Estamos verificando tu pago con Wompi." />
+    <meta name="csrf-token" content={csrfToken} />
+    <meta name="session-id" content={cookieSessionId} />
+    <meta name="robots" content="noindex,nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="m-0 p-0 w-full min-h-full font-body text-on-surface overflow-y-auto bg-soft-gradient">
+    <div id="app" class="w-full min-h-screen">
+      {sessionParam ? (
+        <PaymentReturn
+          sessionId={sessionParam}
+          wompiTxId={wompiTxId}
+          onboardingType={onboardingType}
+          client:load
+        />
+      ) : (
+        <main class="min-h-screen flex flex-col items-center justify-center text-center px-6 bg-surface">
+          <span class="material-symbols-outlined text-error text-6xl mb-4">error</span>
+          <h1 class="font-headline text-3xl text-on-surface font-medium mb-2">
+            Enlace inválido
+          </h1>
+          <p class="text-on-surface-variant max-w-md mb-6">
+            Falta información de la sesión. Vuelve al inicio para comenzar de nuevo.
+          </p>
+          <a href="/" class="px-6 py-3 rounded-full bg-primary text-on-primary font-semibold hover:bg-primary-container transition-colors">
+            Volver al inicio
+          </a>
+        </main>
+      )}
+    </div>
+  </body>
+</html>

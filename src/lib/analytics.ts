@@ -41,6 +41,18 @@ export type EventName =
   | "bg_music_pause"
   | "bg_music_volume_changed"
   | "bg_music_next_track"
+  // Payments & coupons
+  | "checkout_viewed"
+  | "checkout_coupon_applied"
+  | "checkout_coupon_rejected"
+  | "onboarding_payment_initiated"
+  | "onboarding_payment_verifying"
+  | "onboarding_payment_completed"
+  | "onboarding_payment_failed"
+  | "onboarding_payment_abandoned"
+  // Attribution
+  | "session_created"
+  | "referral_attributed"
   // Errors
   | "error_generic"
   | "error_network"

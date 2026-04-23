@@ -10,7 +10,7 @@ import OnboardingProgress from "./OnboardingProgress";
 import OnboardingStep from "./OnboardingStep";
 import SessionTypeSelector from "./SessionTypeSelector";
 import GeneratingScreen from "./GeneratingScreen";
-import PaymentGate from "./PaymentGate";
+import WompiCheckout from "./WompiCheckout";
 import OnboardingPlayer from "./OnboardingPlayer";
 import ConfirmationStep from "./ConfirmationStep";
 import AwaitingEmailScreen from "./AwaitingEmailScreen";
@@ -38,12 +38,15 @@ interface Props {
   sessionId?: string;
   /** Nombre pre-cargado desde la landing page (via ?name=). Si está presente, salta el paso de nombre. */
   initialName?: string;
+  /** Código de cupón pre-cargado desde el query string (?coupon=...). */
+  initialCouponCode?: string;
 }
 
 export default function OnboardingFlow({
   type: initialType,
   sessionId: initialSid,
   initialName,
+  initialCouponCode,
 }: Props) {
   const hasPrefilledName = Boolean(initialName && initialName.trim());
 
@@ -168,12 +171,30 @@ export default function OnboardingFlow({
     (type: OnboardingType) => {
       track("onboarding_type_selected", { type });
       setChosenType(type);
-      setPhase("intake");
       setDirection(1);
-      setStepIdx(1);
+      if (isPaid) {
+        setPhase("intake");
+        setStepIdx(1);
+      } else {
+        setPhase("payment");
+      }
     },
-    [],
+    [isPaid],
   );
+
+  const handlePaid = useCallback((paidSessionId: string) => {
+    setSessionId(paidSessionId);
+    setIsPaid(true);
+    setDirection(1);
+    setStepIdx(1);
+    setPhase("intake");
+  }, []);
+
+  const handlePaymentBack = useCallback(() => {
+    setDirection(-1);
+    setChosenType(null);
+    setPhase("selectType");
+  }, []);
 
   const handleConfirm = useCallback(
     (opts: { deliverByEmail: boolean; email: string }) => {
@@ -289,11 +310,6 @@ export default function OnboardingFlow({
     }
   }
 
-  const handleUnlock = useCallback(() => {
-    setIsPaid(true);
-    setPhase("player");
-  }, []);
-
   // ---- Render phases ----
   if (phase === "selectType") {
     return (
@@ -340,11 +356,16 @@ export default function OnboardingFlow({
     );
   }
 
-  // TEMP: payment gate disabled — kept for future production use
-  if (phase === "payment") {
+  if (phase === "payment" && chosenType) {
     return (
       <AnimatePresence mode="wait">
-        <PaymentGate onUnlock={handleUnlock} />
+        <WompiCheckout
+          type={chosenType}
+          userName={answers.nombre || ""}
+          initialCouponCode={initialCouponCode}
+          onPaid={handlePaid}
+          onBack={handlePaymentBack}
+        />
       </AnimatePresence>
     );
   }

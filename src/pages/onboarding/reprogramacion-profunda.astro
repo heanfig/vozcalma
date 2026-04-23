@@ -11,6 +11,7 @@ const initialName = session?.name || queryName;
 const sessionId = session?.sessionId || "anonymous";
 const csrfToken = signCsrfToken(sessionId);
 const existingPaidSessionId = Astro.url.searchParams.get("session") || undefined;
+const initialCouponCode = Astro.url.searchParams.get("coupon")?.trim() || undefined;
 ---
 
 <!doctype html>
@@ -43,7 +44,7 @@ const existingPaidSessionId = Astro.url.searchParams.get("session") || undefined
     <script is:inline>(function(){var b=document.getElementById("theme-toggle-onb"),i=document.getElementById("theme-icon-onb");function u(){if(i)i.textContent=document.documentElement.classList.contains("dark")?"light_mode":"dark_mode"}u();if(b)b.addEventListener("click",function(){var d=!document.documentElement.classList.contains("dark");document.documentElement.classList.toggle("dark",d);localStorage.setItem("vc-theme",d?"dark":"light");u()})})();</script>
     <BackgroundMusicWidget client:idle />
     <div id="app" class="w-full min-h-screen">
-      <OnboardingFlow type="deep" sessionId={existingPaidSessionId} initialName={initialName} client:load />
+      <OnboardingFlow type="deep" sessionId={existingPaidSessionId} initialName={initialName} initialCouponCode={initialCouponCode} client:load />
     </div>
   </body>
 </html>

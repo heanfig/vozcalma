@@ -429,12 +429,22 @@ const formatDate = (iso: string) => {
               window.posthog.capture("landing_activation_submit", { name_length: name.length });
             }
 
+            // Capturar UTM + coupon del query string (atribución de referidos)
+            var qp = new URLSearchParams(window.location.search);
+            var attribution = {
+              name: name,
+              utm_source: qp.get("utm_source") || undefined,
+              utm_medium: qp.get("utm_medium") || undefined,
+              utm_campaign: qp.get("utm_campaign") || undefined,
+              coupon_code: qp.get("coupon") || undefined,
+            };
+
             try {
               var res = await fetch("/api/onboarding/start-session", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "same-origin",
-                body: JSON.stringify({ name: name }),
+                body: JSON.stringify(attribution),
               });
 
               if (!res.ok) {
@@ -445,7 +455,38 @@ const formatDate = (iso: string) => {
                 return;
               }
 
-              window.location.href = "/onboarding";
+              var startData = await res.json().catch(function () { return {}; });
+              if (window.posthog && typeof window.posthog.identify === "function" && startData.sessionId) {
+                window.posthog.identify(startData.sessionId, {
+                  utm_source: attribution.utm_source || null,
+                  utm_medium: attribution.utm_medium || null,
+                  utm_campaign: attribution.utm_campaign || null,
+                });
+              }
+              if (window.posthog && typeof window.posthog.capture === "function") {
+                window.posthog.capture("session_created", {
+                  has_coupon: !!attribution.coupon_code,
+                  utm_source: attribution.utm_source || null,
+                  utm_medium: attribution.utm_medium || null,
+                  utm_campaign: attribution.utm_campaign || null,
+                });
+                if (attribution.utm_source) {
+                  window.posthog.capture("referral_attributed", {
+                    utm_source: attribution.utm_source,
+                    utm_medium: attribution.utm_medium || null,
+                    utm_campaign: attribution.utm_campaign || null,
+                  });
+                }
+              }
+
+              // Preservar coupon + utm en URL del onboarding para que auto-fill y análisis funcionen
+              var nextQs = new URLSearchParams();
+              if (attribution.coupon_code) nextQs.set("coupon", attribution.coupon_code);
+              if (attribution.utm_source) nextQs.set("utm_source", attribution.utm_source);
+              if (attribution.utm_medium) nextQs.set("utm_medium", attribution.utm_medium);
+              if (attribution.utm_campaign) nextQs.set("utm_campaign", attribution.utm_campaign);
+              var qsStr = nextQs.toString();
+              window.location.href = "/onboarding" + (qsStr ? "?" + qsStr : "");
             } catch (err) {
               showError("No pudimos conectar con el servidor. Intenta de nuevo.");
               submitBtn.disabled = false;

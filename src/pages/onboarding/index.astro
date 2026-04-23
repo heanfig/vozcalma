@@ -17,6 +17,7 @@ const sessionId = session?.sessionId || "anonymous";
 const csrfToken = signCsrfToken(sessionId);
 
 const existingPaidSessionId = Astro.url.searchParams.get("session") || undefined;
+const initialCouponCode = Astro.url.searchParams.get("coupon")?.trim() || undefined;
 ---
 
 <!doctype html>
@@ -67,7 +68,7 @@ const existingPaidSessionId = Astro.url.searchParams.get("session") || undefined
     <!-- Background music widget -->
     <BackgroundMusicWidget client:idle />
     <div id="app" class="w-full min-h-screen">
-      <OnboardingFlow sessionId={existingPaidSessionId} initialName={initialName} client:load />
+      <OnboardingFlow sessionId={existingPaidSessionId} initialName={initialName} initialCouponCode={initialCouponCode} client:load />
     </div>
   </body>
 </html>

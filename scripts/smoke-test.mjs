@@ -238,6 +238,68 @@ await test("API: missing nombre → 400", async () => {
 });
 
 // ============================================================================
+// PAYMENTS + CUPONES
+// ============================================================================
+
+await test("API: /api/coupons/validate sin sesión → 401", async () => {
+  const res = await fetchWithTimeout(`${BASE}/api/coupons/validate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code: "NOEXISTE" }),
+  });
+  assert(res.status === 401, `expected 401, got ${res.status}`);
+});
+
+await test("API: /api/payment/initiate sin sesión → 401", async () => {
+  const res = await fetchWithTimeout(`${BASE}/api/payment/initiate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type: "quick" }),
+  });
+  assert(res.status === 401, `expected 401, got ${res.status}`);
+});
+
+await test("API: /api/payment/webhook sin firma válida → 401", async () => {
+  const res = await fetchWithTimeout(`${BASE}/api/payment/webhook`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      event: "transaction.updated",
+      timestamp: Math.floor(Date.now() / 1000),
+      signature: { properties: ["transaction.id"], checksum: "0".repeat(64) },
+      data: { transaction: { id: "fake", reference: "fake", status: "APPROVED", amount_in_cents: 2100000, currency: "COP" } },
+    }),
+  });
+  assert(res.status === 401, `expected 401, got ${res.status}`);
+});
+
+await test("API: /api/payment/webhook con JSON inválido → 400", async () => {
+  const res = await fetchWithTimeout(`${BASE}/api/payment/webhook`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: "not-json",
+  });
+  assert(res.status === 400, `expected 400, got ${res.status}`);
+});
+
+await test("API: /api/payment/status sin sesión → 401", async () => {
+  const res = await fetchWithTimeout(
+    `${BASE}/api/payment/status?session_id=00000000-0000-0000-0000-000000000000`,
+  );
+  assert(res.status === 401, `expected 401, got ${res.status}`);
+});
+
+await test("Página /payment/return renderiza (sin session → error visible)", async () => {
+  const res = await fetchWithTimeout(`${BASE}/payment/return`);
+  assert(res.ok, `status ${res.status}`);
+  const body = await res.text();
+  assert(
+    body.includes("Enlace inválido") || body.includes("Verificando"),
+    "missing expected page content",
+  );
+});
+
+// ============================================================================
 // REPORT
 // ============================================================================
 

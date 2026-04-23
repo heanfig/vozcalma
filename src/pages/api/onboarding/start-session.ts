@@ -28,9 +28,15 @@ export const POST: APIRoute = async ({ request, cookies, clientAddress }) => {
     );
   }
 
-  let body: { name?: string };
+  let body: {
+    name?: string;
+    utm_source?: string;
+    utm_medium?: string;
+    utm_campaign?: string;
+    coupon_code?: string;
+  };
   try {
-    body = (await request.json()) as { name?: string };
+    body = (await request.json()) as typeof body;
   } catch {
     return json({ error: "JSON inválido" }, 400);
   }
@@ -49,7 +55,20 @@ export const POST: APIRoute = async ({ request, cookies, clientAddress }) => {
     }, 400);
   }
 
-  const session = createSession(name);
+  // Sanitizar UTM + coupon (whitelist ascii + límite de longitud) — evitan tráfico
+  // malicioso intentando inyectar valores extensos en cookie o DB.
+  const cleanUtm = (raw: unknown, max = 64): string | undefined => {
+    if (typeof raw !== "string") return undefined;
+    const v = raw.trim().slice(0, max).replace(/[^\w\-.~:/?#@!$&'()*+,;=]/g, "");
+    return v || undefined;
+  };
+
+  const session = createSession(name, {
+    utm_source: cleanUtm(body.utm_source),
+    utm_medium: cleanUtm(body.utm_medium),
+    utm_campaign: cleanUtm(body.utm_campaign),
+    coupon_code: cleanUtm(body.coupon_code, 42),
+  });
   setSessionCookie(cookies, session.cookieValue);
 
   return json({

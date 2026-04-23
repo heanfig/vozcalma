@@ -19,6 +19,17 @@ export interface SessionPayload {
   name: string;
   sessionId: string;
   createdAt: number;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  coupon_code?: string;
+}
+
+export interface SessionMeta {
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  coupon_code?: string;
 }
 
 function getSecret(): string {
@@ -37,13 +48,21 @@ function sign(payload: string): string {
 
 /**
  * Crea una nueva sesión firmada. Retorna el cookieValue + el sessionId.
+ * `meta` opcional persiste UTM + coupon_code para atribución de referidos.
  */
-export function createSession(name: string): SessionPayload & { cookieValue: string } {
+export function createSession(
+  name: string,
+  meta?: SessionMeta,
+): SessionPayload & { cookieValue: string } {
   const sessionId = randomUUID();
   const payload: SessionPayload = {
     name,
     sessionId,
     createdAt: Date.now(),
+    ...(meta?.utm_source ? { utm_source: meta.utm_source } : {}),
+    ...(meta?.utm_medium ? { utm_medium: meta.utm_medium } : {}),
+    ...(meta?.utm_campaign ? { utm_campaign: meta.utm_campaign } : {}),
+    ...(meta?.coupon_code ? { coupon_code: meta.coupon_code } : {}),
   };
   const json = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const sig = sign(json);
