@@ -8,7 +8,7 @@ export const GET: APIRoute = withAdmin(async ({ params }) => {
 
   const supabase = getSupabaseAdmin();
 
-  const [sessionRes, costsRes, playLinksRes, redemptionsRes] = await Promise.all([
+  const [sessionRes, costsRes, playLinksRes, redemptionsRes, artifactRes] = await Promise.all([
     supabase.from("onboarding_sessions").select("*").eq("id", id).maybeSingle(),
     supabase
       .from("meditation_costs")
@@ -24,6 +24,11 @@ export const GET: APIRoute = withAdmin(async ({ params }) => {
       .from("coupon_redemptions")
       .select("*")
       .eq("session_id", id),
+    supabase
+      .from("meditation_artifacts")
+      .select("script_text, plan_json, audio_status, audio_error, created_at, updated_at")
+      .eq("session_id", id)
+      .maybeSingle(),
   ]);
 
   if (sessionRes.error) return json({ error: sessionRes.error.message }, 500);
@@ -34,5 +39,6 @@ export const GET: APIRoute = withAdmin(async ({ params }) => {
     costs: costsRes.data || [],
     play_links: playLinksRes.data || [],
     coupon_redemptions: redemptionsRes.data || [],
+    artifact: artifactRes.data || null,
   });
 });

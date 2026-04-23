@@ -86,23 +86,37 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     }
   }
 
-  // --- Si ya hay sessionId con audio generado, devolver cache ---
-  if (body.sessionId) {
-    const supabase = getSupabaseAdmin();
-    const { data: existing } = await supabase
-      .from("onboarding_sessions")
-      .select("id, is_paid, audio_url, script_text")
-      .eq("id", body.sessionId)
-      .maybeSingle();
-    if (existing?.audio_url) {
-      return json({
-        sessionId: existing.id,
-        audioUrl: existing.audio_url,
-        isPaid: !!existing.is_paid,
-        scriptText: existing.script_text ?? "",
-        source: "cache",
-      });
-    }
+  const supabase = getSupabaseAdmin();
+
+  const { data: cookieSession, error: cookieSessionErr } = await supabase
+    .from("onboarding_sessions")
+    .select("id, is_paid, audio_url, script_text")
+    .eq("id", session.sessionId)
+    .maybeSingle();
+
+  if (cookieSessionErr) {
+    console.error("[generate] lookup session failed:", cookieSessionErr.message);
+    return json({ error: "Error al validar la sesión" }, 500);
+  }
+
+  if (!cookieSession || !cookieSession.is_paid) {
+    return json(
+      {
+        error: "Esta sesión no tiene un pago registrado. Completa el pago antes de generar la meditación.",
+        requiresPayment: true,
+      },
+      402,
+    );
+  }
+
+  if (cookieSession.audio_url) {
+    return json({
+      sessionId: cookieSession.id,
+      audioUrl: cookieSession.audio_url,
+      isPaid: true,
+      scriptText: cookieSession.script_text ?? "",
+      source: "cache",
+    });
   }
 
   // --- Async mode: deliverByEmail ---
@@ -121,8 +135,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       return json({ error: "Demasiados envíos por email recientes" }, 429);
     }
 
-    // Lanzar job en background (NO awaited — la Promise sigue corriendo)
-    void runAsyncJob({ type, answers, email, name: answers.nombre || session.name });
+    void runAsyncJob({
+      type,
+      answers,
+      email,
+      name: answers.nombre || session.name,
+      sessionId: session.sessionId,
+    });
 
     return json({
       sessionId: session.sessionId,
@@ -136,7 +155,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     const result = await generateMeditation({
       type,
       answers,
-      existingSessionId: body.sessionId || null,
+      existingSessionId: session.sessionId,
     });
 
     return json({
@@ -163,14 +182,15 @@ async function runAsyncJob(params: {
   answers: Record<string, string>;
   email: string;
   name: string;
+  sessionId: string;
 }): Promise<void> {
-  const { type, answers, email, name } = params;
+  const { type, answers, email, name, sessionId } = params;
   try {
     console.log("[async-job] starting generation for", email);
     const result = await generateMeditation({
       type,
       answers,
-      existingSessionId: null,
+      existingSessionId: sessionId,
     });
     console.log("[async-job] generation complete, sending email to", email);
     await sendMeditationReadyEmail({

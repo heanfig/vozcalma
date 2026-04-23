@@ -26,6 +26,15 @@ interface PlayLink {
   created_at: string;
 }
 
+interface Artifact {
+  script_text: string | null;
+  plan_json: Record<string, unknown> | null;
+  audio_status: "pending" | "ready" | "failed" | null;
+  audio_error: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
 interface SessionData {
   session: Record<string, unknown>;
   costs: Cost[];
@@ -36,6 +45,7 @@ interface SessionData {
     redeemed_at: string;
     discount_cents_applied: number;
   }>;
+  artifact: Artifact | null;
 }
 
 function getBaseUrl(): string {
@@ -274,6 +284,31 @@ export default function SessionDetail({ sessionId }: { sessionId: string }) {
           {JSON.stringify(intake, null, 2)}
         </pre>
       </Section>
+
+      {data.artifact?.script_text && (
+        <Section title="Script generado (LLM)">
+          <div className="flex items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400 -mt-2">
+            <span>
+              {data.artifact.script_text.length.toLocaleString()} caracteres
+              {data.artifact.updated_at
+                ? ` · actualizado ${formatDate(data.artifact.updated_at)}`
+                : ""}
+            </span>
+            <CopyButton value={data.artifact.script_text} />
+          </div>
+          <pre className="text-sm whitespace-pre-wrap bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 rounded-lg p-4 max-h-[32rem] overflow-y-auto border border-slate-200 dark:border-slate-800">
+            {data.artifact.script_text}
+          </pre>
+        </Section>
+      )}
+
+      {data.artifact?.plan_json && (
+        <Section title="Plan JSON">
+          <pre className="text-xs bg-slate-900 text-slate-100 rounded-lg p-4 overflow-x-auto max-h-96 overflow-y-auto">
+            {JSON.stringify(data.artifact.plan_json, null, 2)}
+          </pre>
+        </Section>
+      )}
     </div>
   );
 }

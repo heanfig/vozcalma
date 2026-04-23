@@ -268,13 +268,42 @@ export default function OnboardingFlow({
     [answers, chosenType, sessionId],
   );
 
-  const handleStartAnother = useCallback(() => {
+  const handleStartAnother = useCallback(async () => {
     const keepName = answers.nombre || "";
+
+    try {
+      const res = await fetch("/api/onboarding/start-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ name: keepName }),
+      });
+      if (res.ok) {
+        const data = (await res.json()) as {
+          sessionId?: string;
+          csrfToken?: string;
+        };
+        if (data.csrfToken) {
+          document
+            .querySelector('meta[name="csrf-token"]')
+            ?.setAttribute("content", data.csrfToken);
+        }
+        if (data.sessionId) {
+          document
+            .querySelector('meta[name="session-id"]')
+            ?.setAttribute("content", data.sessionId);
+        }
+      }
+    } catch (err) {
+      trackError("start_another_rotate_failed", err);
+    }
+
     setAnswers(keepName ? { nombre: keepName } : {});
     setAudioUrl(null);
     setScriptText("");
     setPlayUrl(null);
     setSessionId(null);
+    setIsPaid(false);
     setError(null);
     setPendingEmail("");
     setGenerationDone(false);
