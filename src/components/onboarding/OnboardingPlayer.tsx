@@ -1,5 +1,5 @@
-import { useRef, useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useRef, useState, useEffect, useCallback, useMemo } from "react";
+import { motion } from "framer-motion";
 
 interface Props {
   audioUrl: string;
@@ -15,18 +15,9 @@ function fmt(s: number): string {
   return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
 }
 
-/** Divide el guion en párrafos, limpiando líneas vacías. */
-function splitParagraphs(text: string): string[] {
-  return text
-    .split(/\n{2,}/)
-    .map((p) => p.trim())
-    .filter(Boolean);
-}
-
 export default function OnboardingPlayer({
   audioUrl,
   userName,
-  scriptText,
   sessionTitle,
   playUrl,
 }: Props) {
@@ -34,7 +25,6 @@ export default function OnboardingPlayer({
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [showScript, setShowScript] = useState(true);
   const [copied, setCopied] = useState(false);
 
   const copyLink = useCallback(() => {
@@ -97,7 +87,16 @@ export default function OnboardingPlayer({
   const pct = duration > 0 ? (current / duration) * 100 : 0;
   const safeName = userName?.trim() || "";
   const title = sessionTitle || "Sesion personalizada";
-  const paragraphs = scriptText ? splitParagraphs(scriptText) : [];
+
+  const waveBars = useMemo(
+    () =>
+      Array.from({ length: 28 }, (_, i) => ({
+        idx: i,
+        baseHeight: 22 + Math.sin(i * 0.9) * 12 + Math.random() * 18,
+        delay: (i % 7) * 0.08,
+      })),
+    [],
+  );
 
   return (
     <motion.div
@@ -147,81 +146,82 @@ export default function OnboardingPlayer({
         )}
       </header>
 
-      {/* ── Script content ── */}
-      {paragraphs.length > 0 && (
-        <div className="flex-1 overflow-y-auto px-4 md:px-6 pb-48">
+      {/* ── Visualizador de ondas ── */}
+      <div className="flex-1 flex items-center justify-center px-6 pb-48">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+          className="relative w-full max-w-lg"
+        >
+          {/* Halo de fondo */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="max-w-2xl mx-auto"
-          >
-            {/* Toggle script visibility */}
-            <button
-              onClick={() => setShowScript((s) => !s)}
-              className="flex items-center gap-2 mx-auto mb-6 text-sm font-label text-on-surface-variant/70 hover:text-primary transition-colors"
-            >
-              <span className="material-symbols-outlined text-lg">
-                {showScript ? "visibility_off" : "visibility"}
-              </span>
-              {showScript ? "Ocultar guion" : "Ver guion"}
-            </button>
-
-            <AnimatePresence>
-              {showScript && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="overflow-hidden"
-                >
-                  <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 md:p-10 border border-white/40 shadow-sm">
-                    <div className="flex items-center gap-2 mb-6 text-primary/50">
-                      <span className="material-symbols-outlined text-lg">auto_stories</span>
-                      <span className="text-xs font-label uppercase tracking-widest">Tu meditacion guiada</span>
-                    </div>
-                    <div className="space-y-5">
-                      {paragraphs.map((p, i) => (
-                        <motion.p
-                          key={i}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.35 + i * 0.04 }}
-                          className="font-body text-base md:text-lg leading-relaxed text-on-surface/85 font-light"
-                        >
-                          {p}
-                        </motion.p>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Spacer if no script */}
-      {paragraphs.length === 0 && (
-        <div className="flex-1 flex items-center justify-center">
-          <motion.div
-            className="w-48 h-48 rounded-full overflow-hidden diffusion-shadow bg-gradient-to-br from-primary-fixed via-surface to-tertiary-fixed flex items-center justify-center"
+            aria-hidden
+            className="absolute inset-0 -z-10 rounded-full blur-3xl bg-gradient-to-br from-primary/20 via-tertiary-fixed/20 to-primary-fixed/20"
             animate={
               playing
-                ? { scale: [1, 1.04, 1], opacity: [0.9, 1, 0.9] }
-                : { scale: 1, opacity: 0.85 }
+                ? { scale: [1, 1.08, 1], opacity: [0.55, 0.85, 0.55] }
+                : { scale: 1, opacity: 0.4 }
             }
             transition={
               playing
                 ? { duration: 4, repeat: Infinity, ease: "easeInOut" }
-                : { duration: 0.4 }
+                : { duration: 0.6 }
             }
-          >
-            <div className="w-20 h-20 rounded-full bg-white/60 backdrop-blur-sm" />
-          </motion.div>
-        </div>
-      )}
+          />
+
+          <div className="relative bg-white/55 backdrop-blur-xl rounded-[2.5rem] px-8 py-12 border border-white/60 shadow-xl">
+            <div className="flex items-center gap-2 justify-center mb-8 text-primary/50">
+              <span className="material-symbols-outlined text-lg">graphic_eq</span>
+              <span className="text-xs font-label uppercase tracking-[0.25em]">
+                Tu meditacion
+              </span>
+            </div>
+
+            <div
+              role="presentation"
+              aria-hidden
+              className="flex items-center justify-center gap-[5px] h-40"
+            >
+              {waveBars.map(({ idx, baseHeight, delay }) => (
+                <motion.span
+                  key={idx}
+                  className="inline-block w-[5px] rounded-full bg-gradient-to-b from-primary via-primary/80 to-tertiary-fixed"
+                  style={{ height: baseHeight }}
+                  animate={
+                    playing
+                      ? {
+                          scaleY: [0.45, 1.35, 0.55, 1.15, 0.45],
+                          opacity: [0.65, 1, 0.75, 0.95, 0.65],
+                        }
+                      : { scaleY: 0.35, opacity: 0.45 }
+                  }
+                  transition={
+                    playing
+                      ? {
+                          duration: 1.4 + (idx % 5) * 0.18,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                          delay,
+                        }
+                      : { duration: 0.45 }
+                  }
+                />
+              ))}
+            </div>
+
+            <motion.p
+              className="text-center mt-8 text-sm font-body text-on-surface-variant/70"
+              animate={{ opacity: playing ? 0.85 : 0.5 }}
+              transition={{ duration: 0.4 }}
+            >
+              {playing
+                ? "Respira y dejate llevar..."
+                : "Presiona play cuando estes listo"}
+            </motion.p>
+          </div>
+        </motion.div>
+      </div>
 
       {/* ── Sticky Player Bar ── */}
       <motion.div

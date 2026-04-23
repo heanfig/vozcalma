@@ -21,7 +21,10 @@ export default function AdminShell({
   const [open, setOpen] = useState(false);
 
   async function onLogout() {
-    await fetch("/api/admin/logout", { method: "POST" });
+    await fetch("/api/admin/logout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
     window.location.href = "/admin/login";
   }
 

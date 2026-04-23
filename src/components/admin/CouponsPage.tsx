@@ -59,6 +59,7 @@ export default function CouponsPage() {
   async function toggle(code: string) {
     const res = await fetch(`/api/admin/coupons/${encodeURIComponent(code)}/toggle`, {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
