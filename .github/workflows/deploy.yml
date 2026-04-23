@@ -57,7 +57,8 @@ jobs:
             umask 077
             {
               echo "# Managed by CI (.github/workflows/deploy.yml) — do not edit by hand."
-              echo "# Rotate secrets with: gh secret set <KEY> --body '<value>' --repo heanfig/vozcalma"
+              echo "# Variables: gh variable set <KEY> --body '<value>' --repo heanfig/vozcalma"
+              echo "# Secrets:   gh secret   set <KEY> --body '<value>' --repo heanfig/vozcalma"
               echo ""
               echo "# Clerk"
               echo "PUBLIC_CLERK_PUBLISHABLE_KEY=${PUBLIC_CLERK_PUBLISHABLE_KEY}"
@@ -98,28 +99,30 @@ jobs:
             chmod 600 "$TMP"
             mv "$TMP" .env
         env:
-          PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          # vars.*: config pública / no sensible (editable en Settings → Variables)
+          PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ vars.PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          PUBLIC_CLERK_SIGN_IN_URL: ${{ vars.PUBLIC_CLERK_SIGN_IN_URL }}
+          PUBLIC_CLERK_SIGN_UP_URL: ${{ vars.PUBLIC_CLERK_SIGN_UP_URL }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          ELEVENLABS_VOICE_ID: ${{ vars.ELEVENLABS_VOICE_ID }}
+          EMAIL_FROM: ${{ vars.EMAIL_FROM }}
+          PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
+          WOMPI_PUBLIC_KEY: ${{ vars.WOMPI_PUBLIC_KEY }}
+          WOMPI_ENVIRONMENT: ${{ vars.WOMPI_ENVIRONMENT }}
+          # secrets.*: crypto / API keys sensibles
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
-          PUBLIC_CLERK_SIGN_IN_URL: ${{ secrets.PUBLIC_CLERK_SIGN_IN_URL }}
-          PUBLIC_CLERK_SIGN_UP_URL: ${{ secrets.PUBLIC_CLERK_SIGN_UP_URL }}
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
-          ELEVENLABS_VOICE_ID: ${{ secrets.ELEVENLABS_VOICE_ID }}
           ADMIN_API_SECRET: ${{ secrets.ADMIN_API_SECRET }}
           CSRF_SECRET: ${{ secrets.CSRF_SECRET }}
           COOKIE_SECRET: ${{ secrets.COOKIE_SECRET }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
-          PUBLIC_SITE_URL: ${{ secrets.PUBLIC_SITE_URL }}
-          WOMPI_PUBLIC_KEY: ${{ secrets.WOMPI_PUBLIC_KEY }}
           WOMPI_PRIVATE_KEY: ${{ secrets.WOMPI_PRIVATE_KEY }}
           WOMPI_EVENTS_SECRET: ${{ secrets.WOMPI_EVENTS_SECRET }}
           WOMPI_INTEGRITY_SECRET: ${{ secrets.WOMPI_INTEGRITY_SECRET }}
-          WOMPI_ENVIRONMENT: ${{ secrets.WOMPI_ENVIRONMENT }}
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
