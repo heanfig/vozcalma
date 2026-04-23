@@ -110,12 +110,76 @@ export default function OnboardingFlow({
   }, [currentRawStep, answers]);
 
   const handleAnswer = useCallback(
-    (value: string) => {
+    async (value: string) => {
       const step = allSteps[stepIdx];
       const next = { ...answers, [step.key]: value };
       setAnswers(next);
 
       if (step.key === "nombre" && !chosenType) {
+        // Si el usuario entró directo a /onboarding (sin pasar por la landing),
+        // no hay cookie vc_session y el meta session-id es "anonymous".
+        // Creamos la sesión aquí para que el CSRF+cookie estén listos antes del pago.
+        const sidMeta = document
+          .querySelector('meta[name="session-id"]')
+          ?.getAttribute("content");
+        if (!sidMeta || sidMeta === "anonymous") {
+          try {
+            const qp = new URLSearchParams(window.location.search);
+            const attribution = {
+              name: value,
+              utm_source: qp.get("utm_source") || undefined,
+              utm_medium: qp.get("utm_medium") || undefined,
+              utm_campaign: qp.get("utm_campaign") || undefined,
+              coupon_code:
+                qp.get("coupon") || initialCouponCode || undefined,
+            };
+            const res = await fetch("/api/onboarding/start-session", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "same-origin",
+              body: JSON.stringify(attribution),
+            });
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              setError(errData.error || "No se pudo iniciar la sesión");
+              return;
+            }
+            const data = (await res.json()) as {
+              sessionId?: string;
+              csrfToken?: string;
+            };
+            if (data.csrfToken) {
+              const metaCsrf = document.querySelector(
+                'meta[name="csrf-token"]',
+              );
+              metaCsrf?.setAttribute("content", data.csrfToken);
+            }
+            if (data.sessionId) {
+              const metaSid = document.querySelector(
+                'meta[name="session-id"]',
+              );
+              metaSid?.setAttribute("content", data.sessionId);
+              if (
+                typeof window !== "undefined" &&
+                (window as any).posthog?.identify
+              ) {
+                (window as any).posthog.identify(data.sessionId, {
+                  utm_source: attribution.utm_source || null,
+                  utm_medium: attribution.utm_medium || null,
+                  utm_campaign: attribution.utm_campaign || null,
+                });
+              }
+              track("session_created", {
+                has_coupon: !!attribution.coupon_code,
+                utm_source: attribution.utm_source || null,
+              });
+            }
+          } catch (err) {
+            trackError("start_session_failed", err);
+            setError("No se pudo iniciar la sesión. Intenta de nuevo.");
+            return;
+          }
+        }
         setPhase("selectType");
         return;
       }
@@ -138,7 +202,7 @@ export default function OnboardingFlow({
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [stepIdx, answers, allSteps, chosenType],
+    [stepIdx, answers, allSteps, chosenType, initialCouponCode],
   );
 
   const handleBack = useCallback(() => {

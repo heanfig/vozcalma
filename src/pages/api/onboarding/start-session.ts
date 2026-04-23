@@ -12,6 +12,7 @@ import { json } from "../../../lib/api-utils";
 import { createSession, setSessionCookie } from "../../../lib/session-cookie";
 import { rateLimit } from "../../../lib/rate-limit";
 import { validateName } from "../../../lib/content-moderation";
+import { signCsrfToken } from "../../../lib/csrf";
 
 export const POST: APIRoute = async ({ request, cookies, clientAddress }) => {
   const ip = clientAddress || request.headers.get("x-forwarded-for") || "unknown";
@@ -74,5 +75,6 @@ export const POST: APIRoute = async ({ request, cookies, clientAddress }) => {
   return json({
     ok: true,
     sessionId: session.sessionId,
+    csrfToken: signCsrfToken(session.sessionId),
   });
 };
