@@ -78,8 +78,15 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   let dbSessionId: string;
   if (existing) {
     if (existing.is_paid) {
+      // Si llegamos acá es porque el rotador del page load no corrió (caso raro).
+      // Devolvemos un error con flag para que el cliente recargue y obtenga
+      // una sesión fresca.
       return json(
-        { error: "Esta sesión ya fue pagada.", sessionId: existing.id, alreadyPaid: true },
+        {
+          error: "Esta sesión ya fue pagada. Recargá la página para iniciar una nueva.",
+          alreadyPaid: true,
+          shouldRefresh: true,
+        },
         409,
       );
     }

@@ -2,12 +2,13 @@
 import OnboardingFlow from "../../components/onboarding/OnboardingFlow";
 import BackgroundMusicWidget from "../../components/BackgroundMusicWidget";
 import "../../styles/onboarding.css";
-import { readSession } from "../../lib/session-cookie";
+import { ensureFreshSession } from "../../lib/ensure-fresh-session";
 import { signCsrfToken } from "../../lib/csrf";
 import { getSupabaseAdmin } from "../../lib/supabase-server";
 
 // Preferir cookie firmada. Fallback al query param para compatibilidad/links directos.
-const session = readSession(Astro.cookies);
+// ensureFreshSession rota el sessionId si la cookie apunta a una sesión ya pagada.
+const session = await ensureFreshSession(Astro.cookies);
 const queryName = Astro.url.searchParams.get("name")?.trim() || undefined;
 const initialName = session?.name || queryName;
 

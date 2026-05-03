@@ -146,8 +146,13 @@ export default function WompiCheckout({
         sessionId?: string;
         reference?: string;
         error?: string;
+        shouldRefresh?: boolean;
       };
       if (!res.ok) {
+        if (data.shouldRefresh) {
+          window.location.reload();
+          return;
+        }
         setError(data.error || "No se pudo iniciar el pago");
         setSubmitting(false);
         return;
