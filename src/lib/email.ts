@@ -144,3 +144,60 @@ export async function sendMeditationFailedEmail(params: {
     throw new Error(`Resend error: ${res.error.message}`);
   }
 }
+
+// ============================================================================
+// Template: pago confirmado — link para retomar onboarding
+// ============================================================================
+
+export async function sendPaymentConfirmedEmail(params: {
+  email: string;
+  name: string;
+  resumeUrl: string;
+}): Promise<void> {
+  const { email, name, resumeUrl } = params;
+  const safeName = escapeHtml(name);
+  const safeResumeUrl = escapeHtml(resumeUrl);
+
+  const html = `<!doctype html>
+<html lang="es">
+<body style="margin:0;padding:32px;font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:#F5F3F5;color:#1b1c1e">
+  <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:24px;padding:40px;box-shadow:0 8px 34px rgba(79,23,206,.08)">
+    <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#4f17ce;font-weight:700;margin:0 0 8px">VozCalma</p>
+    <h1 style="font-family:'Noto Serif',serif;font-size:26px;line-height:1.2;margin:8px 0 16px;color:#1b1c1e">
+      Pago confirmado, ${safeName}
+    </h1>
+    <p style="color:#484455;line-height:1.7;font-size:16px;margin:16px 0">
+      Recibimos tu pago. Para crear tu meditación personalizada necesitamos
+      que respondas unas preguntas rápidas (toma menos de 2 minutos).
+    </p>
+    <p style="margin:32px 0 24px">
+      <a href="${safeResumeUrl}" style="display:inline-block;background:#4f17ce;color:#fff;padding:14px 28px;border-radius:999px;text-decoration:none;font-weight:600;font-size:15px">
+        Continuar mi sesión
+      </a>
+    </p>
+    <p style="color:#484455;line-height:1.6;font-size:14px;margin:16px 0">
+      Cuando termines, te llegará otro correo con el link de tu meditación
+      lista para escuchar.
+    </p>
+    <p style="color:#7a7a85;font-size:12px;margin:24px 0 0;line-height:1.5">
+      Guarda este correo: si cierras la pestaña o cambias de dispositivo,
+      este link te trae de vuelta a tu sesión.
+    </p>
+  </div>
+  <p style="text-align:center;color:#7a7a85;font-size:11px;margin-top:24px">
+    © ${new Date().getFullYear()} VozCalma — El Santuario Digital
+  </p>
+</body>
+</html>`;
+
+  const res = await getClient().emails.send({
+    from: getFrom(),
+    to: email,
+    subject: `✅ Pago confirmado — completa tu sesión, ${name}`,
+    html,
+  });
+
+  if (res.error) {
+    throw new Error(`Resend error: ${res.error.message}`);
+  }
+}

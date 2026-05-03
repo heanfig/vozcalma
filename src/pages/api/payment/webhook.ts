@@ -11,6 +11,15 @@ import type { APIRoute } from "astro";
 import { getSupabaseAdmin } from "../../../lib/supabase-server";
 import { verifyWebhookSignature } from "../../../lib/wompi";
 import { redeemCoupon } from "../../../lib/coupons";
+import { sendPaymentConfirmedEmail } from "../../../lib/email";
+
+function getSiteUrl(): string {
+  const url =
+    (import.meta.env.PUBLIC_SITE_URL as string | undefined) ||
+    process.env.PUBLIC_SITE_URL ||
+    "https://vozcalma.app";
+  return url.replace(/\/$/, "");
+}
 
 interface WompiEvent {
   event?: string;
@@ -53,7 +62,7 @@ export const POST: APIRoute = async ({ request }) => {
   const supabase = getSupabaseAdmin();
   const { data: sessionRow } = await supabase
     .from("onboarding_sessions")
-    .select("id, is_paid, amount_cents, coupon_code, discount_cents, payment_transaction_id")
+    .select("id, is_paid, amount_cents, coupon_code, discount_cents, payment_transaction_id, intake_json, type")
     .eq("payment_reference", tx.reference)
     .maybeSingle();
 
@@ -100,6 +109,33 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     console.log(`[payment/webhook] approved session=${sessionRow.id} tx=${tx.id}`);
+
+    // Email de confirmación con link para retomar onboarding
+    // (cubre caso de cierre de browser, cyber café, cambio de dispositivo).
+    // Fire-and-forget: nunca bloquear el webhook.
+    const intake = (sessionRow.intake_json ?? {}) as Record<string, unknown>;
+    const recipient =
+      typeof intake.email === "string" && intake.email
+        ? (intake.email as string)
+        : tx.customer_email;
+    const recipientName =
+      typeof intake.name === "string" && intake.name
+        ? (intake.name as string)
+        : "tú";
+
+    if (recipient) {
+      const resumeUrl = `${getSiteUrl()}/onboarding?session=${sessionRow.id}`;
+      void sendPaymentConfirmedEmail({
+        email: recipient,
+        name: recipientName,
+        resumeUrl,
+      }).catch((err) => {
+        console.error(
+          `[payment/webhook] failed to send confirmation email to ${recipient}:`,
+          err,
+        );
+      });
+    }
   } else if (
     tx.status === "DECLINED" ||
     tx.status === "ERROR" ||

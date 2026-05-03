@@ -23,10 +23,10 @@ export const WOMPI_CHECKOUT_URL = "https://checkout.wompi.co/p/";
 
 /**
  * Soporte WhatsApp — formato internacional sin `+` ni espacios (para wa.me)
- * y versión legible para mostrar. TODO: reemplazar con el número real.
+ * y versión legible para mostrar.
  */
-export const WHATSAPP_SUPPORT_NUMBER = "573001234567";
-export const WHATSAPP_SUPPORT_DISPLAY = "+57 300 123 4567";
+export const WHATSAPP_SUPPORT_NUMBER = "573006892049";
+export const WHATSAPP_SUPPORT_DISPLAY = "+57 300 689 2049";
 export const WHATSAPP_SUPPORT_URL = `https://wa.me/${WHATSAPP_SUPPORT_NUMBER}?text=${encodeURIComponent(
   "Hola VozCalma, tengo un problema con mi pago.",
 )}`;

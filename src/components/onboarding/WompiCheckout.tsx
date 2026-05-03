@@ -287,6 +287,14 @@ export default function WompiCheckout({
               <p className="text-error text-sm text-center">{error}</p>
             )}
 
+            <div className="flex items-start gap-3 pt-2 text-xs md:text-sm text-on-surface-variant/80 leading-relaxed">
+              <span className="material-symbols-outlined text-tertiary text-lg shrink-0 mt-0.5">mark_email_read</span>
+              <p>
+                Tras el pago, completas unas preguntas rápidas y te enviamos
+                el link de tu meditación al correo electrónico.
+              </p>
+            </div>
+
             {/* Cupón (colapsado por defecto) */}
             <div className="text-center">
               {coupon.state === "valid" ? (
@@ -405,7 +413,7 @@ export default function WompiCheckout({
         {/* Soporte WhatsApp */}
         <section className="w-full flex flex-col items-center pt-2 pb-4">
           <p className="text-xs text-on-surface-variant/60 text-center max-w-md">
-            ¿Tienes problemas con el pago? Escríbenos por WhatsApp y te ayudamos:
+            ¿Tienes problemas con el pago o ya hiciste el pago? Escríbenos por WhatsApp y te ayudamos:
           </p>
           <a
             href={WHATSAPP_SUPPORT_URL}

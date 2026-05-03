@@ -171,7 +171,6 @@ Webhook en dev: `ngrok http 4321`. Prod: `https://vozcalma.app/api/payment/webho
 
 ### Post-launch TODO
 - [ ] Registrar webhook URL en dashboard Wompi sandbox (sin esto, approvals no sincronizan)
-- [ ] `WHATSAPP_SUPPORT_NUMBER` en `src/lib/constants.ts` sigue siendo placeholder `573001234567` — reemplazar
 - [ ] Al pasar a prod: cambiar `WOMPI_ENVIRONMENT` a `production` + rotar `WOMPI_*` keys a las reales
 
 ---

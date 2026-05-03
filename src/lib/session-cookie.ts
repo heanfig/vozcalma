@@ -13,7 +13,7 @@ import { createHmac, timingSafeEqual, randomUUID } from "node:crypto";
 import type { AstroCookies } from "astro";
 
 const COOKIE_NAME = "vc_session";
-const TTL_SECONDS = 60 * 60; // 1 hora
+const TTL_SECONDS = 60 * 60 * 24 * 7; // 7 días — permite retomar onboarding tras pago aunque cierre navegador
 
 export interface SessionPayload {
   name: string;

@@ -125,7 +125,6 @@
     rgb(var(--color-surface-container)) 100%
   );
   position: relative;
-  overflow: hidden;
 }
 
 /* Ondas sutiles animadas de fondo */
