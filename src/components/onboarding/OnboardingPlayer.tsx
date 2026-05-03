@@ -26,6 +26,7 @@ export default function OnboardingPlayer({
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   const copyLink = useCallback(() => {
     if (!playUrl) return;
@@ -34,6 +35,30 @@ export default function OnboardingPlayer({
       setTimeout(() => setCopied(false), 2000);
     });
   }, [playUrl]);
+
+  const downloadAudio = useCallback(async () => {
+    if (!audioUrl || downloading) return;
+    setDownloading(true);
+    try {
+      const res = await fetch(audioUrl);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `vozcalma-meditacion-${Date.now()}.mp3`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("[player] download failed", err);
+      // Fallback: abrir en nueva pestaña
+      window.open(audioUrl, "_blank", "noopener");
+    } finally {
+      setDownloading(false);
+    }
+  }, [audioUrl, downloading]);
 
   const toggle = useCallback(() => {
     const el = audioRef.current;
@@ -130,20 +155,37 @@ export default function OnboardingPlayer({
           {title}
         </motion.p>
 
-        {playUrl && (
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            onClick={copyLink}
-            className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant text-sm font-label hover:bg-surface-container-high transition-colors"
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="mt-4 flex flex-wrap items-center justify-center gap-2"
+        >
+          {playUrl && (
+            <button
+              type="button"
+              onClick={copyLink}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant text-sm font-label hover:bg-surface-container-high transition-colors"
+            >
+              <span className="material-symbols-outlined text-lg">
+                {copied ? "check" : "link"}
+              </span>
+              <span>{copied ? "Enlace copiado" : "Copiar enlace"}</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={downloadAudio}
+            disabled={downloading}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant text-sm font-label hover:bg-surface-container-high transition-colors disabled:opacity-60"
+            aria-label="Descargar audio"
           >
             <span className="material-symbols-outlined text-lg">
-              {copied ? "check" : "link"}
+              {downloading ? "progress_activity" : "download"}
             </span>
-            <span>{copied ? "Enlace copiado" : "Copiar enlace para volver a escuchar"}</span>
-          </motion.button>
-        )}
+            <span>{downloading ? "Descargando..." : "Descargar audio"}</span>
+          </button>
+        </motion.div>
       </header>
 
       {/* ── Visualizador de ondas ── */}
