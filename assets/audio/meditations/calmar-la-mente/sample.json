@@ -1,0 +1,10 @@
+{
+  "slug": "calmar-la-mente",
+  "label": "Calmar la mente",
+  "chars": 408,
+  "bytes": 579523,
+  "generated_at": "2026-05-03T19:02:54.879Z",
+  "voice_id": "QBsPKmoGZuwUUe6aRj8v",
+  "model": "anthropic/claude-sonnet-4",
+  "background_track": "konstantinpazuzustudio-quiet-rain-thunder-rain-and-piano-512040.mp3"
+}

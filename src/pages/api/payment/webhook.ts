@@ -124,7 +124,15 @@ export const POST: APIRoute = async ({ request }) => {
         : "tú";
 
     if (recipient) {
-      const resumeUrl = `${getSiteUrl()}/onboarding?session=${sessionRow.id}`;
+      // Link directo al tipo pagado para evitar que el usuario acceda a un
+      // tipo distinto (security: pagó "quick" no debe entrar a "deep").
+      const typePath =
+        sessionRow.type === "quick"
+          ? "/onboarding/alivio-rapido"
+          : sessionRow.type === "deep"
+            ? "/onboarding/reprogramacion-profunda"
+            : "/onboarding";
+      const resumeUrl = `${getSiteUrl()}${typePath}?session=${sessionRow.id}`;
       void sendPaymentConfirmedEmail({
         email: recipient,
         name: recipientName,

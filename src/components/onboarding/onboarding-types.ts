@@ -15,6 +15,7 @@ export interface RichSelectOption {
   icon?: string;
   featured?: boolean;
   wide?: boolean;
+  subtle?: boolean;
 }
 
 export interface InspirationCard {

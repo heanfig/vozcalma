@@ -1,0 +1,10 @@
+{
+  "slug": "sueno-y-descanso",
+  "label": "Sueño y descanso",
+  "chars": 491,
+  "bytes": 669057,
+  "generated_at": "2026-05-03T19:03:30.989Z",
+  "voice_id": "QBsPKmoGZuwUUe6aRj8v",
+  "model": "anthropic/claude-sonnet-4",
+  "background_track": "onesevenbeatxs-supereroi-mr-rain-recreated-instrumental-prod-by-onesevenbeatxs-310385.mp3"
+}

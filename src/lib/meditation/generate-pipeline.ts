@@ -16,7 +16,7 @@ import { completeChat, type ChatMessage, type CompleteChatResult } from "../open
 import { fetchGenerationCost } from "../openrouter-usage";
 import { estimateTtsCostUsd } from "../pricing";
 import { prepareScriptForTts } from "./script-post";
-import { synthesizeLongSpeech } from "../elevenlabs";
+import { synthesizeWithPauses, spokenChars } from "../elevenlabs";
 import { buildPrompt, type OnboardingType } from "../../components/onboarding/onboarding-data";
 import { mixVoiceWithBackground } from "../audio-mixer";
 import { pickPreGenMeditation } from "../pre-gen-meditations";
@@ -125,7 +125,7 @@ async function runPipeline(params: GenerateParams): Promise<GenerateResult> {
     const firstName = answers.nombre?.trim() || "";
     cleanScript = prepareScriptForTts(rawScript, firstName);
 
-    const voiceBuf = await synthesizeLongSpeech(cleanScript);
+    const voiceBuf = await synthesizeWithPauses(cleanScript);
 
     try {
       audioBuffer = await mixVoiceWithBackground(voiceBuf);
@@ -214,7 +214,8 @@ async function runPipeline(params: GenerateParams): Promise<GenerateResult> {
   // 6. Persistir costos (fire-and-forget). LLM cost real llega con delay vía
   //    fetchGenerationCost; por ahora insertamos tokens + TTS estimado.
   // ------------------------------------------------------------
-  const ttsChars = cleanScript.length;
+  // Contar solo chars HABLADOS (sin marcadores ||PAUSE:Xs||) para no inflar el costo TTS.
+  const ttsChars = source === "pregen" ? 0 : spokenChars(cleanScript);
   const ttsCostUsd = source === "pregen" ? 0 : estimateTtsCostUsd(ttsChars);
   const generationId = llmUsage?.generationId;
 

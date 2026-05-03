@@ -63,7 +63,7 @@ export async function synthesizeSpeech(text: string): Promise<ArrayBuffer> {
         similarity_boost: 0.72,
         style: 0.28,
         use_speaker_boost: true,
-        speed: 0.65,
+        speed: 0.7,
       },
     }),
   });
@@ -216,4 +216,146 @@ export async function synthesizeLongSpeech(text: string): Promise<ArrayBuffer> {
     concatenated.byteOffset,
     concatenated.byteOffset + concatenated.byteLength,
   ) as ArrayBuffer;
+}
+
+// ============================================================================
+// SÍNTESIS CON PAUSAS REALES
+// ============================================================================
+//
+// `eleven_multilingual_v2` IGNORA tags SSML <break>. Para conseguir el ritmo
+// meditativo (silencios reales entre frases) usamos un marcador propio
+// `||PAUSE:Xs||` que el LLM emite. Aquí lo parseamos y construimos el audio
+// final como: voz_1 + silencio_X + voz_2 + silencio_Y + … (concatenados con ffmpeg).
+//
+// Costo: el TTS cobra por chars, no por requests, así que el costo no sube.
+// Latencia: cada frase suma una request (~2s). Aceptable porque la calidad
+// meditativa lo justifica (decisión del CEO).
+
+export interface ScriptSegment {
+  type: "voice" | "pause";
+  text?: string;
+  duration?: number;
+}
+
+/**
+ * Parsea un script con marcadores ||PAUSE:Xs|| en una secuencia de segmentos.
+ * Tolerante con espacios y tipografía variable del LLM.
+ */
+export function parseScriptSegments(script: string): ScriptSegment[] {
+  const segments: ScriptSegment[] = [];
+  const re = /\|\|\s*PAUSE\s*:\s*(\d+(?:\.\d+)?)\s*s?\s*\|\|/gi;
+  let lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(script)) !== null) {
+    const before = script.slice(lastIndex, m.index).trim();
+    if (before) segments.push({ type: "voice", text: before });
+    const duration = Math.min(4, Math.max(0.3, parseFloat(m[1])));
+    segments.push({ type: "pause", duration });
+    lastIndex = re.lastIndex;
+  }
+  const tail = script.slice(lastIndex).trim();
+  if (tail) segments.push({ type: "voice", text: tail });
+  return segments;
+}
+
+/**
+ * Genera un buffer MP3 de silencio puro de N segundos via ffmpeg.
+ * Mismo sample rate que ElevenLabs (44.1kHz mono) para concatenación limpia.
+ */
+async function generateSilenceBuffer(durationSec: number): Promise<Buffer> {
+  const { mkdtemp, writeFile, readFile, rm } = await import("node:fs/promises");
+  const { spawn } = await import("node:child_process");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+
+  const tempDir = await mkdtemp(join(tmpdir(), "vc-silence-"));
+  const outPath = join(tempDir, "silence.mp3");
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const ff = spawn("ffmpeg", [
+        "-y",
+        "-f", "lavfi",
+        "-i", "anullsrc=channel_layout=mono:sample_rate=44100",
+        "-t", String(durationSec),
+        "-codec:a", "libmp3lame",
+        "-q:a", "4",
+        outPath,
+      ]);
+      let stderr = "";
+      ff.stderr.on("data", (d) => (stderr += d.toString()));
+      ff.on("close", (code) => {
+        if (code === 0) resolve();
+        else reject(new Error(`ffmpeg silence exit ${code}: ${stderr.slice(0, 300)}`));
+      });
+      ff.on("error", reject);
+    });
+    return await readFile(outPath);
+  } finally {
+    await rm(tempDir, { recursive: true, force: true }).catch(() => {});
+  }
+}
+
+/**
+ * Sintetiza un script con marcadores ||PAUSE:Xs|| respetando las pausas
+ * como SILENCIOS REALES insertados con ffmpeg.
+ *
+ * Si el script no tiene marcadores, hace fallback a `synthesizeLongSpeech`.
+ *
+ * Síntesis serial (sin paralelo) para no chocar con rate limits y por
+ * simplicidad. Una meditación Quick (~30 frases) tarda ~60-90s; una Deep
+ * (~60 frases) tarda ~2-3 min. La calidad meditativa lo justifica.
+ */
+export async function synthesizeWithPauses(script: string): Promise<ArrayBuffer> {
+  const segments = parseScriptSegments(script);
+  const hasPauses = segments.some((s) => s.type === "pause");
+
+  if (!hasPauses) {
+    return synthesizeLongSpeech(script);
+  }
+
+  const buffers: ArrayBuffer[] = [];
+  for (const seg of segments) {
+    if (seg.type === "voice" && seg.text) {
+      // Si una "frase" supera el chunk size (raro), partirla
+      if (seg.text.length > ELEVENLABS_CHUNK_SIZE) {
+        const subChunks = chunkScriptForTts(seg.text);
+        for (const c of subChunks) {
+          const b = await synthesizeSpeech(c);
+          buffers.push(b);
+        }
+      } else {
+        const b = await synthesizeSpeech(seg.text);
+        buffers.push(b);
+      }
+    } else if (seg.type === "pause" && seg.duration) {
+      const silence = await generateSilenceBuffer(seg.duration);
+      buffers.push(
+        silence.buffer.slice(
+          silence.byteOffset,
+          silence.byteOffset + silence.byteLength,
+        ) as ArrayBuffer,
+      );
+    }
+  }
+
+  if (buffers.length === 0) {
+    throw new Error("synthesizeWithPauses: el script no produjo segmentos válidos");
+  }
+  if (buffers.length === 1) {
+    return buffers[0];
+  }
+
+  const concatenated = await concatenateMp3Buffers(buffers);
+  return concatenated.buffer.slice(
+    concatenated.byteOffset,
+    concatenated.byteOffset + concatenated.byteLength,
+  ) as ArrayBuffer;
+}
+
+/**
+ * Devuelve la longitud en chars del texto HABLADO (sin contar marcadores
+ * ||PAUSE:Xs||). Útil para cobrar costo TTS real, no inflado.
+ */
+export function spokenChars(script: string): number {
+  return script.replace(/\|\|\s*PAUSE\s*:\s*\d+(?:\.\d+)?\s*s?\s*\|\|/gi, "").trim().length;
 }

@@ -18,7 +18,7 @@ export const QUICK_CATEGORIES: RichSelectOption[] = [
   { value: "Mindfulness / Presencia", icon: "spa", description: "Para volver al aquí y ahora." },
   { value: "Relaciones y emociones sociales", icon: "diversity_3", description: "Para cuidar los vínculos que te importan." },
   { value: "Iniciar la mañana (energía, intención)", icon: "wb_sunny", description: "Para abrir el día con claridad y propósito." },
-  { value: "Situaciones específicas", icon: "edit_note", description: "Cuéntanos qué estás viviendo. Tu sesión será única.", wide: true },
+  { value: "Situaciones específicas", icon: "edit_note", description: "Cuéntanos qué estás viviendo. Tu sesión será única.", subtle: true },
 ];
 
 export const QUICK_STEPS: OnboardingStepDef[] = [
@@ -57,7 +57,7 @@ export const QUICK_STEPS: OnboardingStepDef[] = [
     placeholder:
       "Describe qué estás sintiendo, qué te pasó, o qué necesitas soltar...",
     minRows: 6,
-    maxLength: 1000,
+    maxLength: 600,
     showIf: (answers) => answers.categoria === "Situaciones específicas",
   },
 ];

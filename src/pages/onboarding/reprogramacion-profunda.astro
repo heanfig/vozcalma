@@ -4,14 +4,39 @@ import BackgroundMusicWidget from "../../components/BackgroundMusicWidget";
 import "../../styles/onboarding.css";
 import { readSession } from "../../lib/session-cookie";
 import { signCsrfToken } from "../../lib/csrf";
+import { getSupabaseAdmin } from "../../lib/supabase-server";
 
 const session = readSession(Astro.cookies);
 const queryName = Astro.url.searchParams.get("name")?.trim() || undefined;
 const initialName = session?.name || queryName;
 const sessionId = session?.sessionId || "anonymous";
 const csrfToken = signCsrfToken(sessionId);
-const existingPaidSessionId = Astro.url.searchParams.get("session") || undefined;
+const rawSessionParam = Astro.url.searchParams.get("session") || undefined;
 const initialCouponCode = Astro.url.searchParams.get("coupon")?.trim() || undefined;
+
+// Validar ?session=<sid>:
+//   - sin pagar o ya consumida (audio_url presente) → ignorar (forzar nuevo pago)
+//   - type "quick" → redirigir al flujo correcto (type lock)
+let existingPaidSessionId: string | undefined;
+if (rawSessionParam) {
+  const supabase = getSupabaseAdmin();
+  const { data: row } = await supabase
+    .from("onboarding_sessions")
+    .select("type, is_paid, audio_url")
+    .eq("id", rawSessionParam)
+    .maybeSingle();
+  const isUsable = !!row && !!row.is_paid && !row.audio_url;
+  if (isUsable) {
+    existingPaidSessionId = rawSessionParam;
+    if (row.type === "quick") {
+      const qs = new URLSearchParams();
+      qs.set("session", existingPaidSessionId);
+      if (initialCouponCode) qs.set("coupon", initialCouponCode);
+      if (queryName) qs.set("name", queryName);
+      return Astro.redirect(`/onboarding/alivio-rapido?${qs.toString()}`, 302);
+    }
+  }
+}
 ---
 
 <!doctype html>

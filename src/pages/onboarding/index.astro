@@ -4,6 +4,7 @@ import BackgroundMusicWidget from "../../components/BackgroundMusicWidget";
 import "../../styles/onboarding.css";
 import { readSession } from "../../lib/session-cookie";
 import { signCsrfToken } from "../../lib/csrf";
+import { getSupabaseAdmin } from "../../lib/supabase-server";
 
 // Preferir cookie firmada. Fallback al query param para compatibilidad/links directos.
 const session = readSession(Astro.cookies);
@@ -16,8 +17,38 @@ const initialName = session?.name || queryName;
 const sessionId = session?.sessionId || "anonymous";
 const csrfToken = signCsrfToken(sessionId);
 
-const existingPaidSessionId = Astro.url.searchParams.get("session") || undefined;
+const rawSessionParam = Astro.url.searchParams.get("session") || undefined;
 const initialCouponCode = Astro.url.searchParams.get("coupon")?.trim() || undefined;
+
+// Si llega con ?session=<sid>, validar contra DB:
+//   - si ya tiene audio_url → sesión consumida → ignorar (forzar nueva)
+//   - si no está pagada → ignorar (no autoriza saltar el pago)
+//   - si tiene type asignado → redirigir a la página específica
+let existingPaidSessionId: string | undefined;
+if (rawSessionParam) {
+  const supabase = getSupabaseAdmin();
+  const { data: row } = await supabase
+    .from("onboarding_sessions")
+    .select("type, is_paid, audio_url")
+    .eq("id", rawSessionParam)
+    .maybeSingle();
+  const isConsumed = !!row?.audio_url;
+  const isPaid = !!row?.is_paid;
+  if (row && isPaid && !isConsumed) {
+    existingPaidSessionId = rawSessionParam;
+    if (row.type === "quick" || row.type === "deep") {
+      const path =
+        row.type === "quick"
+          ? "/onboarding/alivio-rapido"
+          : "/onboarding/reprogramacion-profunda";
+      const qs = new URLSearchParams();
+      qs.set("session", existingPaidSessionId);
+      if (initialCouponCode) qs.set("coupon", initialCouponCode);
+      if (queryName) qs.set("name", queryName);
+      return Astro.redirect(`${path}?${qs.toString()}`, 302);
+    }
+  }
+}
 ---
 
 <!doctype html>

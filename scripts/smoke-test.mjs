@@ -112,21 +112,52 @@ const DEEP_FIXTURE = {
 
 console.log(`\n\x1b[1mVozCalma smoke test\x1b[0m → ${BASE}\n`);
 
-let lastQuickSessionId = null;
-let lastQuickAudioUrl = null;
-let lastQuickPlayUrl = null;
-let lastDeepScriptLength = 0;
+// Nota: variables de happy-path (lastQuick*) removidas — el smoke ya no genera
+// meditaciones reales (requiere sesión paga, fuera de scope automatizable).
 
-await test("Landing page rinde con copy correcto", async () => {
+await test("Landing page rinde con copy nuevo + secciones clave", async () => {
   const res = await fetchWithTimeout(`${BASE}/`);
   assert(res.ok, `status ${res.status}`);
   const body = await res.text();
-  assert(body.includes("RITUAL DE ACTIVACIÓN") || body.includes("Ritual de Activación"), "missing 'Ritual de Activación'");
+  // Hero v2
   assert(
-    body.includes("ESTOY LISTO PARA CAMBIAR"),
-    "missing 'ESTOY LISTO PARA CAMBIAR' button",
+    body.includes("Una meditación creada") && body.includes("solo para ti"),
+    "missing hero headline 'Una meditación creada solo para ti'",
   );
-  assert(body.includes("Begin Ritual"), "missing 'Begin Ritual' CTA");
+  assert(
+    body.includes("Crear mi meditación"),
+    "missing 'Crear mi meditación' CTA",
+  );
+  // Anclas de las nuevas secciones
+  assert(body.includes('id="demo"'), "missing #demo anchor (sample player)");
+  assert(body.includes('id="como-funciona"'), "missing #como-funciona anchor");
+  assert(body.includes('id="precios"'), "missing #precios anchor");
+  assert(body.includes('id="faq"'), "missing #faq anchor");
+  // Pricing visible (formatCOP genera "$13.000 COP" / "$26.000 COP")
+  assert(body.includes("13.000 COP"), "missing quick price (13.000 COP)");
+  assert(body.includes("26.000 COP"), "missing deep price (26.000 COP)");
+});
+
+await test("API: /api/meditations/sample/<slug> responde audio o 404", async () => {
+  const res = await fetchWithTimeout(
+    `${BASE}/api/meditations/sample/calmar-la-mente`,
+  );
+  // 200 (ya pre-generado) o 404 (todavía no generado) — ambos son válidos
+  assert(
+    res.status === 200 || res.status === 404,
+    `expected 200 or 404, got ${res.status}`,
+  );
+  if (res.status === 200) {
+    const ct = res.headers.get("content-type") || "";
+    assert(ct.includes("audio/mpeg"), `expected audio/mpeg, got ${ct}`);
+  }
+});
+
+await test("API: /api/meditations/sample/<slug-inválido> → 404", async () => {
+  const res = await fetchWithTimeout(
+    `${BASE}/api/meditations/sample/../../../etc/passwd`,
+  );
+  assert(res.status === 404, `expected 404, got ${res.status}`);
 });
 
 await test("Onboarding page rinde (sin prefill)", async () => {
@@ -141,100 +172,41 @@ await test("Onboarding page rinde con ?name= (prefill)", async () => {
   assert(res.ok, `status ${res.status}`);
 });
 
-await test("API: Alivio Rápido genera meditación", async () => {
+// Nota: /api/onboarding/generate ahora requiere sesión paga (payment-first flow).
+// Los smoke tests no pueden simular el pago Wompi, así que validamos que la
+// guardia de auth funcione. El happy-path full se cubre en QA manual con
+// tarjeta sandbox.
+
+await test("API: /api/onboarding/generate sin sesión → 401", async () => {
   const res = await fetchWithTimeout(`${BASE}/api/onboarding/generate`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(QUICK_FIXTURE),
   });
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`status ${res.status}: ${errText.slice(0, 300)}`);
+  assert(res.status === 401, `expected 401, got ${res.status}`);
+});
+
+await test("API: /api/onboarding/generate sin pago → 401/403", async () => {
+  // Crear sesión sin pago + intentar generar
+  const startRes = await fetchWithTimeout(`${BASE}/api/onboarding/start-session`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: "SmokeUnpaid" }),
+  });
+  if (!startRes.ok) {
+    log("info", "   start-session falló — se acepta (sin sesión válida → siguiente test)");
+    return;
   }
-  const data = await res.json();
-  assert(typeof data.sessionId === "string", "missing sessionId");
-  assert(/^[0-9a-f-]{36}$/i.test(data.sessionId), "sessionId not UUID");
-  assert(typeof data.audioUrl === "string" && data.audioUrl.length > 10, "missing audioUrl");
-  assert(typeof data.scriptText === "string", "missing scriptText");
-  // Target 2500-5000 chars per user requirement ("2000 a 4000")
+  const cookie = startRes.headers.get("set-cookie") || "";
+  const res = await fetchWithTimeout(`${BASE}/api/onboarding/generate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: cookie },
+    body: JSON.stringify(QUICK_FIXTURE),
+  });
   assert(
-    data.scriptText.length >= 2500,
-    `scriptText too short (${data.scriptText.length}, expected >= 2500)`,
+    res.status === 401 || res.status === 403,
+    `expected 401/403 (unpaid), got ${res.status}`,
   );
-  assert(typeof data.playUrl === "string" && data.playUrl.startsWith("http"), "missing playUrl");
-  assert(/\/p\/[0-9a-f]{24}/i.test(data.playUrl), "playUrl format incorrect");
-  lastQuickSessionId = data.sessionId;
-  lastQuickAudioUrl = data.audioUrl;
-  lastQuickPlayUrl = data.playUrl;
-  log("info", `   scriptText: ${data.scriptText.length} chars, audio: ${data.audioUrl}`);
-});
-
-await test("API: Alivio Rápido idempotencia (misma sessionId)", async () => {
-  assert(lastQuickSessionId, "previous test failed");
-  const res = await fetchWithTimeout(`${BASE}/api/onboarding/generate`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...QUICK_FIXTURE, sessionId: lastQuickSessionId }),
-  });
-  if (!res.ok) throw new Error(`status ${res.status}`);
-  const data = await res.json();
-  assert(
-    data.sessionId === lastQuickSessionId,
-    "sessionId changed on re-POST (should be idempotent)",
-  );
-  assert(data.audioUrl === lastQuickAudioUrl, "audioUrl changed on re-POST");
-});
-
-await test("API: Play link resuelve y muestra <audio>", async () => {
-  assert(lastQuickPlayUrl, "previous test failed");
-  // Extract token and call the relative path on our BASE (not the env PUBLIC_SITE_URL)
-  const match = lastQuickPlayUrl.match(/\/p\/([0-9a-f]{24})/i);
-  assert(match, "no token in playUrl");
-  const token = match[1];
-  const res = await fetchWithTimeout(`${BASE}/p/${token}`);
-  assert(res.ok, `status ${res.status}`);
-  const body = await res.text();
-  assert(body.includes("<audio") || body.includes("audio"), "missing audio element");
-});
-
-await test("API: Reprogramación Profunda genera meditación (larga, con chunking)", async () => {
-  const res = await fetchWithTimeout(`${BASE}/api/onboarding/generate`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(DEEP_FIXTURE),
-  });
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`status ${res.status}: ${errText.slice(0, 300)}`);
-  }
-  const data = await res.json();
-  assert(typeof data.sessionId === "string", "missing sessionId");
-  assert(typeof data.audioUrl === "string" && data.audioUrl.length > 10, "missing audioUrl");
-  assert(typeof data.scriptText === "string", "missing scriptText");
-  assert(
-    data.scriptText.length >= 6500,
-    `scriptText too short for deep flow (${data.scriptText.length}, expected >= 6500)`,
-  );
-  lastDeepScriptLength = data.scriptText.length;
-  log("info", `   scriptText: ${data.scriptText.length} chars, audio: ${data.audioUrl}`);
-});
-
-await test("API: type inválido → 400", async () => {
-  const res = await fetchWithTimeout(`${BASE}/api/onboarding/generate`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ type: "bogus", answers: { nombre: "X" } }),
-  });
-  assert(res.status === 400, `expected 400, got ${res.status}`);
-});
-
-await test("API: missing nombre → 400", async () => {
-  const res = await fetchWithTimeout(`${BASE}/api/onboarding/generate`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ type: "quick", answers: {} }),
-  });
-  assert(res.status === 400, `expected 400, got ${res.status}`);
 });
 
 // ============================================================================
@@ -356,8 +328,5 @@ console.log(
   `\x1b[1mResults:\x1b[0m ${passed} passed, ${failed} failed` +
     (failed === 0 ? " \x1b[32m✓\x1b[0m" : " \x1b[31m✗\x1b[0m"),
 );
-if (lastDeepScriptLength > 0) {
-  console.log(`\x1b[36mDeep flow script length:\x1b[0m ${lastDeepScriptLength} chars`);
-}
 console.log("");
 process.exit(failed === 0 ? 0 : 1);

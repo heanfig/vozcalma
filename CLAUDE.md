@@ -175,6 +175,26 @@ Webhook en dev: `ngrok http 4321`. Prod: `https://vozcalma.app/api/payment/webho
 
 ---
 
+## Pausas reales en meditaciones (||PAUSE:Xs||)
+
+`eleven_multilingual_v2` **ignora** los tags SSML `<break>`. Para conseguir el ritmo meditativo (silencios reales entre frases) usamos un marcador propio: el LLM emite `||PAUSE:Xs||` (X entre 1 y 4 segundos) al final de cada frase, y el pipeline TTS los convierte en silencios reales.
+
+### Pipeline
+- **Prompts** (`onboarding-prompts.ts`): instruyen al LLM a emitir frases cortas (5-15 palabras) cada una seguida de `||PAUSE:Xs||`. Después de respiraciones → 3-4s; entre frases normales → 1.5-2s; tras decir el nombre → 3s.
+- **Script post** (`script-post.ts`): preserva los marcadores (no usa `\s{2,}/g, " "` que los rompería; usa `[ \t]{2,}/g` solamente).
+- **TTS** (`elevenlabs.ts → synthesizeWithPauses`): parsea segmentos voice/pause con `parseScriptSegments`, sintetiza cada frase por separado en ElevenLabs, genera silencios MP3 puros con ffmpeg (`anullsrc=channel_layout=mono:sample_rate=44100`), concatena todo con `concatenateMp3Buffers`. Si el script no tiene marcadores, fallback a `synthesizeLongSpeech`.
+- **Mix con música** (`audio-mixer.ts`): la voz ya concatenada se mezcla con un track de fondo aleatorio.
+- **Costos**: `tts_chars` cuenta solo el texto hablado (helper `spokenChars` filtra los marcadores) para no inflar el costo.
+
+### Trade-off
+- **Costo**: neutro. ElevenLabs cobra por chars, no por requests.
+- **Latencia**: cada frase = 1 request (~2s). Quick (~30 frases) → ~60-90s; Deep (~60 frases) → ~2-3 min. Decisión del CEO: priorizar calidad de pausas sobre velocidad.
+
+### Pre-gen samples
+`scripts/pre-generate-samples.mjs` usa el mismo enfoque (síntesis por segmentos + silencios ffmpeg). Para regenerar: `node --env-file=.env scripts/pre-generate-samples.mjs --only=<slug> --force`.
+
+---
+
 ## Dashboard Admin
 
 `/admin` es una UI web para auditar y mantener el software sin SQL directo.

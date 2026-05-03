@@ -1,5 +1,7 @@
 ---
 import PostHog from "../../components/posthog.astro";
+import OnboardingPlayer from "../../components/onboarding/OnboardingPlayer";
+import BackgroundMusicWidget from "../../components/BackgroundMusicWidget";
 import "../../styles/onboarding.css";
 import { getSupabaseAdmin } from "../../lib/supabase-server";
 
@@ -13,7 +15,7 @@ const supabase = getSupabaseAdmin();
 
 const { data, error } = await supabase
   .from("play_links")
-  .select("audio_url, expires_at")
+  .select("audio_url, expires_at, session_id, onboarding_sessions(intake_json, type)")
   .eq("token", token)
   .maybeSingle();
 
@@ -32,9 +34,23 @@ if (new Date(data.expires_at) < new Date()) {
 }
 
 const audioUrl = data.audio_url;
+const session = (data as any).onboarding_sessions as
+  | { intake_json?: Record<string, unknown> | null; type?: string | null }
+  | null;
+const userName =
+  typeof session?.intake_json?.nombre === "string"
+    ? (session!.intake_json!.nombre as string)
+    : "";
+const sessionTitle =
+  session?.type === "deep"
+    ? "Reprogramación profunda"
+    : session?.type === "quick"
+      ? "Alivio rápido personalizado"
+      : "Tu meditación guiada";
 const shareUrl = `https://vozcalma.app/p/${token}`;
 const shareTitle = "Una meditación creada para ti — VozCalma";
-const shareDescription = "Escucha esta meditación guiada personalizada por IA. Un espacio de calma creado con intención.";
+const shareDescription =
+  "Escucha esta meditación guiada personalizada por IA. Un espacio de calma creado con intención.";
 ---
 
 <!doctype html>
@@ -74,154 +90,21 @@ const shareDescription = "Escucha esta meditación guiada personalizada por IA. 
       rel="stylesheet"
     />
   </head>
-  <body class="bg-surface font-body text-on-surface antialiased min-h-full flex flex-col items-center justify-center px-6 py-12">
-    <main class="max-w-md w-full text-center space-y-8">
-      <!-- Brand -->
-      <a href="/" class="font-headline text-2xl font-semibold text-primary tracking-tight">
-        VozCalma
-      </a>
-
-      <div class="space-y-2">
-        <h1 class="font-headline text-2xl md:text-3xl text-on-surface italic">
-          Tu meditación guiada
-        </h1>
-        <p class="font-body text-sm text-on-surface-variant">
-          Creada especialmente con IA para ti
-        </p>
-      </div>
-
-      <!-- Audio player -->
-      <div class="bg-surface-container-low rounded-[2rem] p-6 md:p-8 space-y-4">
-        <audio
-          class="w-full rounded-xl"
-          controls
-          src={audioUrl}
-          preload="metadata"
-        >
-          Tu navegador no soporta audio.
-        </audio>
-      </div>
-
-      <!-- Share button -->
-      <div class="relative inline-block">
-        <button
-          id="share-btn"
-          class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-on-primary font-label font-semibold text-sm hover:opacity-90 transition-all shadow-md shadow-primary/15"
-        >
-          <span class="material-symbols-outlined text-lg">share</span>
-          <span>Compartir</span>
-        </button>
-
-        <!-- Fallback share menu (desktop) -->
-        <div id="share-menu" class="hidden absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-surface-container-low rounded-2xl shadow-xl border border-outline-variant/10 p-2 min-w-[200px] z-50">
-          <a
-            href="#"
-            data-share="whatsapp"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-label text-on-surface hover:bg-surface-container-high transition-colors"
-          >
-            <span class="material-symbols-outlined text-lg text-tertiary">chat</span>
-            WhatsApp
-          </a>
-          <a
-            href="#"
-            data-share="twitter"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-label text-on-surface hover:bg-surface-container-high transition-colors"
-          >
-            <span class="material-symbols-outlined text-lg text-primary">alternate_email</span>
-            X / Twitter
-          </a>
-          <button
-            data-share="copy"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-label text-on-surface hover:bg-surface-container-high transition-colors w-full text-left"
-          >
-            <span class="material-symbols-outlined text-lg text-on-surface-variant">link</span>
-            <span>Copiar enlace</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- CTA -->
-      <a
-        href="/#activation"
-        class="inline-flex items-center gap-2 text-sm font-label text-on-surface-variant hover:text-primary transition-colors"
-      >
-        <span class="material-symbols-outlined text-base">add</span>
-        Crear mi propia meditación
-      </a>
-
-      <!-- Disclaimer -->
-      <p class="text-[0.65rem] font-body text-on-surface-variant/50 uppercase tracking-widest leading-relaxed max-w-xs mx-auto">
-        VozCalma no sustituye atención profesional de salud mental.
-      </p>
-    </main>
-
-    <!-- Share logic -->
+  <body class="m-0 p-0 w-full min-h-full font-body text-on-surface bg-soft-gradient overflow-y-auto">
+    <BackgroundMusicWidget client:idle />
+    <div id="app" class="w-full min-h-screen">
+      <OnboardingPlayer
+        audioUrl={audioUrl}
+        userName={userName}
+        sessionTitle={sessionTitle}
+        playUrl={shareUrl}
+        client:load
+      />
+    </div>
     <script is:inline>
-      (function () {
-        var url = window.location.href;
-        var title = "Una meditación creada para ti — VozCalma";
-        var btn = document.getElementById("share-btn");
-        var menu = document.getElementById("share-menu");
-
-        // Track page open
-        if (window.posthog && window.posthog.capture) {
-          window.posthog.capture("share_link_opened");
-        }
-
-        if (btn) {
-          btn.addEventListener("click", async function () {
-            if (window.posthog && window.posthog.capture) {
-              window.posthog.capture("player_share_clicked");
-            }
-            // Prefer native share on mobile
-            if (navigator.share) {
-              try {
-                await navigator.share({ title: title, url: url, text: title });
-                if (window.posthog && window.posthog.capture) {
-                  window.posthog.capture("player_share_completed", { method: "native" });
-                }
-              } catch (e) {
-                // User cancelled — ignore
-              }
-            } else {
-              // Show fallback menu
-              if (menu) menu.classList.toggle("hidden");
-            }
-          });
-        }
-
-        // Close menu when clicking outside
-        document.addEventListener("click", function (e) {
-          if (menu && !menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
-            menu.classList.add("hidden");
-          }
-        });
-
-        if (menu) {
-          menu.querySelectorAll("[data-share]").forEach(function (el) {
-            el.addEventListener("click", function (e) {
-              e.preventDefault();
-              var method = el.getAttribute("data-share");
-              if (method === "whatsapp") {
-                window.open("https://wa.me/?text=" + encodeURIComponent(title + " " + url));
-              } else if (method === "twitter") {
-                window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(title) + "&url=" + encodeURIComponent(url));
-              } else if (method === "copy") {
-                navigator.clipboard.writeText(url);
-                var span = el.querySelector("span:last-child");
-                if (span) {
-                  span.textContent = "¡Copiado!";
-                  setTimeout(function () { span.textContent = "Copiar enlace"; }, 2000);
-                }
-              }
-              if (window.posthog && window.posthog.capture) {
-                window.posthog.capture("player_share_completed", { method: method });
-              }
-              if (method !== "copy" && menu) menu.classList.add("hidden");
-            });
-          });
-        }
-      })();
+      if (window.posthog && window.posthog.capture) {
+        window.posthog.capture("share_link_opened");
+      }
     </script>
   </body>
 </html>

@@ -150,8 +150,6 @@ export default function BackgroundMusicWidget() {
 
   if (!ready || tracks.length === 0) return null;
 
-  const currentTrack = tracks[trackIndex];
-
   return (
     <>
       <audio ref={audioRef} preload="none" />
@@ -170,11 +168,6 @@ export default function BackgroundMusicWidget() {
                 <span className="material-symbols-outlined text-lg">close</span>
               </button>
             </div>
-
-            {/* Track name */}
-            <p className="text-xs font-body text-on-surface truncate">
-              {currentTrack?.name || "Track"}
-            </p>
 
             {/* Controls */}
             <div className="flex items-center gap-3">

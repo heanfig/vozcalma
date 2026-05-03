@@ -78,6 +78,7 @@ function BentoSelect({
         const isSelected = value === opt.value;
         const span = opt.wide === true ? "md:col-span-2" : "";
         const featured = opt.featured === true;
+        const subtle = opt.subtle === true;
         return (
           <motion.button
             key={opt.value}
@@ -92,7 +93,9 @@ function BentoSelect({
               span,
               featured
                 ? "bg-primary text-on-primary shadow-xl shadow-primary/15 md:min-h-[140px]"
-                : "bg-surface-container-low hover:bg-surface-container-lowest hover:shadow-lg",
+                : subtle
+                  ? "bg-surface-container-high/60 border border-dashed border-outline-variant/60 hover:bg-surface-container-high hover:shadow-md"
+                  : "bg-surface-container-low hover:bg-surface-container-lowest hover:shadow-lg",
               isSelected && !featured ? "ring-2 ring-primary ring-offset-2 ring-offset-surface" : "",
               isSelected && featured ? "ring-2 ring-on-primary/30" : "",
             ]
@@ -105,14 +108,20 @@ function BentoSelect({
                   "w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center shrink-0 transition-shadow",
                   featured
                     ? "bg-on-primary/15"
-                    : "bg-white shadow-sm group-hover:shadow-md",
+                    : subtle
+                      ? "bg-surface-container-low"
+                      : "bg-white shadow-sm group-hover:shadow-md",
                 ].join(" ")}
               >
                 {opt.icon && (
                   <span
                     className={[
                       "material-symbols-outlined text-2xl md:text-3xl",
-                      featured ? "text-on-primary" : "text-primary",
+                      featured
+                        ? "text-on-primary"
+                        : subtle
+                          ? "text-on-surface-variant/70"
+                          : "text-primary",
                     ].join(" ")}
                     style={
                       opt.icon === "favorite"

@@ -1,14 +1,22 @@
 ---
-// Landing Page Persuasiva — VozCalma
-// Diseño basado en Stitch project 15344559829188899043 screen f29b71c9d6...
-// Estática (Astro), sin React hydration para primera impresión rápida.
+// Landing Page — VozCalma
+// Tono concreto y diferenciador en hero/pricing/FAQ; alma poética se conserva
+// en manifiesto, blog y sección "El Nacimiento". Pricing transparente +
+// muestra audible + cómo funciona + FAQ + garantía.
 import "../styles/onboarding.css";
 import { blogPosts } from "../lib/blog";
 import BackgroundMusicWidget from "../components/BackgroundMusicWidget";
+import SamplePlayer from "../components/landing/SamplePlayer";
+import FAQ from "../components/landing/FAQ";
+import { PRICE_QUICK_COP_CENTS, PRICE_DEEP_COP_CENTS } from "../lib/constants";
+import { formatCOP } from "../lib/format";
 
 const latestPosts = [...blogPosts]
   .sort((a, b) => b.date.localeCompare(a.date))
   .slice(0, 3);
+
+const quickPrice = formatCOP(PRICE_QUICK_COP_CENTS);
+const deepPrice = formatCOP(PRICE_DEEP_COP_CENTS);
 
 const formatDate = (iso: string) => {
   try {
@@ -28,19 +36,18 @@ const formatDate = (iso: string) => {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Anti-flash: aplica dark mode ANTES del primer paint -->
     <script is:inline>
       (function(){var s=localStorage.getItem('vc-theme')||'system';var d=s==='dark'||(s==='system'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('dark')})();
     </script>
-    <title>VozCalma — El Santuario Digital</title>
+    <title>VozCalma — Una meditación creada solo para ti</title>
     <meta
       name="description"
-      content="No todos están listos para cambiar su mente. Meditaciones personalizadas que transforman tu estado emocional en minutos. Tu ritual de activación comienza aquí."
+      content="Meditaciones guiadas en español, hechas a la medida de lo que estás viviendo hoy. Sin suscripción. Pagas solo cuando quieras una."
     />
-    <meta property="og:title" content="VozCalma — El Santuario Digital" />
+    <meta property="og:title" content="VozCalma — Una meditación creada solo para ti" />
     <meta
       property="og:description"
-      content="No todos están listos para cambiar su mente… pero si estás aquí, algo en ti ya comenzó."
+      content="Cuéntanos qué necesitas y te entregamos una meditación con tu nombre y tu situación, en menos de 3 minutos."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://vozcalma.app/" />
@@ -102,11 +109,7 @@ const formatDate = (iso: string) => {
     </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link
-      rel="preconnect"
-      href="https://fonts.gstatic.com"
-      crossorigin
-    />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
@@ -124,13 +127,13 @@ const formatDate = (iso: string) => {
         <a href="#" class="font-headline text-xl md:text-2xl font-semibold text-primary tracking-tight">
           VozCalma
         </a>
-        <nav class="hidden md:flex items-center gap-8 text-sm font-label text-on-surface-variant">
-          <a href="#paths" class="hover:text-primary transition-colors">Los Caminos</a>
+        <nav class="hidden md:flex items-center gap-7 text-sm font-label text-on-surface-variant">
+          <a href="#como-funciona" class="hover:text-primary transition-colors">Cómo funciona</a>
+          <a href="#precios" class="hover:text-primary transition-colors">Precios</a>
+          <a href="#faq" class="hover:text-primary transition-colors">Preguntas</a>
           <a href="#articulos" class="hover:text-primary transition-colors">Artículos</a>
-          <a href="#activation" class="hover:text-primary transition-colors">Activación</a>
         </nav>
         <div class="flex items-center gap-2">
-          <!-- Dark mode toggle -->
           <button
             id="theme-toggle"
             type="button"
@@ -140,197 +143,262 @@ const formatDate = (iso: string) => {
             <span class="material-symbols-outlined text-lg" id="theme-icon">dark_mode</span>
           </button>
           <a
-            href="#activation"
-            data-begin-ritual
+            href="/onboarding"
+            data-cta="header"
             class="bg-primary text-on-primary px-5 py-2.5 rounded-full text-sm font-label font-semibold hover:opacity-90 transition-all shadow-md shadow-primary/10"
           >
-            Empezar ritual
+            Crear mi meditación
           </a>
         </div>
       </div>
     </header>
 
     <!-- ================= HERO ================= -->
-    <section
-      class="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 md:px-10 overflow-hidden"
-    >
-      <!-- Ambient background blurs -->
+    <section class="relative pt-28 pb-16 md:pt-40 md:pb-24 px-6 md:px-10 overflow-hidden">
       <div class="absolute inset-0 -z-10 pointer-events-none">
         <div class="absolute top-0 right-0 w-[60%] h-[70%] bg-gradient-to-bl from-primary-fixed/40 via-primary-fixed/10 to-transparent blur-3xl rounded-full"></div>
         <div class="absolute bottom-0 left-0 w-[50%] h-[60%] bg-gradient-to-tr from-tertiary-fixed/30 to-transparent blur-3xl rounded-full"></div>
       </div>
 
-      <div class="max-w-4xl mx-auto text-center space-y-8">
+      <div class="max-w-4xl mx-auto text-center space-y-7">
         <p class="font-label text-xs md:text-sm uppercase tracking-[0.3em] text-tertiary/80">
-          El Santuario Digital
+          Meditaciones personalizadas con IA
         </p>
         <h1 class="font-headline text-[2.25rem] sm:text-5xl md:text-6xl lg:text-7xl leading-[1.05] tracking-tight text-on-surface">
-          No todos están listos para cambiar su mente...
-          <span class="block italic text-primary mt-2">
-            pero si estás aquí, algo en ti ya comenzó.
-          </span>
+          Una meditación creada
+          <span class="block italic text-primary mt-2">solo para ti.</span>
         </h1>
         <p class="font-body text-base md:text-xl text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
-          Este no es otro app de meditación. Es un portal de transformación mental creado
-          para quienes buscan reprogramar sus patrones desde adentro. Cada sesión es única,
-          creada por IA al detalle de tu historia.
+          Cuéntanos qué estás viviendo hoy y te entregamos una sesión guiada con
+          tu nombre, tu situación y el tono exacto que necesitas. En menos de 3 minutos.
         </p>
-        <div class="pt-4">
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-3">
           <a
-            href="#activation"
-            class="inline-flex items-center gap-3 bg-primary text-on-primary px-8 py-4 rounded-full font-label font-semibold text-base md:text-lg hover:opacity-90 transition-all shadow-xl shadow-primary/15"
+            href="/onboarding"
+            data-cta="hero-primary"
+            class="inline-flex items-center justify-center gap-3 bg-primary text-on-primary px-8 py-4 rounded-full font-label font-semibold text-base md:text-lg hover:opacity-90 transition-all shadow-xl shadow-primary/15 w-full sm:w-auto"
           >
-            <span>Descubre tu camino</span>
-            <span class="material-symbols-outlined text-xl">expand_more</span>
+            <span>Crear mi meditación</span>
+            <span class="material-symbols-outlined text-xl">arrow_forward</span>
           </a>
+          <a
+            href="#demo"
+            data-cta="hero-secondary"
+            class="inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full font-label font-semibold text-base text-on-surface-variant hover:text-primary transition-colors w-full sm:w-auto"
+          >
+            <span class="material-symbols-outlined text-xl">graphic_eq</span>
+            <span>Escuchar una muestra</span>
+          </a>
+        </div>
+        <p class="font-body text-xs md:text-sm text-on-surface-variant/60 pt-2">
+          Sin suscripción · Pagas solo cuando quieras una nueva
+        </p>
+      </div>
+    </section>
+
+    <!-- ================= DEMO (SAMPLE PLAYER) ================= -->
+    <section id="demo" class="px-6 md:px-10 py-16 md:py-20 bg-surface scroll-mt-20">
+      <div class="max-w-4xl mx-auto text-center mb-10">
+        <p class="font-label text-xs md:text-sm uppercase tracking-[0.3em] text-tertiary/80">
+          Escucha primero
+        </p>
+        <h2 class="font-headline text-3xl md:text-5xl text-on-surface leading-tight tracking-tight mt-3">
+          Esto es <span class="italic text-primary">cómo suena</span>.
+        </h2>
+        <p class="font-body text-base md:text-lg text-on-surface-variant max-w-xl mx-auto mt-4 leading-relaxed">
+          Reproduce una muestra real de cualquier categoría. Sin pagar, sin registrarte.
+        </p>
+      </div>
+      <SamplePlayer client:load />
+    </section>
+
+    <!-- ================= CÓMO FUNCIONA ================= -->
+    <section id="como-funciona" class="px-6 md:px-10 py-20 md:py-28 bg-surface-container-low scroll-mt-20">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-14 space-y-4">
+          <p class="font-label text-xs md:text-sm uppercase tracking-[0.3em] text-tertiary/80">
+            Cómo funciona
+          </p>
+          <h2 class="font-headline text-3xl md:text-5xl text-on-surface leading-tight tracking-tight">
+            Tres pasos. <span class="italic text-primary">Tu meditación lista.</span>
+          </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+          <div class="bg-surface rounded-[2rem] p-8 md:p-9 space-y-4 relative">
+            <div class="absolute top-6 right-6 font-headline text-5xl italic text-primary/15">1</div>
+            <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-2xl">edit_note</span>
+            </div>
+            <h3 class="font-headline text-xl md:text-2xl text-on-surface">
+              Cuéntanos qué necesitas
+            </h3>
+            <p class="font-body text-sm md:text-base text-on-surface-variant leading-relaxed">
+              Responde unas pocas preguntas sobre lo que estás viviendo hoy. 2 minutos.
+              No hay respuestas correctas.
+            </p>
+          </div>
+
+          <div class="bg-surface rounded-[2rem] p-8 md:p-9 space-y-4 relative">
+            <div class="absolute top-6 right-6 font-headline text-5xl italic text-primary/15">2</div>
+            <div class="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary">
+              <span class="material-symbols-outlined text-2xl">auto_awesome</span>
+            </div>
+            <h3 class="font-headline text-xl md:text-2xl text-on-surface">
+              Creamos tu sesión
+            </h3>
+            <p class="font-body text-sm md:text-base text-on-surface-variant leading-relaxed">
+              Generamos un guion único con tu nombre, tu intención y tu tono. Lo
+              convertimos en audio guiado con voz cálida en español.
+            </p>
+          </div>
+
+          <div class="bg-surface rounded-[2rem] p-8 md:p-9 space-y-4 relative">
+            <div class="absolute top-6 right-6 font-headline text-5xl italic text-primary/15">3</div>
+            <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-2xl">headphones</span>
+            </div>
+            <h3 class="font-headline text-xl md:text-2xl text-on-surface">
+              Escucha cuando quieras
+            </h3>
+            <p class="font-body text-sm md:text-base text-on-surface-variant leading-relaxed">
+              Recibe tu audio en menos de 3 minutos. Reprodúcelo online o descárgalo
+              para escucharlo sin conexión.
+            </p>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- ================= MANIFESTO ================= -->
-    <section class="relative px-6 md:px-10 py-20 md:py-32 bg-surface-container-low">
-      <div class="max-w-4xl mx-auto space-y-12">
+    <!-- ================= PRECIOS ================= -->
+    <section id="precios" class="px-6 md:px-10 py-20 md:py-28 bg-surface scroll-mt-20">
+      <div class="max-w-5xl mx-auto">
+        <div class="text-center mb-12 space-y-4">
+          <p class="font-label text-xs md:text-sm uppercase tracking-[0.3em] text-tertiary/80">
+            Precios
+          </p>
+          <h2 class="font-headline text-3xl md:text-5xl text-on-surface leading-tight tracking-tight">
+            Elige el camino que <span class="italic text-primary">necesitas hoy</span>.
+          </h2>
+          <p class="font-body text-base md:text-lg text-on-surface-variant max-w-xl mx-auto leading-relaxed">
+            Pagas por sesión. Sin suscripción, sin renovaciones automáticas.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-stretch">
+          <!-- Quick -->
+          <div class="bg-surface-container-low rounded-[2rem] p-8 md:p-10 border border-outline-variant/20 hover:shadow-xl hover:-translate-y-1 transition-all duration-500 flex flex-col">
+            <div class="flex items-center gap-3 min-h-[3.5rem]">
+              <div class="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary flex-shrink-0">
+                <span class="material-symbols-outlined text-2xl">spa</span>
+              </div>
+              <h3 class="font-headline text-2xl md:text-3xl text-on-surface italic">
+                Alivio Rápido
+              </h3>
+            </div>
+            <p class="font-body text-base text-on-surface-variant leading-relaxed mt-5 flex-1">
+              Una sesión corta para soltar lo que pesa hoy. Calma mental, descanso,
+              gestión emocional o presencia. 3 a 4 minutos.
+            </p>
+            <div class="pt-6">
+              <p class="font-headline text-4xl md:text-5xl text-on-surface">
+                {quickPrice}
+              </p>
+              <p class="font-body text-xs text-on-surface-variant/70 mt-1">
+                Pago único · Sin renovación
+              </p>
+            </div>
+            <a
+              href="/onboarding/alivio-rapido"
+              data-cta="pricing-quick"
+              class="inline-flex items-center justify-center gap-2 w-full bg-primary text-on-primary px-6 py-3.5 rounded-full font-label font-semibold text-sm md:text-base hover:opacity-90 transition-all shadow-md shadow-primary/15 mt-5"
+            >
+              Crear meditación rápida
+              <span class="material-symbols-outlined text-lg">arrow_forward</span>
+            </a>
+          </div>
+
+          <!-- Deep -->
+          <div class="bg-surface-container-low rounded-[2rem] p-8 md:p-10 border-2 border-primary/30 hover:shadow-xl hover:-translate-y-1 transition-all duration-500 relative flex flex-col">
+            <span class="absolute -top-3 left-8 bg-primary text-on-primary text-[10px] font-label font-semibold uppercase tracking-widest px-3 py-1 rounded-full shadow-md">
+              Recomendado
+            </span>
+            <div class="flex items-center gap-3 min-h-[3.5rem]">
+              <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary flex-shrink-0">
+                <span class="material-symbols-outlined text-2xl">psychology</span>
+              </div>
+              <h3 class="font-headline text-2xl md:text-3xl text-on-surface italic">
+                Reprogramación Profunda
+              </h3>
+            </div>
+            <p class="font-body text-base text-on-surface-variant leading-relaxed mt-5 flex-1">
+              Una sesión más larga para trabajar patrones, identidad y reprogramación
+              subconsciente. 6 a 8 minutos. Cuando lo que buscas es transformación, no solo alivio.
+            </p>
+            <div class="pt-6">
+              <p class="font-headline text-4xl md:text-5xl text-on-surface">
+                {deepPrice}
+              </p>
+              <p class="font-body text-xs text-on-surface-variant/70 mt-1">
+                Pago único · Sin renovación
+              </p>
+            </div>
+            <a
+              href="/onboarding/reprogramacion-profunda"
+              data-cta="pricing-deep"
+              class="inline-flex items-center justify-center gap-2 w-full bg-primary text-on-primary px-6 py-3.5 rounded-full font-label font-semibold text-sm md:text-base hover:opacity-90 transition-all shadow-md shadow-primary/15 mt-5"
+            >
+              Crear meditación profunda
+              <span class="material-symbols-outlined text-lg">arrow_forward</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= MANIFESTO (alma poética conservada) ================= -->
+    <section class="relative px-6 md:px-10 py-20 md:py-28 bg-surface-container-low">
+      <div class="max-w-4xl mx-auto space-y-10">
         <div class="text-center space-y-4">
           <p class="font-label text-xs md:text-sm uppercase tracking-[0.3em] text-tertiary/80">
             El Manifiesto
           </p>
           <h2 class="font-headline text-3xl md:text-5xl lg:text-6xl text-on-surface leading-tight tracking-tight">
-            Esto no es para{" "}
-            <span class="italic text-primary">cualquiera</span>.
+            Esto no es para <span class="italic text-primary">cualquiera</span>.
           </h2>
         </div>
 
         <div class="max-w-2xl mx-auto text-center space-y-6">
           <p class="font-body text-lg md:text-xl text-on-surface-variant leading-relaxed">
-            Este programa fue diseñado para quienes buscan reprogramar su subconsciente.
-            Para quienes están listos a soltar las viejas historias y construir
-            una nueva forma de habitarse.
+            VozCalma fue diseñada para quienes buscan algo más que una biblioteca
+            de meditaciones genéricas. Para quienes quieren una sesión hecha a la medida
+            de su momento — no la de alguien más.
           </p>
           <p class="font-body text-lg md:text-xl text-on-surface-variant leading-relaxed">
-            Cada meditación que creamos para ti es un acto íntimo. Tu historia, tus palabras,
-            tu voz interior... se convierten en el material desde donde nace la transformación.
-          </p>
-        </div>
-
-        <div class="text-center pt-8">
-          <p class="font-label text-xs md:text-sm uppercase tracking-[0.3em] text-primary">
-            ¿Qué vas a experimentar?
+            Tu nombre, tu historia, tu situación específica se convierten en el material
+            desde donde nace cada audio. Una meditación íntima, hecha para ti, hoy.
           </p>
         </div>
       </div>
     </section>
 
-    <!-- ================= FEATURE CARDS ================= -->
-    <section id="paths" class="px-6 md:px-10 py-20 md:py-28 bg-surface">
-      <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-        <!-- Card 1 -->
-        <div class="bg-surface-container-low rounded-[2rem] p-8 md:p-10 space-y-5 hover:shadow-xl transition-shadow duration-500">
-          <div class="w-14 h-14 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
-            <span class="material-symbols-outlined text-3xl">graphic_eq</span>
-          </div>
-          <h3 class="font-headline text-2xl md:text-3xl text-on-surface italic">
-            Susurros Subconscientes
-          </h3>
-          <p class="font-body text-base text-on-surface-variant leading-relaxed">
-            Audios diseñados para hablarle directamente a las capas más profundas de tu mente.
-            No es una voz que te habla: es una presencia que te guía.
+    <!-- ================= FAQ ================= -->
+    <section id="faq" class="px-6 md:px-10 py-20 md:py-28 bg-surface scroll-mt-20">
+      <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-12 space-y-4">
+          <p class="font-label text-xs md:text-sm uppercase tracking-[0.3em] text-tertiary/80">
+            Preguntas frecuentes
           </p>
-        </div>
-
-        <!-- Card 2 -->
-        <div class="bg-surface-container-low rounded-[2rem] p-8 md:p-10 space-y-5 hover:shadow-xl transition-shadow duration-500">
-          <div class="w-14 h-14 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary">
-            <span class="material-symbols-outlined text-3xl">psychology_alt</span>
-          </div>
-          <h3 class="font-headline text-2xl md:text-3xl text-on-surface italic">
-            Guía Intuitiva
-          </h3>
-          <p class="font-body text-base text-on-surface-variant leading-relaxed">
-            No hay fórmulas. Cada sesión entiende tu momento presente y te acompaña
-            exactamente donde estás. Los miedos se disuelven en presencia.
-          </p>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="bg-surface-container-low rounded-[2rem] p-8 md:p-10 space-y-5 hover:shadow-xl transition-shadow duration-500">
-          <div class="w-14 h-14 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
-            <span class="material-symbols-outlined text-3xl">auto_awesome</span>
-          </div>
-          <h3 class="font-headline text-2xl md:text-3xl text-on-surface italic">
-            El Nacimiento
-          </h3>
-          <p class="font-body text-base text-on-surface-variant leading-relaxed">
-            No se trata de relajarte. Se trata de renacer. Cada meditación es
-            el inicio de la identidad que siempre estuvo esperándote.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ================= ACTIVATION (NAME FORM) ================= -->
-    <section
-      id="activation"
-      class="relative px-6 md:px-10 py-24 md:py-36 bg-gradient-to-b from-surface-container-low via-surface to-primary-fixed/20 overflow-hidden"
-    >
-      <!-- Ambient glow -->
-      <div class="absolute inset-0 -z-10 pointer-events-none">
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[80%] bg-primary/5 blur-3xl rounded-full"></div>
-      </div>
-
-      <div class="max-w-2xl mx-auto text-center space-y-10">
-        <div class="space-y-4">
-          <p class="font-label text-xs md:text-sm uppercase tracking-[0.3em] text-primary">
-            Ritual de Activación
-          </p>
-          <h2 class="font-headline text-3xl md:text-5xl lg:text-6xl text-on-surface leading-tight tracking-tight">
-            Al entrar aquí, algo se mueve en tu interior y{" "}
-            <span class="italic text-primary">no hay vuelta atrás</span>.
+          <h2 class="font-headline text-3xl md:text-5xl text-on-surface leading-tight tracking-tight">
+            Lo que casi todos <span class="italic text-primary">se preguntan</span>.
           </h2>
-          <p class="font-body text-base md:text-lg text-on-surface-variant max-w-lg mx-auto pt-4 leading-relaxed">
-            Escribe tu nombre. Este es el primer paso del ritual.
-            Desde aquí empieza tu camino.
-          </p>
         </div>
-
-        <form
-          id="activation-form"
-          class="space-y-6 max-w-md mx-auto"
-          novalidate
-        >
-          <label class="block">
-            <span class="sr-only">Tu nombre</span>
-            <input
-              type="text"
-              name="name"
-              id="activation-name"
-              maxlength="50"
-              required
-              autocomplete="given-name"
-              placeholder="¿Cómo te llamas?"
-              class="w-full bg-surface-container-lowest border-none rounded-2xl py-5 px-8 text-xl md:text-2xl font-body text-on-surface placeholder:text-on-surface-variant/30 focus:ring-2 focus:ring-primary-fixed transition-all text-center shadow-sm outline-none"
-            />
-          </label>
-
-          <button
-            type="submit"
-            class="w-full bg-primary text-on-primary px-8 py-5 rounded-full font-label font-semibold text-base md:text-lg hover:opacity-90 transition-all shadow-xl shadow-primary/15 disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-3"
-          >
-            <span>ESTOY LISTO PARA CAMBIAR</span>
-            <span class="material-symbols-outlined text-xl">arrow_forward</span>
-          </button>
-        </form>
-
-        <p class="font-body text-xs text-on-surface-variant/60 italic">
-          Al continuar, aceptas nuestros{" "}
-          <a href="/terminos-del-servicio" class="underline hover:text-primary">Términos</a>
-          {" "}y{" "}
-          <a href="/politica-de-privacidad" class="underline hover:text-primary">Política de Privacidad</a>.
-        </p>
+        <FAQ client:load />
       </div>
     </section>
 
     <!-- ================= ARTÍCULOS (BLOG) ================= -->
-    <section id="articulos" class="px-6 md:px-10 py-20 md:py-28 bg-surface">
+    <section id="articulos" class="px-6 md:px-10 py-20 md:py-28 bg-surface-container-low">
       <div class="max-w-6xl mx-auto">
         <div class="text-center space-y-4 mb-14">
           <p class="font-label text-xs md:text-sm uppercase tracking-[0.3em] text-tertiary/80">
@@ -348,7 +416,7 @@ const formatDate = (iso: string) => {
           {latestPosts.map((post) => (
             <a
               href={`/blog/${post.slug}`}
-              class="group bg-surface-container-low rounded-[2rem] p-8 md:p-9 flex flex-col gap-4 hover:shadow-xl hover:-translate-y-1 transition-all duration-500"
+              class="group bg-surface rounded-[2rem] p-8 md:p-9 flex flex-col gap-4 hover:shadow-xl hover:-translate-y-1 transition-all duration-500"
             >
               <time class="text-xs font-label uppercase tracking-widest text-on-surface-variant/60">
                 {formatDate(post.date)}
@@ -379,12 +447,39 @@ const formatDate = (iso: string) => {
       </div>
     </section>
 
-    <!-- ================= FOOTER ================= -->
-    <footer class="bg-surface-container-low px-6 md:px-10 py-12">
-      <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-        <p class="font-body text-xs text-on-surface-variant/70">
-          © {new Date().getFullYear()} VozCalma. El Santuario Digital.
+    <!-- ================= CIERRE / CTA FINAL ================= -->
+    <section class="relative px-6 md:px-10 py-24 md:py-32 bg-gradient-to-b from-surface via-surface to-primary-fixed/20 overflow-hidden">
+      <div class="absolute inset-0 -z-10 pointer-events-none">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[80%] bg-primary/5 blur-3xl rounded-full"></div>
+      </div>
+      <div class="max-w-2xl mx-auto text-center space-y-7">
+        <h2 class="font-headline text-3xl md:text-5xl lg:text-6xl text-on-surface leading-tight tracking-tight">
+          Tu próxima meditación <span class="italic text-primary">empieza con una pregunta</span>.
+        </h2>
+        <p class="font-body text-base md:text-lg text-on-surface-variant max-w-lg mx-auto leading-relaxed">
+          ¿Qué estás viviendo hoy?
         </p>
+        <div class="pt-2">
+          <a
+            href="/onboarding"
+            data-cta="footer-final"
+            class="inline-flex items-center gap-3 bg-primary text-on-primary px-8 py-4 rounded-full font-label font-semibold text-base md:text-lg hover:opacity-90 transition-all shadow-xl shadow-primary/15"
+          >
+            <span>Crear mi meditación</span>
+            <span class="material-symbols-outlined text-xl">arrow_forward</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="bg-surface-container-low px-6 md:px-10 py-10 border-t border-outline-variant/10">
+      <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="text-center md:text-left">
+          <p class="font-body text-xs text-on-surface-variant/70">
+            © {new Date().getFullYear()} VozCalma. Hecho con cuidado en Colombia.
+          </p>
+        </div>
         <nav class="flex items-center gap-6 text-xs font-label text-on-surface-variant/70">
           <a href="/politica-de-privacidad" class="hover:text-primary transition-colors">Privacidad</a>
           <a href="/terminos-del-servicio" class="hover:text-primary transition-colors">Términos</a>
@@ -393,121 +488,11 @@ const formatDate = (iso: string) => {
       </div>
     </footer>
 
-    <!-- Background music widget -->
     <BackgroundMusicWidget client:idle />
 
     <!-- Interactive wiring -->
     <script is:inline>
       (function () {
-        var form = document.getElementById("activation-form");
-        var submitBtn = form ? form.querySelector("button[type='submit']") : null;
-        var input = document.getElementById("activation-name");
-
-        // FIX R5: Reset botón cuando el browser restaura la página desde bfcache
-        window.addEventListener("pageshow", function () {
-          if (submitBtn) submitBtn.disabled = false;
-          // Limpiar cualquier error previo
-          var errEl = document.getElementById("activation-error");
-          if (errEl) errEl.remove();
-        });
-
-        if (form && submitBtn) {
-          form.addEventListener("submit", async function (e) {
-            e.preventDefault();
-            var name = (input && input.value ? input.value : "").trim();
-            if (!name) {
-              input && input.focus();
-              return;
-            }
-
-            submitBtn.disabled = true;
-            // Limpiar error previo
-            var errEl = document.getElementById("activation-error");
-            if (errEl) errEl.remove();
-
-            if (window.posthog && typeof window.posthog.capture === "function") {
-              window.posthog.capture("landing_activation_submit", { name_length: name.length });
-            }
-
-            // Capturar UTM + coupon del query string (atribución de referidos)
-            var qp = new URLSearchParams(window.location.search);
-            var attribution = {
-              name: name,
-              utm_source: qp.get("utm_source") || undefined,
-              utm_medium: qp.get("utm_medium") || undefined,
-              utm_campaign: qp.get("utm_campaign") || undefined,
-              coupon_code: qp.get("coupon") || undefined,
-            };
-
-            try {
-              var res = await fetch("/api/onboarding/start-session", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "same-origin",
-                body: JSON.stringify(attribution),
-              });
-
-              if (!res.ok) {
-                var errData = await res.json().catch(function () { return { error: "Error" }; });
-                var errMsg = errData.error || "No se pudo iniciar la sesión";
-                showError(errMsg);
-                submitBtn.disabled = false;
-                return;
-              }
-
-              var startData = await res.json().catch(function () { return {}; });
-              if (window.posthog && typeof window.posthog.identify === "function" && startData.sessionId) {
-                window.posthog.identify(startData.sessionId, {
-                  utm_source: attribution.utm_source || null,
-                  utm_medium: attribution.utm_medium || null,
-                  utm_campaign: attribution.utm_campaign || null,
-                });
-              }
-              if (window.posthog && typeof window.posthog.capture === "function") {
-                window.posthog.capture("session_created", {
-                  has_coupon: !!attribution.coupon_code,
-                  utm_source: attribution.utm_source || null,
-                  utm_medium: attribution.utm_medium || null,
-                  utm_campaign: attribution.utm_campaign || null,
-                });
-                if (attribution.utm_source) {
-                  window.posthog.capture("referral_attributed", {
-                    utm_source: attribution.utm_source,
-                    utm_medium: attribution.utm_medium || null,
-                    utm_campaign: attribution.utm_campaign || null,
-                  });
-                }
-              }
-
-              // Preservar coupon + utm en URL del onboarding para que auto-fill y análisis funcionen
-              var nextQs = new URLSearchParams();
-              if (attribution.coupon_code) nextQs.set("coupon", attribution.coupon_code);
-              if (attribution.utm_source) nextQs.set("utm_source", attribution.utm_source);
-              if (attribution.utm_medium) nextQs.set("utm_medium", attribution.utm_medium);
-              if (attribution.utm_campaign) nextQs.set("utm_campaign", attribution.utm_campaign);
-              var qsStr = nextQs.toString();
-              window.location.href = "/onboarding" + (qsStr ? "?" + qsStr : "");
-            } catch (err) {
-              showError("No pudimos conectar con el servidor. Intenta de nuevo.");
-              submitBtn.disabled = false;
-            }
-          });
-        }
-
-        function showError(msg) {
-          var errEl = document.getElementById("activation-error");
-          if (!errEl) {
-            errEl = document.createElement("p");
-            errEl.id = "activation-error";
-            errEl.className = "text-error text-sm mt-3 text-center font-body";
-            if (form) form.appendChild(errEl);
-          }
-          errEl.textContent = msg;
-          if (window.posthog && typeof window.posthog.capture === "function") {
-            window.posthog.capture("landing_activation_error", { error: msg });
-          }
-        }
-
         // Theme toggle (dark mode)
         var themeBtn = document.getElementById("theme-toggle");
         var themeIcon = document.getElementById("theme-icon");
@@ -518,7 +503,6 @@ const formatDate = (iso: string) => {
         updateThemeIcon();
         if (themeBtn) {
           themeBtn.addEventListener("click", function () {
-            // Simple toggle: light ↔ dark (sin ciclo por "system" que confunde)
             var isDark = document.documentElement.classList.contains("dark");
             var next = isDark ? "light" : "dark";
             document.documentElement.classList.toggle("dark", next === "dark");
@@ -530,14 +514,40 @@ const formatDate = (iso: string) => {
           });
         }
 
-        // Begin Ritual / Empezar ritual button: track click
-        document.querySelectorAll("[data-begin-ritual]").forEach(function (el) {
+        // Track CTA clicks (capture intent)
+        document.querySelectorAll("[data-cta]").forEach(function (el) {
           el.addEventListener("click", function () {
+            var label = el.getAttribute("data-cta");
             if (window.posthog && typeof window.posthog.capture === "function") {
-              window.posthog.capture("landing_begin_ritual_click");
+              window.posthog.capture("hero_cta_clicked", { cta: label });
             }
           });
         });
+
+        // Capturar UTM + coupon → preservar en links de onboarding
+        try {
+          var qp = new URLSearchParams(window.location.search);
+          var utm = {
+            utm_source: qp.get("utm_source"),
+            utm_medium: qp.get("utm_medium"),
+            utm_campaign: qp.get("utm_campaign"),
+            coupon: qp.get("coupon"),
+          };
+          var qs = new URLSearchParams();
+          if (utm.utm_source) qs.set("utm_source", utm.utm_source);
+          if (utm.utm_medium) qs.set("utm_medium", utm.utm_medium);
+          if (utm.utm_campaign) qs.set("utm_campaign", utm.utm_campaign);
+          if (utm.coupon) qs.set("coupon", utm.coupon);
+          var qsStr = qs.toString();
+          if (qsStr) {
+            document.querySelectorAll('a[href^="/onboarding"]').forEach(function (a) {
+              var href = a.getAttribute("href");
+              if (!href) return;
+              var sep = href.indexOf("?") >= 0 ? "&" : "?";
+              a.setAttribute("href", href + sep + qsStr);
+            });
+          }
+        } catch (e) {}
       })();
     </script>
   </body>

@@ -53,10 +53,18 @@ export default function OnboardingFlow({
   const [chosenType, setChosenType] = useState<OnboardingType | null>(
     initialType ?? null,
   );
-  // Si hay nombre pre-cargado y NO hay type pre-seleccionado → ir directo al selectType
-  // Si hay nombre pre-cargado Y type → ir directo al primer step del flow (stepIdx 1)
-  const initialPhase: Phase =
-    hasPrefilledName && !initialType ? "selectType" : "intake";
+  // Determinar fase inicial. Reglas:
+  //  - sin nombre prellenado → intake (preguntar nombre)
+  //  - con nombre + sin tipo → selectType
+  //  - con nombre + tipo + sin pago → payment (NO permitir saltar al intake sin pagar)
+  //  - con nombre + tipo + pago → intake (preguntas)
+  const initialPhase: Phase = !hasPrefilledName
+    ? "intake"
+    : !initialType
+      ? "selectType"
+      : !initialSid
+        ? "payment"
+        : "intake";
   const initialStepIdx = hasPrefilledName && initialType ? 1 : 0;
 
   const [phase, setPhase] = useState<Phase>(initialPhase);
@@ -184,6 +192,15 @@ export default function OnboardingFlow({
         return;
       }
 
+      // Si el paso actual era "nombre" y ya hay tipo elegido pero NO se pagó
+      // (caso: el usuario aterriza directo en /onboarding/alivio-rapido sin
+      // venir del flujo de pago), forzar payment antes de seguir con preguntas.
+      if (step.key === "nombre" && chosenType && !isPaid) {
+        setDirection(1);
+        setPhase("payment");
+        return;
+      }
+
       // CRÍTICO: recalcular allSteps con `next` (no con `answers` stale del useMemo).
       // Sin esto, pasos con showIf (como situacionEspecifica) se saltarían porque
       // el allSteps viejo aún no refleja la nueva respuesta.
@@ -202,7 +219,7 @@ export default function OnboardingFlow({
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [stepIdx, answers, allSteps, chosenType, initialCouponCode],
+    [stepIdx, answers, allSteps, chosenType, initialCouponCode, isPaid],
   );
 
   const handleBack = useCallback(() => {

@@ -31,7 +31,8 @@ function sanitizePersonalizationForTts(script: string, firstName: string | undef
     out = out.replace(/\bquerida\s+usuario\b/gi, "");
     out = out.replace(/\bcariño\s+usuario\b/gi, "cariño");
     out = out.replace(/\bUsuario\b/g, "");
-    out = out.replace(/\s{2,}/g, " ");
+    // Solo colapsar espacios horizontales múltiples; preserva newlines y marcadores ||PAUSE:Xs||.
+    out = out.replace(/[ \t]{2,}/g, " ");
   }
   return out;
 }

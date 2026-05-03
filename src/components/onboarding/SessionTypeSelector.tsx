@@ -52,6 +52,25 @@ export default function SessionTypeSelector({ userName, onSelect }: Props) {
           <p className="font-body text-on-surface-variant text-sm sm:text-base md:text-lg tracking-wide opacity-80">
             Elige el ritmo de tu práctica. Desde una pausa breve hasta una transformación consciente.
           </p>
+          {safeName && (
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await fetch("/api/onboarding/clear-session", {
+                    method: "POST",
+                    credentials: "same-origin",
+                  });
+                } catch {
+                  // best-effort
+                }
+                window.location.href = "/onboarding";
+              }}
+              className="text-xs sm:text-sm text-on-surface-variant/70 hover:text-primary underline underline-offset-4 transition-colors"
+            >
+              ¿No eres tú? Cambiar usuario
+            </button>
+          )}
         </motion.header>
 
         {/* Cards grid */}
