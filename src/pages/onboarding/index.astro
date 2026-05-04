@@ -7,8 +7,10 @@ import { signCsrfToken } from "../../lib/csrf";
 import { getSupabaseAdmin } from "../../lib/supabase-server";
 
 // Preferir cookie firmada. Fallback al query param para compatibilidad/links directos.
-// ensureFreshSession rota el sessionId si la cookie apunta a una sesión ya pagada.
-const session = await ensureFreshSession(Astro.cookies);
+// ensureFreshSession rota el sessionId si la cookie apunta a una sesión ya pagada,
+// y adopta una sesión paga vía URL si no hay cookie (caso: link en otro navegador).
+const rawSessionParam = Astro.url.searchParams.get("session") || undefined;
+const session = await ensureFreshSession(Astro.cookies, rawSessionParam);
 const queryName = Astro.url.searchParams.get("name")?.trim() || undefined;
 const initialName = session?.name || queryName;
 
@@ -18,7 +20,6 @@ const initialName = session?.name || queryName;
 const sessionId = session?.sessionId || "anonymous";
 const csrfToken = signCsrfToken(sessionId);
 
-const rawSessionParam = Astro.url.searchParams.get("session") || undefined;
 const initialCouponCode = Astro.url.searchParams.get("coupon")?.trim() || undefined;
 
 // Si llega con ?session=<sid>, validar contra DB:

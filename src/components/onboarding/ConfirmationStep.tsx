@@ -113,19 +113,19 @@ export default function ConfirmationStep({
 
         {/* Warning banner: tiempo estimado */}
         <motion.div
-          className="bg-primary-fixed/60 border border-primary-fixed rounded-2xl p-4 md:p-5 flex items-start gap-3"
+          className="bg-primary-fixed border border-primary-fixed-dim rounded-2xl p-4 md:p-5 flex items-start gap-3"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <span className="material-symbols-outlined text-2xl text-primary shrink-0 mt-0.5">
+          <span className="material-symbols-outlined text-2xl text-on-primary-fixed shrink-0 mt-0.5">
             schedule
           </span>
           <div className="space-y-1">
-            <p className="font-label font-semibold text-sm text-primary">
+            <p className="font-label font-semibold text-sm text-on-primary-fixed">
               Esto puede tardar hasta 5 minutos
             </p>
-            <p className="text-xs text-on-surface-variant leading-relaxed">
+            <p className="text-xs text-on-primary-fixed-variant leading-relaxed">
               Nuestra IA está creando una meditación profundamente detallada para ti. Si prefieres,
               podemos enviarte el enlace por correo cuando esté lista.
             </p>

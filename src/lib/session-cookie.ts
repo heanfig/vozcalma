@@ -54,7 +54,19 @@ export function createSession(
   name: string,
   meta?: SessionMeta,
 ): SessionPayload & { cookieValue: string } {
-  const sessionId = randomUUID();
+  return signSessionPayload(randomUUID(), name, meta);
+}
+
+/**
+ * Firma un sessionId existente (caso: adoptar una sesión paga vía ?session=).
+ * Útil cuando un usuario llega de un email/share-link sin cookie y necesitamos
+ * que el cookie apunte al sessionId específico que ya pagó.
+ */
+export function signSessionPayload(
+  sessionId: string,
+  name: string,
+  meta?: SessionMeta,
+): SessionPayload & { cookieValue: string } {
   const payload: SessionPayload = {
     name,
     sessionId,

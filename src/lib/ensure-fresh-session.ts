@@ -5,6 +5,10 @@
  * Esto evita el caso en que un usuario con cookie persistente intente iniciar
  * una nueva meditación y obtenga "Esta sesión ya fue pagada" en checkout.
  *
+ * Si NO hay cookie pero llega un `paidSessionId` válido por URL (caso: usuario
+ * pagó y abrió el link en otro navegador / incógnito), firmamos una cookie
+ * apuntando a esa sesión para que el endpoint /generate la pueda autorizar.
+ *
  * Debe ejecutarse al inicio de las páginas de onboarding, ANTES de firmar el
  * CSRF token, para que todo (cookie, CSRF, sessionId rendered) quede alineado.
  */
@@ -12,6 +16,7 @@ import type { AstroCookies } from "astro";
 import {
   readSession,
   createSession,
+  signSessionPayload,
   setSessionCookie,
   type SessionPayload,
 } from "./session-cookie";
@@ -19,11 +24,37 @@ import { getSupabaseAdmin } from "./supabase-server";
 
 export async function ensureFreshSession(
   cookies: AstroCookies,
+  paidSessionId?: string,
 ): Promise<SessionPayload | null> {
   const session = readSession(cookies);
+  const supabase = getSupabaseAdmin();
+
+  // Caso A: no hay cookie pero llega ?session=<sid> por URL.
+  // Si la sesión existe, está paga y NO consumida, firmamos una cookie.
+  if (!session && paidSessionId) {
+    const { data: row } = await supabase
+      .from("onboarding_sessions")
+      .select("is_paid, audio_url, intake_json")
+      .eq("id", paidSessionId)
+      .maybeSingle();
+    if (row && row.is_paid && !row.audio_url) {
+      const intake = (row.intake_json ?? {}) as Record<string, unknown>;
+      const name = typeof intake.nombre === "string" && intake.nombre.trim()
+        ? intake.nombre.trim()
+        : "amigo/a";
+      const adopted = signSessionPayload(paidSessionId, name);
+      setSessionCookie(cookies, adopted.cookieValue);
+      return {
+        name: adopted.name,
+        sessionId: adopted.sessionId,
+        createdAt: adopted.createdAt,
+      };
+    }
+    return null;
+  }
+
   if (!session) return null;
 
-  const supabase = getSupabaseAdmin();
   const { data: row } = await supabase
     .from("onboarding_sessions")
     .select("is_paid, audio_url")

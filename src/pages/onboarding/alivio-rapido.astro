@@ -6,12 +6,12 @@ import { ensureFreshSession } from "../../lib/ensure-fresh-session";
 import { signCsrfToken } from "../../lib/csrf";
 import { getSupabaseAdmin } from "../../lib/supabase-server";
 
-const session = await ensureFreshSession(Astro.cookies);
+const rawSessionParam = Astro.url.searchParams.get("session") || undefined;
+const session = await ensureFreshSession(Astro.cookies, rawSessionParam);
 const queryName = Astro.url.searchParams.get("name")?.trim() || undefined;
 const initialName = session?.name || queryName;
 const sessionId = session?.sessionId || "anonymous";
 const csrfToken = signCsrfToken(sessionId);
-const rawSessionParam = Astro.url.searchParams.get("session") || undefined;
 const initialCouponCode = Astro.url.searchParams.get("coupon")?.trim() || undefined;
 
 // Validar ?session=<sid>:
