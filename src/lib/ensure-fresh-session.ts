@@ -26,11 +26,14 @@ export async function ensureFreshSession(
   const supabase = getSupabaseAdmin();
   const { data: row } = await supabase
     .from("onboarding_sessions")
-    .select("is_paid")
+    .select("is_paid, audio_url")
     .eq("id", session.sessionId)
     .maybeSingle();
 
-  if (!row || !row.is_paid) return session;
+  // Solo rotamos si la sesión está consumida (audio entregado). Si está paga
+  // pero sin audio, el usuario está en medio del flow (intake) y debe
+  // conservar la misma sessionId para que el endpoint /generate la encuentre.
+  if (!row || !row.is_paid || !row.audio_url) return session;
 
   const fresh = createSession(session.name, {
     utm_source: session.utm_source,

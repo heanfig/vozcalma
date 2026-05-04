@@ -75,12 +75,14 @@ export default function ConfirmationStep({
   const entries = Object.entries(answers).filter(([, v]) => v.trim());
   const [deliverByEmail, setDeliverByEmail] = useState(false);
   const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   const emailValid = !deliverByEmail || EMAIL_REGEX.test(email.trim());
-  const canSubmit = !deliverByEmail || emailValid;
+  const canSubmit = (!deliverByEmail || emailValid) && !submitted;
 
   const handleSubmit = () => {
     if (!canSubmit) return;
+    setSubmitted(true);
     onConfirm({ deliverByEmail, email: email.trim() });
   };
 

@@ -286,7 +286,7 @@ export default function WompiCheckout({
                 ? "Procesando..."
                 : isFree
                   ? "Continuar gratis"
-                  : `Pagar ${formatCOP(finalAmount)} COP con Wompi`}
+                  : `Pagar ${formatCOP(finalAmount)} COP`}
             </button>
             {error && (
               <p className="text-error text-sm text-center">{error}</p>
@@ -405,7 +405,7 @@ export default function WompiCheckout({
             <div className="flex items-center gap-2 text-on-surface-variant/70">
               <span className="material-symbols-outlined text-base">lock</span>
               <span className="text-sm font-medium tracking-tight">
-                Pago seguro procesado por Wompi
+                Pago seguro
               </span>
             </div>
             <p className="text-xs text-on-surface-variant/50 max-w-md text-center">
