@@ -278,3 +278,11 @@
   background-color: rgb(var(--color-primary-fixed));
   color: rgb(var(--color-on-surface));
 }
+
+/* ------------------------------------------------------------------ */
+/* Reproductor activo: ocultar widget flotante de música de fondo      */
+/* ------------------------------------------------------------------ */
+
+body.vc-player-active [data-bg-music-widget] {
+  display: none !important;
+}

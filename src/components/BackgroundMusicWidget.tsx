@@ -153,7 +153,7 @@ export default function BackgroundMusicWidget() {
   return (
     <>
       <audio ref={audioRef} preload="none" />
-      <div className="fixed bottom-4 right-4 z-40">
+      <div data-bg-music-widget className="fixed bottom-4 right-4 z-40">
         {expanded ? (
           <div className="bg-surface/95 backdrop-blur-xl rounded-3xl shadow-xl border border-outline-variant/15 p-4 w-64 space-y-3 transition-all">
             {/* Header */}

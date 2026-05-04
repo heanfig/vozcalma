@@ -1,7 +1,6 @@
 ---
 import PostHog from "../../components/posthog.astro";
 import OnboardingPlayer from "../../components/onboarding/OnboardingPlayer";
-import BackgroundMusicWidget from "../../components/BackgroundMusicWidget";
 import "../../styles/onboarding.css";
 import { getSupabaseAdmin } from "../../lib/supabase-server";
 
@@ -91,7 +90,6 @@ const shareDescription =
     />
   </head>
   <body class="m-0 p-0 w-full min-h-full font-body text-on-surface bg-soft-gradient overflow-y-auto">
-    <BackgroundMusicWidget client:idle />
     <div id="app" class="w-full min-h-screen">
       <OnboardingPlayer
         audioUrl={audioUrl}

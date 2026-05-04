@@ -36,6 +36,16 @@ export default function OnboardingPlayer({
     if (el) el.playbackRate = playbackRate;
   }, [playbackRate]);
 
+  // Mientras el reproductor esté visible, ocultar la burbuja de música de fondo
+  // (hay otras páginas como onboarding que la inyectan a nivel de body — el
+  // reproductor pide silencio y foco total).
+  useEffect(() => {
+    document.body.classList.add("vc-player-active");
+    return () => {
+      document.body.classList.remove("vc-player-active");
+    };
+  }, []);
+
   const cycleSpeed = useCallback(() => {
     setSpeedIdx((i) => (i + 1) % SPEEDS.length);
   }, [SPEEDS.length]);
