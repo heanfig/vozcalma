@@ -228,7 +228,7 @@ export default function WompiCheckout({
           </h1>
           <p className="text-on-surface-variant text-base md:text-lg max-w-lg mx-auto leading-relaxed">
             {type === "quick"
-              ? "Alivio rápido personalizado creado con IA solo para ti."
+              ? "Alivio rápido personalizado, creado solo para ti."
               : "Una sesión profunda de reprogramación diseñada con intención."}
           </p>
         </section>
@@ -382,7 +382,7 @@ export default function WompiCheckout({
                 <span className="material-symbols-outlined text-primary text-base">
                   check_circle
                 </span>
-                Audio personalizado creado por IA
+                Audio personalizado creado para ti
               </li>
               <li className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary text-base">

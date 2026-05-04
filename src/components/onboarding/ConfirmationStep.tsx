@@ -126,7 +126,7 @@ export default function ConfirmationStep({
               Esto puede tardar hasta 5 minutos
             </p>
             <p className="text-xs text-on-primary-fixed-variant leading-relaxed">
-              Nuestra IA está creando una meditación profundamente detallada para ti. Si prefieres,
+              Estamos creando una meditación profundamente detallada para ti. Si prefieres,
               podemos enviarte el enlace por correo cuando esté lista.
             </p>
           </div>

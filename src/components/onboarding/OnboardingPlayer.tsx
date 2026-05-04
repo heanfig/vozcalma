@@ -93,25 +93,41 @@ export default function OnboardingPlayer({
     const onPlay = () => setPlaying(true);
     const onPause = () => setPlaying(false);
     const onTime = () => setCurrent(el.currentTime);
-    const onMeta = () => setDuration(el.duration);
+    const updateDuration = () => {
+      const d = el.duration;
+      if (Number.isFinite(d) && d > 0) {
+        setDuration(d);
+        return;
+      }
+      // MP3 streaming truco: si duration es Infinity/NaN, forzar al browser
+      // a calcular el final seteando currentTime a un valor enorme; el evento
+      // siguiente `durationchange` traerá el valor real.
+      try {
+        el.currentTime = 1e10;
+      } catch {
+        /* noop */
+      }
+    };
     const onEnd = () => setPlaying(false);
     el.addEventListener("play", onPlay);
     el.addEventListener("pause", onPause);
     el.addEventListener("timeupdate", onTime);
-    el.addEventListener("loadedmetadata", onMeta);
+    el.addEventListener("loadedmetadata", updateDuration);
+    el.addEventListener("durationchange", updateDuration);
     el.addEventListener("ended", onEnd);
     return () => {
       el.removeEventListener("play", onPlay);
       el.removeEventListener("pause", onPause);
       el.removeEventListener("timeupdate", onTime);
-      el.removeEventListener("loadedmetadata", onMeta);
+      el.removeEventListener("loadedmetadata", updateDuration);
+      el.removeEventListener("durationchange", updateDuration);
       el.removeEventListener("ended", onEnd);
     };
   }, []);
 
   const pct = duration > 0 ? (current / duration) * 100 : 0;
   const safeName = userName?.trim() || "";
-  const title = sessionTitle || "Sesion personalizada";
+  const title = sessionTitle || "Sesión personalizada";
 
   const waveBars = useMemo(
     () =>
@@ -141,7 +157,7 @@ export default function OnboardingPlayer({
           transition={{ delay: 0.1, duration: 0.5 }}
           className="font-headline text-3xl md:text-[2.75rem] leading-tight text-on-surface mb-2"
         >
-          Tu sesion esta lista
+          Tu sesión está lista
           {safeName ? (
             <>, <span className="text-primary italic">{safeName}</span></>
           ) : null}
@@ -216,7 +232,7 @@ export default function OnboardingPlayer({
             <div className="flex items-center gap-2 justify-center mb-8 text-primary/50">
               <span className="material-symbols-outlined text-lg">graphic_eq</span>
               <span className="text-xs font-label uppercase tracking-[0.25em]">
-                Tu meditacion
+                Tu meditación
               </span>
             </div>
 
@@ -258,8 +274,8 @@ export default function OnboardingPlayer({
               transition={{ duration: 0.4 }}
             >
               {playing
-                ? "Respira y dejate llevar..."
-                : "Presiona play cuando estes listo"}
+                ? "Respira y déjate llevar..."
+                : "Presiona play cuando estés listo"}
             </motion.p>
           </div>
         </motion.div>
@@ -329,7 +345,7 @@ export default function OnboardingPlayer({
         {/* Disclaimer */}
         <div className="text-center pb-3 px-6">
           <p className="text-[0.6rem] font-body text-on-surface-variant/40 max-w-sm mx-auto uppercase tracking-widest leading-relaxed">
-            Contenido informativo. No sustituye consejo medico profesional.
+            Contenido informativo. No sustituye consejo médico profesional.
           </p>
         </div>
       </motion.div>

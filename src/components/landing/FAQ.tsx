@@ -21,7 +21,7 @@ const FAQ_ITEMS: QA[] = [
   },
   {
     q: "¿Qué voz se usa? ¿Es una persona real?",
-    a: "Usamos una voz de IA en español, cuidadosamente entrenada para tono cálido y pausado. No es una voz robótica: muchas personas no notan la diferencia con una locutora humana.",
+    a: "Usamos una voz sintetizada en español, cuidadosamente afinada para un tono cálido y pausado. Muchas personas no notan la diferencia con una locutora humana.",
   },
   {
     q: "¿Es realmente diferente cada vez?",
