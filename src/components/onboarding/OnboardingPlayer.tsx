@@ -27,6 +27,20 @@ export default function OnboardingPlayer({
   const [duration, setDuration] = useState(0);
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [speedIdx, setSpeedIdx] = useState(0);
+  const SPEEDS = useMemo(() => [1, 1.5, 2] as const, []);
+  const playbackRate = SPEEDS[speedIdx];
+
+  useEffect(() => {
+    const el = audioRef.current;
+    if (el) el.playbackRate = playbackRate;
+  }, [playbackRate]);
+
+  const cycleSpeed = useCallback(() => {
+    setSpeedIdx((i) => (i + 1) % SPEEDS.length);
+  }, [SPEEDS.length]);
+
+  const formatRate = (r: number) => (Number.isInteger(r) ? `${r}x` : `${r}x`);
 
   const copyLink = useCallback(() => {
     if (!playUrl) return;
@@ -301,11 +315,13 @@ export default function OnboardingPlayer({
               />
             </div>
 
-            <div className="flex items-center justify-between">
-              {/* Time left */}
-              <span className="text-xs font-label text-on-surface-variant tabular-nums w-14">
-                {fmt(current)}
-              </span>
+            <div className="flex items-center justify-between gap-2">
+              {/* Time left + spacer balance */}
+              <div className="flex items-center gap-2 w-24">
+                <span className="text-xs font-label text-on-surface-variant tabular-nums">
+                  {fmt(current)}
+                </span>
+              </div>
 
               {/* Controls */}
               <div className="flex items-center gap-6">
@@ -334,10 +350,20 @@ export default function OnboardingPlayer({
                 </button>
               </div>
 
-              {/* Time right */}
-              <span className="text-xs font-label text-on-surface-variant tabular-nums w-14 text-right">
-                {fmt(duration)}
-              </span>
+              {/* Time right + speed toggle */}
+              <div className="flex items-center justify-end gap-2 w-24">
+                <span className="text-xs font-label text-on-surface-variant tabular-nums">
+                  {fmt(duration)}
+                </span>
+                <button
+                  type="button"
+                  onClick={cycleSpeed}
+                  aria-label={`Velocidad de reproducción ${formatRate(playbackRate)}`}
+                  className="text-[0.65rem] font-label font-semibold tabular-nums px-2 py-1 rounded-full bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-colors min-w-[2.5rem]"
+                >
+                  {formatRate(playbackRate)}
+                </button>
+              </div>
             </div>
           </div>
         </div>
