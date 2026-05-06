@@ -135,8 +135,12 @@ async function runPipeline(params: GenerateParams): Promise<GenerateResult> {
 
     // Fire-and-forget: guardar en filesystem para review
     const tempSessionId = crypto.randomUUID().slice(0, 8);
-    void saveMeditationScriptReviewFile({ sessionId: tempSessionId, scriptText: cleanScript }).catch(() => {});
-    void saveMeditationAudioFile({ sessionId: tempSessionId, audioBuffer }).catch(() => {});
+    void saveMeditationScriptReviewFile({ sessionId: tempSessionId, scriptText: cleanScript }).catch(
+      (err) => console.error("[generate-pipeline] saveMeditationScriptReviewFile failed:", err),
+    );
+    void saveMeditationAudioFile({ sessionId: tempSessionId, audioBuffer }).catch((err) =>
+      console.error("[generate-pipeline] saveMeditationAudioFile failed:", err),
+    );
   }
 
   // ------------------------------------------------------------
@@ -208,7 +212,7 @@ async function runPipeline(params: GenerateParams): Promise<GenerateResult> {
       session_id: sessionId,
     })
     .then(() => {})
-    .catch(() => {});
+    .catch((err) => console.error("[generate-pipeline] play_links insert failed:", err));
 
   // ------------------------------------------------------------
   // 6. Persistir costos (fire-and-forget). LLM cost real llega con delay vía
@@ -235,7 +239,7 @@ async function runPipeline(params: GenerateParams): Promise<GenerateResult> {
       source,
     })
     .then(() => {})
-    .catch(() => {});
+    .catch((err) => console.error("[generate-pipeline] meditation_costs insert failed:", err));
 
   // Backfill del costo real de OpenRouter cuando esté disponible (~1-5s delay).
   if (generationId) {
@@ -249,7 +253,9 @@ async function runPipeline(params: GenerateParams): Promise<GenerateResult> {
           .update({ llm_cost_usd: realCost })
           .eq("llm_generation_id", generationId);
       }
-    })().catch(() => {});
+    })().catch((err) =>
+      console.error("[generate-pipeline] OpenRouter cost backfill failed:", err),
+    );
   }
 
   const siteUrl =
