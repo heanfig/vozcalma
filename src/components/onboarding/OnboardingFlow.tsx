@@ -123,10 +123,12 @@ export default function OnboardingFlow({
       const next = { ...answers, [step.key]: value };
       setAnswers(next);
 
-      if (step.key === "nombre" && !chosenType) {
-        // Si el usuario entró directo a /onboarding (sin pasar por la landing),
-        // no hay cookie vc_session y el meta session-id es "anonymous".
-        // Creamos la sesión aquí para que el CSRF+cookie estén listos antes del pago.
+      if (step.key === "nombre") {
+        // Si el usuario entró sin cookie vc_session (meta session-id="anonymous"),
+        // creamos la sesión ANTES de cualquier ramificación. Cubre tanto el
+        // flow /onboarding (sin tipo prefijado) como /onboarding/<tipo> (con
+        // initialType) — sin esto, los endpoints /api/coupons/validate y
+        // /api/payment/initiate reciben 401 "Sesión inválida".
         const sidMeta = document
           .querySelector('meta[name="session-id"]')
           ?.getAttribute("content");
@@ -188,17 +190,16 @@ export default function OnboardingFlow({
             return;
           }
         }
-        setPhase("selectType");
-        return;
-      }
 
-      // Si el paso actual era "nombre" y ya hay tipo elegido pero NO se pagó
-      // (caso: el usuario aterriza directo en /onboarding/alivio-rapido sin
-      // venir del flujo de pago), forzar payment antes de seguir con preguntas.
-      if (step.key === "nombre" && chosenType && !isPaid) {
-        setDirection(1);
-        setPhase("payment");
-        return;
+        if (!chosenType) {
+          setPhase("selectType");
+          return;
+        }
+        if (!isPaid) {
+          setDirection(1);
+          setPhase("payment");
+          return;
+        }
       }
 
       // CRÍTICO: recalcular allSteps con `next` (no con `answers` stale del useMemo).
